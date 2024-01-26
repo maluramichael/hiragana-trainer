@@ -1,0 +1,38 @@
+#root
+{
+    padding: 2rem;
+}
+
+main
+{
+    text-align: center;
+}
+
+.current-character
+{
+    font-size: 8em;
+}
+
+.possible-romanji
+{
+    font-weight: bold;
+}
+
+.last-answer
+{
+}
+
+.lecture
+{
+    cursor: pointer;
+}
+
+.lecture:hover
+{
+    color: #4ecaef;
+}
+
+.lecture.active
+{
+    color: #4ecaef;
+}
