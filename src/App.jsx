@@ -184,6 +184,9 @@ function App() {
             <h1>Hiragana trainer</h1>
             <div>
                 {!started && <div>
+                    <p>
+                        Select the lectures you want to train and click on start.
+                    </p>
                     <Lectures
                         setSelectedLectures={setSelectedLectures}
                         selectedLectures={selectedLectures}
