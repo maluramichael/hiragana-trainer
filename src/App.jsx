@@ -128,6 +128,16 @@ const Input = ({ onChange, value }) => {
     </div>;
 };
 
+// TODOs:
+
+/*
+    * Save selected lectures in local storage
+    * Split App Component into smaller routes
+    * Add buttons to select all and deselect all
+    * Add lovely little footer at the bottom. Something like "Made with love by マイケル - https://malura.de"
+    * Add a couple of transitions to make it everything look a bit more smooth
+ */
+
 function App() {
     const [currentCharacter, setCurrentCharacter] = useState(null);
     const [currentInput, setCurrentInput]         = useState('');
