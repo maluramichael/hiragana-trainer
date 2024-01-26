@@ -136,6 +136,11 @@ const Input = ({ onChange, value }) => {
     * Replace english with german text
     * Always show start button but disable it if no lectures are selected
     * Add buttons to select all and deselect all
+    * Add sounds for correct answers
+    * Add sounds for each character
+    * Add a bar with options
+        * Show/hide 'possible romanji'
+        * Play sounds
     * Add lovely little footer at the bottom. Something like "Made with love by マイケル - https://malura.de"
     * Add a couple of transitions to make it everything look a bit more smooth
  */
