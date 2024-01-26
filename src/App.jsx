@@ -133,6 +133,7 @@ const Input = ({ onChange, value }) => {
 /*
     * Save selected lectures in local storage
     * Split App Component into smaller routes
+    * Replace english with german text
     * Always show start button but disable it if no lectures are selected
     * Add buttons to select all and deselect all
     * Add lovely little footer at the bottom. Something like "Made with love by マイケル - https://malura.de"
