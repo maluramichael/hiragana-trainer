@@ -22,14 +22,14 @@ main
 {
 }
 
-.lectures
+.character-sets
 {
     display:               grid;
     grid-template-columns: 1fr 1fr 1fr 1fr;
     gap:                   20px;
 }
 
-.lecture
+.character-set
 {
     display:               flex;
     flex-direction:        column;
@@ -43,12 +43,12 @@ main
     -moz-user-select:      none;
 }
 
-.lecture:hover
+.character-set:hover
 {
     color: #4ecaef;
 }
 
-.lecture.active
+.character-set.active
 {
     background-color: #9de6ff;
 }

@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import classnames    from 'classnames';
 import './App.css';
 
-const hiraganaLectures = [
+const hiraganaCharacterSets = [
     {
         'name':     'a',
         'romanji':  ['a', 'i', 'u', 'e', 'o'],
@@ -53,42 +53,42 @@ const hiraganaLectures = [
         'name':     'wa',
         'romanji':  ['wa', 'wo', 'n'],
         'hiragana': ['わ', 'を', 'ん'],
-    }
+    },
 ];
 
-const getRandomCharacter = (lectures) => {
-    const lectureName = lectures[Math.floor(Math.random() * lectures.length)];
-    const lecture     = hiraganaLectures.find((item) => item.name === lectureName);
-    const index       = Math.floor(Math.random() * lecture.romanji.length);
+const getRandomCharacter = (characterSets) => {
+    const characterSetName = characterSets[Math.floor(Math.random() * characterSets.length)];
+    const characterSet     = hiraganaCharacterSets.find((item) => item.name === characterSetName);
+    const index            = Math.floor(Math.random() * characterSet.romanji.length);
 
     return {
-        'romanji':          lecture.romanji[index],
-        'hiragana':         lecture.hiragana[index],
-        'availableRomanji': lecture.romanji,
+        'romanji':          characterSet.romanji[index],
+        'hiragana':         characterSet.hiragana[index],
+        'availableRomanji': characterSet.romanji,
     };
 };
 
-const Lectures = ({ selectedLectures, setSelectedLectures }) => {
-    return <div className={'lectures'}>
-        {hiraganaLectures.map((lecture) => (
+const CharacterSets = ({ selectedCharacterSets, setSelectedCharacterSets }) => {
+    return <div className={'character-sets'}>
+        {hiraganaCharacterSets.map((characterSet) => (
             <div
-                className={classnames('lecture', { active: selectedLectures.includes(lecture.name) })}
-                key={lecture.name}
+                className={classnames('character-set', { active: selectedCharacterSets.includes(characterSet.name) })}
+                key={characterSet.name}
                 onClick={() => {
-                    if (selectedLectures.includes(lecture.name)) {
-                        setSelectedLectures(selectedLectures.filter((item) => item !== lecture.name));
+                    if (selectedCharacterSets.includes(characterSet.name)) {
+                        setSelectedCharacterSets(selectedCharacterSets.filter((item) => item !== characterSet.name));
                     } else {
-                        setSelectedLectures([...selectedLectures, lecture.name]);
+                        setSelectedCharacterSets([...selectedCharacterSets, characterSet.name]);
                     }
                 }}
             >
-                <h2>{lecture.name}</h2>
+                <h2>{characterSet.name}</h2>
                 <div style={{ display: 'flex' }}>
                     <div style={{ display: 'grid', gap: '10px', gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr' }}>
-                        {lecture.romanji.map((romanji, index) => (
+                        {characterSet.romanji.map((romanji, index) => (
                             <div key={romanji}>
                                 <div>
-                                    {lecture.hiragana[index]}
+                                    {characterSet.hiragana[index]}
                                 </div>
                                 <div>
                                     {romanji}
@@ -131,10 +131,10 @@ const Input = ({ onChange, value }) => {
 // TODOs:
 
 /*
-    * Save selected lectures in local storage
+    * Save selected characterSets in local storage
     * Split App Component into smaller routes
     * Replace english with german text
-    * Always show start button but disable it if no lectures are selected
+    * Always show start button but disable it if no characterSets are selected
     * Add buttons to select all and deselect all
     * Add share images
     * Add favicon (maybe something short that is related to sensei)
@@ -148,16 +148,16 @@ const Input = ({ onChange, value }) => {
  */
 
 function App() {
-    const [currentCharacter, setCurrentCharacter] = useState(null);
-    const [currentInput, setCurrentInput]         = useState('');
-    const [started, setStarted]                   = useState(false);
-    const [selectedLectures, setSelectedLectures] = useState([]);
-    const [points, setPoints]                     = useState(0);
-    const [lastAnswers, setLastAnswers]           = useState([]);
+    const [currentCharacter, setCurrentCharacter]           = useState(null);
+    const [currentInput, setCurrentInput]                   = useState('');
+    const [started, setStarted]                             = useState(false);
+    const [selectedCharacterSets, setSelectedCharacterSets] = useState([]);
+    const [points, setPoints]                               = useState(0);
+    const [lastAnswers, setLastAnswers]                     = useState([]);
 
     const startClicked = () => {
-        if (selectedLectures.length > 0) {
-            setCurrentCharacter(getRandomCharacter(selectedLectures));
+        if (selectedCharacterSets.length > 0) {
+            setCurrentCharacter(getRandomCharacter(selectedCharacterSets));
             setStarted(true);
         }
     };
@@ -175,14 +175,18 @@ function App() {
         if (currentCharacter) {
             // TODO: Move check to a function
             if (
-                (currentCharacter.hiragana === 'ん' && currentInput === 'nn') ||
-                (currentCharacter.hiragana !== 'ん' && currentInput === currentCharacter.romanji)
+                (
+                    currentCharacter.hiragana === 'ん' && currentInput === 'nn'
+                ) ||
+                (
+                    currentCharacter.hiragana !== 'ん' && currentInput === currentCharacter.romanji
+                )
             ) {
                 setCurrentInput('');
                 let newCharacter = currentCharacter;
 
                 while (newCharacter.romanji === currentCharacter.romanji) {
-                    newCharacter = getRandomCharacter(selectedLectures);
+                    newCharacter = getRandomCharacter(selectedCharacterSets);
                 }
 
                 let newLastAnswers = [currentCharacter, ...lastAnswers];
@@ -204,14 +208,14 @@ function App() {
             <div>
                 {!started && <div>
                     <p>
-                        Select the lectures you want to train and click on start.
+                        Select the sets you want to train and click on start.
                     </p>
-                    <Lectures
-                        setSelectedLectures={setSelectedLectures}
-                        selectedLectures={selectedLectures}
+                    <CharacterSets
+                        setSelectedCharacterSets={setSelectedCharacterSets}
+                        selectedCharacterSets={selectedCharacterSets}
                     />
                     <br />
-                    {selectedLectures.length > 0 && <button onClick={startClicked}>Start</button>}
+                    {selectedCharacterSets.length > 0 && <button onClick={startClicked}>Start</button>}
                 </div>}
                 {started && <div>
                     <button onClick={stopClicked}>Stop</button>
