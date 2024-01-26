@@ -136,6 +136,8 @@ const Input = ({ onChange, value }) => {
     * Replace english with german text
     * Always show start button but disable it if no lectures are selected
     * Add buttons to select all and deselect all
+    * Add share images
+    * Add favicon (maybe something short that is related to sensei)
     * Add sounds for correct answers
     * Add sounds for each character
     * Add a bar with options
