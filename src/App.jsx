@@ -154,6 +154,15 @@ function App() {
                     ))}
                 </div>
             </div>}
+            <footer>
+                Made with ❤️ by
+                <a
+                    href={'https://malura.de'}
+                    target={'_blank'}
+                >
+                    &nbsp;マイケル
+                </a>
+            </footer>
         </main>
     );
 }
