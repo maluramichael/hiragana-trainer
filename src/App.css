@@ -31,12 +31,16 @@ main
 
 .lecture
 {
-    display:        flex;
-    flex-direction: column;
-    align-items:    center;
-    cursor:         pointer;
-    border:         1px solid #eeeeee;
-    padding:        30px;
+    display:               flex;
+    flex-direction:        column;
+    align-items:           center;
+    cursor:                pointer;
+    border:                1px solid #eeeeee;
+    padding:               30px;
+    transition:            all 0.3s ease-in-out;
+    -webkit-touch-callout: none;
+    -webkit-user-select:   none;
+    -moz-user-select:      none;
 }
 
 .lecture:hover
