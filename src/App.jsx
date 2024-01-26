@@ -1,60 +1,8 @@
-import { useState }  from 'react';
-import { useEffect } from 'react';
-import classnames    from 'classnames';
+import { useState }              from 'react';
+import { useEffect }             from 'react';
 import './App.css';
-
-const hiraganaCharacterSets = [
-    {
-        'name':     'a',
-        'romanji':  ['a', 'i', 'u', 'e', 'o'],
-        'hiragana': ['あ', 'い', 'う', 'え', 'お'],
-    },
-    {
-        'name':     'ka',
-        'romanji':  ['ka', 'ki', 'ku', 'ke', 'ko'],
-        'hiragana': ['か', 'き', 'く', 'け', 'こ'],
-    },
-    {
-        'name':     'sa',
-        'romanji':  ['sa', 'shi', 'su', 'se', 'so'],
-        'hiragana': ['さ', 'し', 'す', 'せ', 'そ'],
-    },
-    {
-        'name':     'ta',
-        'romanji':  ['ta', 'chi', 'tsu', 'te', 'to'],
-        'hiragana': ['た', 'ち', 'つ', 'て', 'と'],
-    },
-    {
-        'name':     'na',
-        'romanji':  ['na', 'ni', 'nu', 'ne', 'no'],
-        'hiragana': ['な', 'に', 'ぬ', 'ね', 'の'],
-    },
-    {
-        'name':     'ha',
-        'romanji':  ['ha', 'hi', 'hu/fu', 'he', 'ho'],
-        'hiragana': ['は', 'ひ', 'ふ', 'へ', 'ほ'],
-    },
-    {
-        'name':     'ma',
-        'romanji':  ['ma', 'mi', 'mu', 'me', 'mo'],
-        'hiragana': ['ま', 'み', 'む', 'め', 'も'],
-    },
-    {
-        'name':     'ya',
-        'romanji':  ['ya', 'yu', 'yo'],
-        'hiragana': ['や', 'ゆ', 'よ'],
-    },
-    {
-        'name':     'ra',
-        'romanji':  ['ra', 'ri', 'ru', 're', 'ro'],
-        'hiragana': ['ら', 'り', 'る', 'れ', 'ろ'],
-    },
-    {
-        'name':     'wa',
-        'romanji':  ['wa', 'wo', 'n'],
-        'hiragana': ['わ', 'を', 'ん'],
-    },
-];
+import { CharacterSets }         from './CharacterSets.jsx';
+import { hiraganaCharacterSets } from './HiraganaCharacterSets.jsx';
 
 const getRandomCharacter = (characterSets) => {
     const characterSetName = characterSets[Math.floor(Math.random() * characterSets.length)];
@@ -66,40 +14,6 @@ const getRandomCharacter = (characterSets) => {
         'hiragana':         characterSet.hiragana[index],
         'availableRomanji': characterSet.romanji,
     };
-};
-
-const CharacterSets = ({ selectedCharacterSets, setSelectedCharacterSets }) => {
-    return <div className={'character-sets'}>
-        {hiraganaCharacterSets.map((characterSet) => (
-            <div
-                className={classnames('character-set', { active: selectedCharacterSets.includes(characterSet.name) })}
-                key={characterSet.name}
-                onClick={() => {
-                    if (selectedCharacterSets.includes(characterSet.name)) {
-                        setSelectedCharacterSets(selectedCharacterSets.filter((item) => item !== characterSet.name));
-                    } else {
-                        setSelectedCharacterSets([...selectedCharacterSets, characterSet.name]);
-                    }
-                }}
-            >
-                <h2>{characterSet.name}</h2>
-                <div style={{ display: 'flex' }}>
-                    <div style={{ display: 'grid', gap: '10px', gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr' }}>
-                        {characterSet.romanji.map((romanji, index) => (
-                            <div key={romanji}>
-                                <div>
-                                    {characterSet.hiragana[index]}
-                                </div>
-                                <div>
-                                    {romanji}
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </div>
-        ))}
-    </div>;
 };
 
 const CurrentCharacter = ({ currentCharacter }) => {
@@ -134,6 +48,7 @@ const Input = ({ onChange, value }) => {
     * Save selected characterSets in local storage
     * Split App Component into smaller routes
     * Replace english with german text
+    * Mobile friendly
     * Always show start button but disable it if no characterSets are selected
     * Add buttons to select all and deselect all
     * Add share images
@@ -191,8 +106,8 @@ function App() {
 
                 let newLastAnswers = [currentCharacter, ...lastAnswers];
 
-                if (newLastAnswers.length > 10) {
-                    newLastAnswers = newLastAnswers.slice(0, 10);
+                if (newLastAnswers.length > 5) {
+                    newLastAnswers = newLastAnswers.slice(0, 5);
                 }
 
                 setLastAnswers(newLastAnswers);
@@ -204,42 +119,40 @@ function App() {
 
     return (
         <main>
-            <h1>Hiragana trainer</h1>
-            <div>
-                {!started && <div>
-                    <p>
-                        Select the sets you want to train and click on start.
-                    </p>
-                    <CharacterSets
-                        setSelectedCharacterSets={setSelectedCharacterSets}
-                        selectedCharacterSets={selectedCharacterSets}
-                    />
-                    <br />
-                    {selectedCharacterSets.length > 0 && <button onClick={startClicked}>Start</button>}
-                </div>}
-                {started && <div>
-                    <button onClick={stopClicked}>Stop</button>
-                    <CurrentCharacter currentCharacter={currentCharacter} />
-                    <Input
-                        onChange={onChange}
-                        value={currentInput}
-                    />
-                    <br />
-                    <div>
-                        {points} Points
-                    </div>
-                    <div>
-                        {lastAnswers.map((item, index) => (
-                            <div
-                                key={index}
-                                className={'last-answer'}
-                            >
-                                {item.hiragana} - {item.romanji}
-                            </div>
-                        ))}
-                    </div>
-                </div>}
-            </div>
+            {!started && <h1>Hiragana trainer</h1>}
+            {!started && <div>
+                <p>
+                    Select the sets you want to train and click on start.
+                </p>
+                <CharacterSets
+                    setSelectedCharacterSets={setSelectedCharacterSets}
+                    selectedCharacterSets={selectedCharacterSets}
+                />
+                <br />
+                {selectedCharacterSets.length > 0 && <button onClick={startClicked}>Start</button>}
+            </div>}
+            {started && <div>
+                <button onClick={stopClicked}>Go back</button>
+                <CurrentCharacter currentCharacter={currentCharacter} />
+                <Input
+                    onChange={onChange}
+                    value={currentInput}
+                />
+                <br />
+                <div>
+                    {points} Points
+                </div>
+                <div>
+                    {lastAnswers.map((item, index) => (
+                        <div
+                            key={index}
+                            className={'last-answer'}
+                        >
+                            {item.hiragana} - {item.romanji}
+                        </div>
+                    ))}
+                </div>
+            </div>}
         </main>
     );
 }
