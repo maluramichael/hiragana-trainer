@@ -22,9 +22,21 @@ main
 {
 }
 
+.lectures
+{
+    display:               grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap:                   20px;
+}
+
 .lecture
 {
-    cursor: pointer;
+    display:        flex;
+    flex-direction: column;
+    align-items:    center;
+    cursor:         pointer;
+    border:         1px solid #eeeeee;
+    padding:        30px;
 }
 
 .lecture:hover
@@ -34,5 +46,5 @@ main
 
 .lecture.active
 {
-    color: #4ecaef;
+    background-color: #9de6ff;
 }

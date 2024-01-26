@@ -69,12 +69,11 @@ const getRandomCharacter = (lectures) => {
 };
 
 const Lectures = ({ selectedLectures, setSelectedLectures }) => {
-    return <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr' }}>
+    return <div className={'lectures'}>
         {hiraganaLectures.map((lecture) => (
             <div
                 className={classnames('lecture', { active: selectedLectures.includes(lecture.name) })}
                 key={lecture.name}
-                style={{ cursor: 'pointer' }}
                 onClick={() => {
                     if (selectedLectures.includes(lecture.name)) {
                         setSelectedLectures(selectedLectures.filter((item) => item !== lecture.name));
