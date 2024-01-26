@@ -49,6 +49,7 @@ const Input = ({ onChange, value }) => {
     * Split App Component into smaller routes
     * Replace english with german text
     * Mobile friendly
+    * Add option to switch between typing and multiple choice buttons
     * Always show start button but disable it if no characterSets are selected
     * Add buttons to select all and deselect all
     * Add share images
