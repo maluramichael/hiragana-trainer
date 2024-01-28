@@ -73,7 +73,7 @@ function Training() {
         <div id={'page'}>
             <Link
                 to={'/'}
-                className={'button'}
+                className={'button full-width'}
             >
                 Go back
             </Link>

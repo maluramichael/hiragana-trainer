@@ -97,7 +97,6 @@ button:focus-visible
 .button.full-width
 {
     display: block;
-    width:   100%;
 }
 
 .button:hover
