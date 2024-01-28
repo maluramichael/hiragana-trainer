@@ -1,65 +1,74 @@
-export const HiraganaMapping = [
-    {
-        'name':     'a',
-        'romanji':  ['a', 'i', 'u', 'e', 'o'],
-        'hiragana': ['あ', 'い', 'う', 'え', 'お'],
-    },
-    {
-        'name':     'ka',
-        'romanji':  ['ka', 'ki', 'ku', 'ke', 'ko'],
-        'hiragana': ['か', 'き', 'く', 'け', 'こ'],
-    },
-    {
-        'name':     'sa',
-        'romanji':  ['sa', 'shi', 'su', 'se', 'so'],
-        'hiragana': ['さ', 'し', 'す', 'せ', 'そ'],
-    },
-    {
-        'name':     'ta',
-        'romanji':  ['ta', 'chi', 'tsu', 'te', 'to'],
-        'hiragana': ['た', 'ち', 'つ', 'て', 'と'],
-    },
-    {
-        'name':     'na',
-        'romanji':  ['na', 'ni', 'nu', 'ne', 'no'],
-        'hiragana': ['な', 'に', 'ぬ', 'ね', 'の'],
-    },
-    {
-        'name':     'ha',
-        'romanji':  ['ha', 'hi', 'hu/fu', 'he', 'ho'],
-        'hiragana': ['は', 'ひ', 'ふ', 'へ', 'ほ'],
-    },
-    {
-        'name':     'ma',
-        'romanji':  ['ma', 'mi', 'mu', 'me', 'mo'],
-        'hiragana': ['ま', 'み', 'む', 'め', 'も'],
-    },
-    {
-        'name':     'ya',
-        'romanji':  ['ya', 'yu', 'yo'],
-        'hiragana': ['や', 'ゆ', 'よ'],
-    },
-    {
-        'name':     'ra',
-        'romanji':  ['ra', 'ri', 'ru', 're', 'ro'],
-        'hiragana': ['ら', 'り', 'る', 'れ', 'ろ'],
-    },
-    {
-        'name':     'wa',
-        'romanji':  ['wa', 'wo', 'n'],
-        'hiragana': ['わ', 'を', 'ん'],
-    },
-];
+export const HiraganaRomanjiMap = {
+    'あ': 'a',
+    'い': 'i',
+    'う': 'u',
+    'え': 'e',
+    'お': 'o',
+    'か': 'ka',
+    'き': 'ki',
+    'く': 'ku',
+    'け': 'ke',
+    'こ': 'ko',
+    'さ': 'sa',
+    'し': 'shi',
+    'す': 'su',
+    'せ': 'se',
+    'そ': 'so',
+    'た': 'ta',
+    'ち': 'chi',
+    'つ': 'tsu',
+    'て': 'te',
+    'と': 'to',
+    'な': 'na',
+    'に': 'ni',
+    'ぬ': 'nu',
+    'ね': 'ne',
+    'の': 'no',
+    'は': 'ha',
+    'ひ': 'hi',
+    'ふ': ['hu', 'fu'],
+    'へ': 'he',
+    'ほ': 'ho',
+    'ま': 'ma',
+    'み': 'mi',
+    'む': 'mu',
+    'め': 'me',
+    'も': 'mo',
+    'や': 'ya',
+    'ゆ': 'yu',
+    'よ': 'yo',
+    'ら': 'ra',
+    'り': 'ri',
+    'る': 'ru',
+    'れ': 're',
+    'ろ': 'ro',
+    'わ': 'wa',
+    'を': 'wo',
+    'ん': ['nn', 'n'],
+};
+
+export const Sets = {
+    'a': ['あ', 'い', 'う', 'え', 'お'],
+    'ka': ['か', 'き', 'く', 'け', 'こ'],
+    'sa': ['さ', 'し', 'す', 'せ', 'そ'],
+    'ta': ['た', 'ち', 'つ', 'て', 'と'],
+    'na': ['な', 'に', 'ぬ', 'ね', 'の'],
+    'ha': ['は', 'ひ', 'ふ', 'へ', 'ほ'],
+    'ma': ['ま', 'み', 'む', 'め', 'も'],
+    'ya': ['や', 'ゆ', 'よ'],
+    'ra': ['ら', 'り', 'る', 'れ', 'ろ'],
+    'wa': ['わ', 'を', 'ん'],
+}
 
 export const getRandomCharacter = (selectedSets) => {
     const sets             = selectedSets.split(',');
     const characterSetName = sets[Math.floor(Math.random() * sets.length)];
-    const characterSet     = HiraganaMapping.find((item) => item.name === characterSetName);
-    const index            = Math.floor(Math.random() * characterSet.romanji.length);
+    const characterSet     = Sets[characterSetName];
+    const index            = Math.floor(Math.random() * characterSet.length);
 
     return {
-        'romanji':          characterSet.romanji[index],
-        'hiragana':         characterSet.hiragana[index],
-        'availableRomanji': characterSet.romanji,
+        'romanji':          HiraganaRomanjiMap[characterSet[index]],
+        'hiragana':         characterSet[index],
+        'availableRomanji': characterSet.map((item) => HiraganaRomanjiMap[item]),
     };
 };

@@ -1,16 +1,56 @@
 import classnames         from 'classnames';
 import { useTranslation } from 'react-i18next';
+import _                  from 'lodash';
 
-import { HiraganaMapping } from '../data/HiraganaMapping.jsx';
+import { Sets }               from '../data/HiraganaMapping.jsx';
+import { HiraganaRomanjiMap } from '../data/HiraganaMapping.jsx';
 
 export const CharacterSets = ({ selectedCharacterSets, setSelectedCharacterSets }) => {
     const { t } = useTranslation();
+
+    const renderSet = (setName) => {
+        const hiraganaInSet = Sets[setName];
+
+        return (
+            <div
+                className={classnames('character-set', { active: selectedCharacterSets.includes(setName) })}
+                key={setName}
+                onClick={() => {
+                    if (selectedCharacterSets.includes(setName)) {
+                        setSelectedCharacterSets(selectedCharacterSets.filter((item) => item !== setName));
+                    } else {
+                        setSelectedCharacterSets([...selectedCharacterSets, setName]);
+                    }
+                }}
+            >
+                <div style={{ fontWeight: 'bold' }}>{setName}</div>
+                <div style={{ display: 'flex' }}>
+                    <div style={{ display: 'flex', gap: '10px' }}>
+                        {hiraganaInSet.map((hiragana, index) => {
+                            const romanji = HiraganaRomanjiMap[hiragana];
+
+                            return (
+                                <div key={hiragana}>
+                                    <div>
+                                        {hiragana}
+                                    </div>
+                                    <div>
+                                        {_.isArray(romanji) ? romanji.join('/') : romanji}
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            </div>
+        );
+    };
 
     return <>
         <div
             className="button"
             onClick={() => {
-                setSelectedCharacterSets(HiraganaMapping.map((item) => item.name));
+                setSelectedCharacterSets(Object.keys(Sets));
             }}
         >
             {t('Select all')}
@@ -26,35 +66,7 @@ export const CharacterSets = ({ selectedCharacterSets, setSelectedCharacterSets 
         <br />
         <br />
         <div className={'character-sets'}>
-            {HiraganaMapping.map((characterSet) => (
-                <div
-                    className={classnames('character-set', { active: selectedCharacterSets.includes(characterSet.name) })}
-                    key={characterSet.name}
-                    onClick={() => {
-                        if (selectedCharacterSets.includes(characterSet.name)) {
-                            setSelectedCharacterSets(selectedCharacterSets.filter((item) => item !== characterSet.name));
-                        } else {
-                            setSelectedCharacterSets([...selectedCharacterSets, characterSet.name]);
-                        }
-                    }}
-                >
-                    <div style={{ fontWeight: 'bold' }}>{characterSet.name}</div>
-                    <div style={{ display: 'flex' }}>
-                        <div style={{ display: 'flex', gap: '10px' }}>
-                            {characterSet.romanji.map((romanji, index) => (
-                                <div key={romanji}>
-                                    <div>
-                                        {characterSet.hiragana[index]}
-                                    </div>
-                                    <div>
-                                        {romanji}
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            ))}
+            {Object.keys(Sets).map(renderSet)}
         </div>
     </>;
 };

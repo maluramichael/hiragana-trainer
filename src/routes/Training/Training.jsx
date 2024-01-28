@@ -1,7 +1,9 @@
-import { Link }      from 'react-router-dom';
-import { useParams } from 'react-router-dom';
-import { useState }  from 'react';
-import { useEffect } from 'react';
+import { Link }           from 'react-router-dom';
+import { useParams }      from 'react-router-dom';
+import { useState }       from 'react';
+import { useEffect }      from 'react';
+import _                  from 'lodash';
+import { useTranslation } from 'react-i18next';
 
 import { getRandomCharacter } from '../../data/HiraganaMapping.jsx';
 import { RomanjiInput }       from '../../components/RomanjiInput/RomanjiInput.jsx';
@@ -9,26 +11,35 @@ import { CurrentCharacter }   from '../../components/CurrentCharacter/CurrentCha
 import useSettings            from '../../hooks/useSettings.jsx';
 
 import './styles.css';
-import { useTranslation }     from 'react-i18next';
 
 function RomanjiMultipleChoice({ currentCharacter, onSelect }) {
     return <div className={'buttons'}>
-        {currentCharacter.availableRomanji.map((item, index) => (
-            <div
-                className={'button'}
-                style={{ width: '40px', textAlign: 'center', display: 'inline-block' }}
-                key={index}
-                onClick={() => onSelect({ target: { value: item } })}
-            >
-                {item}
-            </div>
-        ))}
+        {currentCharacter.availableRomanji.map((item, index) => {
+
+            return (
+                <div
+                    className={'button'}
+                    style={{ width: '40px', textAlign: 'center', display: 'inline-block' }}
+                    key={index}
+                    onClick={() => onSelect({ target: { value: _.isArray(item) ? item[0] : item } })}
+                >
+                    {item}
+                </div>
+            );
+        })}
+    </div>;
+}
+
+function LastAnswer(props) {
+    return <div
+        className={'last-answer'}
+    >
+        {props.children}
     </div>;
 }
 
 function Training() {
     const { t }                                   = useTranslation();
-    const [points, setPoints]                     = useState(0);
     const [currentInput, setCurrentInput]         = useState('');
     const [lastAnswers, setLastAnswers]           = useState([]);
     const { selectedSets }                        = useParams();
@@ -41,15 +52,10 @@ function Training() {
     };
 
     useEffect(() => {
-        if (currentCharacter) {
-            // TODO: Move check to a function
+        if (currentCharacter && currentInput) {
             if (
-                (
-                    currentCharacter.hiragana === 'ん' && currentInput === 'nn'
-                ) ||
-                (
-                    currentCharacter.hiragana !== 'ん' && currentInput === currentCharacter.romanji
-                )
+                _.isArray(currentCharacter.romanji) && currentCharacter.romanji.includes(currentInput) ||
+                currentInput === currentCharacter.romanji
             ) {
                 setCurrentInput('');
                 let newCharacter = currentCharacter;
@@ -66,7 +72,6 @@ function Training() {
 
                 setLastAnswers(newLastAnswers);
                 setCurrentCharacter(newCharacter);
-                setPoints(points + 1);
             }
         }
     }, [currentInput, currentCharacter]);
@@ -93,16 +98,12 @@ function Training() {
                 />
             }
             <div>
-                {points} {t('Points')}
-            </div>
-            <div>
                 {lastAnswers.map((item, index) => (
-                    <div
+                    <LastAnswer
                         key={index}
-                        className={'last-answer'}
                     >
                         {item.hiragana} - {item.romanji}
-                    </div>
+                    </LastAnswer>
                 ))}
             </div>
         </div>

@@ -12,6 +12,10 @@
 {
 }
 
+.last-answer.visible
+{
+}
+
 .buttons > .button + .button
 {
     margin-left: 10px;
