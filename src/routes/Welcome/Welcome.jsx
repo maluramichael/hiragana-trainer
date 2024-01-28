@@ -1,12 +1,11 @@
-import { useState } from 'react';
-import { Link }     from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 import { CharacterSets } from '../../components/CharacterSets.jsx';
 
 import './styles.css';
+import useLocalStorage   from '../../hooks/useLocalStorage.jsx';
 
 /*
-    * Save selected characterSets in local storage
     * Replace english with german text
     * Mobile friendly
     * Add option to switch between typing and multiple choice buttons
@@ -22,7 +21,7 @@ import './styles.css';
  */
 
 function Welcome() {
-    const [selectedCharacterSets, setSelectedCharacterSets] = useState([]);
+    const [selectedSets, selectSets] = useLocalStorage('selectedSets', []);
 
     return (
         <main>
@@ -32,16 +31,16 @@ function Welcome() {
                     Select the sets you want to train and click on start.
                 </p>
                 <CharacterSets
-                    setSelectedCharacterSets={setSelectedCharacterSets}
-                    selectedCharacterSets={selectedCharacterSets}
+                    setSelectedCharacterSets={selectSets}
+                    selectedCharacterSets={selectedSets}
                 />
                 <br />
                 <Link
                     className={'button'}
-                    to={'/train/' + selectedCharacterSets.join(',')}
-                    disabled={selectedCharacterSets.length <= 0}
+                    to={'/train/' + selectedSets.join(',')}
+                    disabled={selectedSets.length <= 0}
                 >
-                    {selectedCharacterSets.length <= 0 ? 'Select at least one set' : 'Start'}
+                    {selectedSets.length <= 0 ? 'Select at least one set' : 'Start'}
                 </Link>
             </div>
         </main>
