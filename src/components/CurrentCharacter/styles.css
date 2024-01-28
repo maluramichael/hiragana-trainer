@@ -1,0 +1,10 @@
+.current-character
+{
+    font-size: 8em;
+}
+
+.possible-romanji
+{
+    font-weight: bold;
+    text-align:  center;
+}

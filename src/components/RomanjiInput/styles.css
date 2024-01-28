@@ -1,0 +1,9 @@
+.romanji-input
+{
+    font-size:     2em;
+    text-align:    center;
+    border:        none;
+    border-bottom: 1px solid #dddddd;
+    outline:       none;
+    padding:       10px;
+}

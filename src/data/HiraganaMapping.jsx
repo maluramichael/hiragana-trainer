@@ -1,4 +1,4 @@
-export const hiraganaCharacterSets = [
+export const HiraganaMapping = [
     {
         'name':     'a',
         'romanji':  ['a', 'i', 'u', 'e', 'o'],
@@ -50,3 +50,16 @@ export const hiraganaCharacterSets = [
         'hiragana': ['わ', 'を', 'ん'],
     },
 ];
+
+export const getRandomCharacter = (selectedSets) => {
+    const sets             = selectedSets.split(',');
+    const characterSetName = sets[Math.floor(Math.random() * sets.length)];
+    const characterSet     = HiraganaMapping.find((item) => item.name === characterSetName);
+    const index            = Math.floor(Math.random() * characterSet.romanji.length);
+
+    return {
+        'romanji':          characterSet.romanji[index],
+        'hiragana':         characterSet.hiragana[index],
+        'availableRomanji': characterSet.romanji,
+    };
+};

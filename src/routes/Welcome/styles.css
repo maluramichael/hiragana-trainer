@@ -1,27 +1,3 @@
-#root
-{
-    padding: 2rem;
-}
-
-main
-{
-    text-align: center;
-}
-
-.current-character
-{
-    font-size: 8em;
-}
-
-.possible-romanji
-{
-    font-weight: bold;
-}
-
-.last-answer
-{
-}
-
 .character-sets
 {
     display:               grid;
@@ -51,8 +27,4 @@ main
 .character-set.active
 {
     background-color: #9de6ff;
-}
-
-footer {
-    padding: 10px;
 }

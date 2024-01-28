@@ -1,0 +1,15 @@
+#root
+{
+    padding: 2rem;
+}
+
+footer
+{
+    position:   fixed;
+    left:       0;
+    bottom:     0;
+    box-sizing: border-box;
+    padding:    10px;
+    width:      100%;
+    text-align: center;
+}

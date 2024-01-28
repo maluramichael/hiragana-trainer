@@ -1,9 +1,9 @@
-import classnames                from 'classnames';
-import { hiraganaCharacterSets } from './HiraganaCharacterSets.jsx';
+import classnames          from 'classnames';
+import { HiraganaMapping } from '../data/HiraganaMapping.jsx';
 
 export const CharacterSets = ({ selectedCharacterSets, setSelectedCharacterSets }) => {
     return <div className={'character-sets'}>
-        {hiraganaCharacterSets.map((characterSet) => (
+        {HiraganaMapping.map((characterSet) => (
             <div
                 className={classnames('character-set', { active: selectedCharacterSets.includes(characterSet.name) })}
                 key={characterSet.name}
