@@ -12,8 +12,8 @@
     align-items:           center;
     cursor:                pointer;
     border:                1px solid #eeeeee;
-    padding:              20px 10px;
-    transition:            all 0.3s ease-in-out;
+    padding:               20px 10px;
+    transition:            all 0.1s ease-in-out;
     -webkit-touch-callout: none;
     -webkit-user-select:   none;
     -moz-user-select:      none;
@@ -26,5 +26,7 @@
 
 .character-set.active
 {
-    background-color: #9de6ff;
+    background-color: #57c0e5;
+    color:            #ffffff;
+    font-weight:      bold;
 }
