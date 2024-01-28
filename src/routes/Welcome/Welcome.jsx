@@ -5,9 +5,9 @@ import { CharacterSets } from '../../components/CharacterSets.jsx';
 import './styles.css';
 import useLocalStorage   from '../../hooks/useLocalStorage.jsx';
 import { Options }       from '../../components/Options.jsx';
+import { useTranslation } from 'react-i18next';
 
 /*
-    * Replace english with german text
     * Mobile friendly
     * Add share images
     * Add sounds for correct answers
@@ -17,6 +17,7 @@ import { Options }       from '../../components/Options.jsx';
  */
 
 function Welcome() {
+    const { t }                      = useTranslation();
     const [selectedSets, selectSets] = useLocalStorage('selectedSets', []);
 
     return (
@@ -25,7 +26,7 @@ function Welcome() {
             <div>
                 <Options />
                 <h2>
-                    Select the sets you want to train and click on start
+                    {t('Select the sets you want to train and click on start')}
                 </h2>
                 <CharacterSets
                     setSelectedCharacterSets={selectSets}
@@ -36,7 +37,7 @@ function Welcome() {
                     to={'/train/' + selectedSets.join(',')}
                     disabled={selectedSets.length <= 0}
                 >
-                    {selectedSets.length <= 0 ? 'Select at least one set' : 'Start'}
+                    {selectedSets.length <= 0 ? t('Select at least one set') : t('Start')}
                 </Link>
             </div>
         </main>

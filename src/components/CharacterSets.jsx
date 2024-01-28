@@ -1,7 +1,11 @@
-import classnames          from 'classnames';
+import classnames         from 'classnames';
+import { useTranslation } from 'react-i18next';
+
 import { HiraganaMapping } from '../data/HiraganaMapping.jsx';
 
 export const CharacterSets = ({ selectedCharacterSets, setSelectedCharacterSets }) => {
+    const { t } = useTranslation();
+
     return <>
         <div
             className="button"
@@ -9,7 +13,7 @@ export const CharacterSets = ({ selectedCharacterSets, setSelectedCharacterSets 
                 setSelectedCharacterSets(HiraganaMapping.map((item) => item.name));
             }}
         >
-            Select all
+            {t('Select all')}
         </div>
         <div
             className="button"
@@ -17,7 +21,7 @@ export const CharacterSets = ({ selectedCharacterSets, setSelectedCharacterSets 
                 setSelectedCharacterSets([]);
             }}
         >
-            Select none
+            {t('Deselect all')}
         </div>
         <br />
         <br />

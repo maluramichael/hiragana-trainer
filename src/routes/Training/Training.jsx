@@ -9,6 +9,7 @@ import { CurrentCharacter }   from '../../components/CurrentCharacter/CurrentCha
 import useSettings            from '../../hooks/useSettings.jsx';
 
 import './styles.css';
+import { useTranslation }     from 'react-i18next';
 
 function RomanjiMultipleChoice({ currentCharacter, onSelect }) {
     return <div className={'buttons'}>
@@ -26,6 +27,7 @@ function RomanjiMultipleChoice({ currentCharacter, onSelect }) {
 }
 
 function Training() {
+    const { t }                                   = useTranslation();
     const [points, setPoints]                     = useState(0);
     const [currentInput, setCurrentInput]         = useState('');
     const [lastAnswers, setLastAnswers]           = useState([]);
@@ -75,7 +77,7 @@ function Training() {
                 to={'/'}
                 className={'button full-width'}
             >
-                Go back
+                {t('Go back')}
             </Link>
             <CurrentCharacter currentCharacter={currentCharacter} />
             {!multipleChoice &&
@@ -91,7 +93,7 @@ function Training() {
                 />
             }
             <div>
-                {points} Points
+                {points} {t('Points')}
             </div>
             <div>
                 {lastAnswers.map((item, index) => (

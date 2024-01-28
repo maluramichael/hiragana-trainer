@@ -1,21 +1,41 @@
+import { useTranslation } from 'react-i18next';
+import classnames         from 'classnames';
+
 import { Option }  from './Option.jsx';
 import useSettings from '../hooks/useSettings.jsx';
 
 export function Options() {
     const { showPossibleRomanji, setShowPossibleRomanji } = useSettings();
     const { multipleChoice, setMultipleChoice }           = useSettings();
+    const { t, i18n }                                     = useTranslation();
 
     return <div>
-        <h2>Options</h2>
+        <h2>{t('Options')}</h2>
         <Option
-            name={'Show possible romanji'}
+            name={t('Show possible romanji')}
             value={showPossibleRomanji}
             onChange={() => setShowPossibleRomanji(!showPossibleRomanji)}
         />
         <Option
-            name={'Select between kana instead of typing'}
+            name={t('Select between kana instead of typing')}
             value={multipleChoice}
             onChange={() => setMultipleChoice(!multipleChoice)}
         />
+        <div
+            className={classnames('button', { 'active': i18n.language === 'de' })}
+            onClick={() => {
+                i18n.changeLanguage('de');
+            }}
+        >
+            {t('German')}
+        </div>
+        <div
+            className={classnames('button', { 'active': i18n.language === 'en' })}
+            onClick={() => {
+                i18n.changeLanguage('en');
+            }}
+        >
+            {t('English')}
+        </div>
     </div>;
 }
