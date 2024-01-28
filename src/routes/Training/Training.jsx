@@ -11,16 +11,18 @@ import useSettings            from '../../hooks/useSettings.jsx';
 import './styles.css';
 
 function RomanjiMultipleChoice({ currentCharacter, onSelect }) {
-    return <>
+    return <div className={'buttons'}>
         {currentCharacter.availableRomanji.map((item, index) => (
-            <button
+            <div
+                className={'button'}
+                style={{ width: '40px', textAlign: 'center', display: 'inline-block' }}
                 key={index}
                 onClick={() => onSelect({ target: { value: item } })}
             >
                 {item}
-            </button>
+            </div>
         ))}
-    </>;
+    </div>;
 }
 
 function Training() {

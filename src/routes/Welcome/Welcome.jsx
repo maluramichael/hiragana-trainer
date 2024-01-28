@@ -34,9 +34,8 @@ function Welcome() {
                     setSelectedCharacterSets={selectSets}
                     selectedCharacterSets={selectedSets}
                 />
-                <br />
                 <Link
-                    className={'button'}
+                    className={'button full-width'}
                     to={'/train/' + selectedSets.join(',')}
                     disabled={selectedSets.length <= 0}
                 >
