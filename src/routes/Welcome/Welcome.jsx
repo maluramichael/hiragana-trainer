@@ -9,7 +9,6 @@ import { Options }       from '../../components/Options.jsx';
 /*
     * Replace english with german text
     * Mobile friendly
-    * Add buttons to select all and deselect all
     * Add share images
     * Add favicon (maybe something short that is related to sensei)
     * Add sounds for correct answers
