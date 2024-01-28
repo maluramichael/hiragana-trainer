@@ -1,6 +1,9 @@
 import './styles.css';
+import useSettings from '../../hooks/useSettings.jsx';
 
 export const CurrentCharacter = ({ currentCharacter }) => {
+    const { showPossibleRomanji } = useSettings();
+
     if (!currentCharacter) {
         return null;
     }
@@ -9,8 +12,10 @@ export const CurrentCharacter = ({ currentCharacter }) => {
         <div className={'current-character'}>
             <div>{currentCharacter.hiragana}</div>
         </div>
-        <div className={'possible-romanji'}>
-            {currentCharacter.availableRomanji.join(' ')}
-        </div>
+        {showPossibleRomanji &&
+            <div className={'possible-romanji'}>
+                {currentCharacter.availableRomanji.join(' ')}
+            </div>
+        }
     </div>;
 };

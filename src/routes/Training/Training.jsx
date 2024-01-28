@@ -5,25 +5,36 @@ import { useEffect } from 'react';
 
 import { getRandomCharacter } from '../../data/HiraganaMapping.jsx';
 import { RomanjiInput }       from '../../components/RomanjiInput/RomanjiInput.jsx';
+import { CurrentCharacter }   from '../../components/CurrentCharacter/CurrentCharacter.jsx';
+import useSettings            from '../../hooks/useSettings.jsx';
 
 import './styles.css';
-import { CurrentCharacter }   from '../../components/CurrentCharacter/CurrentCharacter.jsx';
+
+function RomanjiMultipleChoice({ currentCharacter, onSelect }) {
+    return <>
+        {currentCharacter.availableRomanji.map((item, index) => (
+            <button
+                key={index}
+                onClick={() => onSelect({ target: { value: item } })}
+            >
+                {item}
+            </button>
+        ))}
+    </>;
+}
 
 function Training() {
     const [points, setPoints]                     = useState(0);
     const [currentInput, setCurrentInput]         = useState('');
     const [lastAnswers, setLastAnswers]           = useState([]);
-    const [currentCharacter, setCurrentCharacter] = useState(null);
     const { selectedSets }                        = useParams();
+    const [currentCharacter, setCurrentCharacter] = useState(getRandomCharacter(selectedSets));
+    const { multipleChoice }                      = useSettings();
 
     const onChange = (event) => {
         const value = event.target.value;
         setCurrentInput(value);
     };
-
-    useEffect(() => {
-        setCurrentCharacter(getRandomCharacter(selectedSets));
-    }, []);
 
     useEffect(() => {
         if (currentCharacter) {
@@ -65,10 +76,18 @@ function Training() {
                 Go back
             </Link>
             <CurrentCharacter currentCharacter={currentCharacter} />
-            <RomanjiInput
-                onChange={onChange}
-                value={currentInput}
-            />
+            {!multipleChoice &&
+                <RomanjiInput
+                    onChange={onChange}
+                    value={currentInput}
+                />
+            }
+            {multipleChoice &&
+                <RomanjiMultipleChoice
+                    currentCharacter={currentCharacter}
+                    onSelect={onChange}
+                />
+            }
             <div>
                 {points} Points
             </div>

@@ -4,12 +4,11 @@ import { CharacterSets } from '../../components/CharacterSets.jsx';
 
 import './styles.css';
 import useLocalStorage   from '../../hooks/useLocalStorage.jsx';
+import { Options }       from '../../components/Options.jsx';
 
 /*
     * Replace english with german text
     * Mobile friendly
-    * Add option to switch between typing and multiple choice buttons
-    * Always show start button but disable it if no characterSets are selected
     * Add buttons to select all and deselect all
     * Add share images
     * Add favicon (maybe something short that is related to sensei)
@@ -27,9 +26,10 @@ function Welcome() {
         <main>
             <h1>Hiragana trainer</h1>
             <div>
-                <p>
-                    Select the sets you want to train and click on start.
-                </p>
+                <Options />
+                <h2>
+                    Select the sets you want to train and click on start
+                </h2>
                 <CharacterSets
                     setSelectedCharacterSets={selectSets}
                     selectedCharacterSets={selectedSets}
