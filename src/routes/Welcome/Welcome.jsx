@@ -32,13 +32,13 @@ function Welcome() {
                     setSelectedCharacterSets={selectSets}
                     selectedCharacterSets={selectedSets}
                 />
-                <Link
+                {selectedSets.length > 0 && <Link
                     className={'button full-width'}
                     to={'/train/' + selectedSets.join(',')}
                     disabled={selectedSets.length <= 0}
                 >
-                    {selectedSets.length <= 0 ? t('Select at least one set') : t('Start')}
-                </Link>
+                    {t('Start')}
+                </Link>}
             </div>
         </main>
     );
