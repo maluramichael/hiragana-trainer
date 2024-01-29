@@ -1,13 +1,13 @@
 import useLocalStorage from './useLocalStorage.jsx';
 
 const useSettings = () => {
-    const [showPossibleRomanji, setShowPossibleRomanji] = useLocalStorage('options.showPossibleRomanji', true);
+    const [showPossibleRomaji, setShowPossibleRomaji] = useLocalStorage('options.showPossibleRomaji', true);
     const [multipleChoice, setMultipleChoice]           = useLocalStorage('options.multipleChoice', false);
     const [language, setLanguage]                       = useLocalStorage('i18nextLng', 'de', false);
 
     return {
-        showPossibleRomanji,
-        setShowPossibleRomanji,
+        showPossibleRomaji,
+        setShowPossibleRomaji,
         multipleChoice,
         setMultipleChoice,
         language,

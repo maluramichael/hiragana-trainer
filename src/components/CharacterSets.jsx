@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import _                  from 'lodash';
 
 import { Sets }               from '../data/HiraganaMapping.jsx';
-import { HiraganaRomanjiMap } from '../data/HiraganaMapping.jsx';
+import { HiraganaRomajiMap } from '../data/HiraganaMapping.jsx';
 
 export const CharacterSets = ({ selectedCharacterSets, setSelectedCharacterSets }) => {
     const { t } = useTranslation();
@@ -27,7 +27,7 @@ export const CharacterSets = ({ selectedCharacterSets, setSelectedCharacterSets 
                 <div style={{ display: 'flex' }}>
                     <div style={{ display: 'flex', gap: '10px' }}>
                         {hiraganaInSet.map((hiragana, index) => {
-                            const romanji = HiraganaRomanjiMap[hiragana];
+                            const romaji = HiraganaRomajiMap[hiragana];
 
                             return (
                                 <div key={hiragana}>
@@ -35,7 +35,7 @@ export const CharacterSets = ({ selectedCharacterSets, setSelectedCharacterSets 
                                         {hiragana}
                                     </div>
                                     <div>
-                                        {_.isArray(romanji) ? romanji.join('/') : romanji}
+                                        {_.isArray(romaji) ? romaji.join('/') : romaji}
                                     </div>
                                 </div>
                             );

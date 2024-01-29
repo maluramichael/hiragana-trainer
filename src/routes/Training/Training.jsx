@@ -6,15 +6,15 @@ import _                  from 'lodash';
 import { useTranslation } from 'react-i18next';
 
 import { getRandomCharacter } from '../../data/HiraganaMapping.jsx';
-import { RomanjiInput }       from '../../components/RomanjiInput/RomanjiInput.jsx';
+import { RomajiInput }        from '../../components/RomajiInput/RomajiInput.jsx';
 import { CurrentCharacter }   from '../../components/CurrentCharacter/CurrentCharacter.jsx';
 import useSettings            from '../../hooks/useSettings.jsx';
 
 import './styles.css';
 
-function RomanjiMultipleChoice({ currentCharacter, onSelect }) {
+function RomajiMultipleChoice({ currentCharacter, onSelect }) {
     return <div className={'buttons'}>
-        {currentCharacter.availableRomanji.map((item, index) => {
+        {currentCharacter.availableRomaji.map((item, index) => {
 
             return (
                 <div
@@ -54,13 +54,13 @@ function Training() {
     useEffect(() => {
         if (currentCharacter && currentInput) {
             if (
-                _.isArray(currentCharacter.romanji) && currentCharacter.romanji.includes(currentInput) ||
-                currentInput === currentCharacter.romanji
+                _.isArray(currentCharacter.romaji) && currentCharacter.romaji.includes(currentInput) ||
+                currentInput === currentCharacter.romaji
             ) {
                 setCurrentInput('');
                 let newCharacter = currentCharacter;
 
-                while (newCharacter.romanji === currentCharacter.romanji) {
+                while (newCharacter.romaji === currentCharacter.romaji) {
                     newCharacter = getRandomCharacter(selectedSets);
                 }
 
@@ -86,13 +86,13 @@ function Training() {
             </Link>
             <CurrentCharacter currentCharacter={currentCharacter} />
             {!multipleChoice &&
-                <RomanjiInput
+                <RomajiInput
                     onChange={onChange}
                     value={currentInput}
                 />
             }
             {multipleChoice &&
-                <RomanjiMultipleChoice
+                <RomajiMultipleChoice
                     currentCharacter={currentCharacter}
                     onSelect={onChange}
                 />
@@ -102,7 +102,7 @@ function Training() {
                     <LastAnswer
                         key={index}
                     >
-                        {item.hiragana} - {item.romanji}
+                        {item.hiragana} - {item.romaji}
                     </LastAnswer>
                 ))}
             </div>

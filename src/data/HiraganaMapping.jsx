@@ -1,4 +1,4 @@
-export const HiraganaRomanjiMap = {
+export const HiraganaRomajiMap = {
     'あ': 'a',
     'い': 'i',
     'う': 'u',
@@ -67,8 +67,8 @@ export const getRandomCharacter = (selectedSets) => {
     const index            = Math.floor(Math.random() * characterSet.length);
 
     return {
-        'romanji':          HiraganaRomanjiMap[characterSet[index]],
+        'romaji':          HiraganaRomajiMap[characterSet[index]],
         'hiragana':         characterSet[index],
-        'availableRomanji': characterSet.map((item) => HiraganaRomanjiMap[item]),
+        'availableRomaji': characterSet.map((item) => HiraganaRomajiMap[item]),
     };
 };

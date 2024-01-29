@@ -5,16 +5,16 @@ import { Option }  from './Option.jsx';
 import useSettings from '../hooks/useSettings.jsx';
 
 export function Options() {
-    const { showPossibleRomanji, setShowPossibleRomanji } = useSettings();
+    const { showPossibleRomaji, setShowPossibleRomaji } = useSettings();
     const { multipleChoice, setMultipleChoice }           = useSettings();
     const { t, i18n }                                     = useTranslation();
 
     return <div>
         <h2>{t('Options')}</h2>
         <Option
-            name={t('Show possible romanji')}
-            value={showPossibleRomanji}
-            onChange={() => setShowPossibleRomanji(!showPossibleRomanji)}
+            name={t('Show possible romaji')}
+            value={showPossibleRomaji}
+            onChange={() => setShowPossibleRomaji(!showPossibleRomaji)}
         />
         <Option
             name={t('Select between kana instead of typing')}
