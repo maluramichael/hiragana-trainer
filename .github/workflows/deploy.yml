@@ -1,0 +1,44 @@
+name: Production deployment
+
+on:
+    push:
+        branches: [ master ]
+    pull_request:
+        branches: [ master ]
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        steps:
+            -   uses: actions/checkout@v2
+                with:
+                    submodules:  'true'
+                    fetch-depth: 0
+            -   uses: actions/setup-node@v4
+                with:
+                    # Version Spec of the version to use in SemVer notation.
+                    # It also emits such aliases as lts, latest, nightly and canary builds
+                    # Examples: 12.x, 10.15.1, >=10.15.0, lts/Hydrogen, 16-nightly, latest, node
+                    node-version: 'latest'
+            -   name: Install dependencies
+                run:  npm ci
+            -   name: Install SSH key
+                uses: shimataro/ssh-key-action@v2
+                with:
+                    key:           ${{ secrets.SSH_DEPLOY_SECRET }}
+                    name:          id_rsa
+                    if_key_exists: fail
+                    known_hosts:   just-some-random-string
+                    config:        |
+                                   LogLevel ERROR
+                                   Host ${{ secrets.SSH_HOST }}
+                                     HostName ${{ secrets.SSH_HOST }}
+                                     Port ${{ secrets.SSH_PORT }}
+                                     User root
+                                     IdentityFile ~/.ssh/id_rsa
+            -   name: Adding Known Hosts
+                run:  ssh-keyscan -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+            -   name: Build
+                run:  npm run build
+            -   name: Deploy
+                run:  ./deploy.sh ${{ secrets.SSH_HOST }}

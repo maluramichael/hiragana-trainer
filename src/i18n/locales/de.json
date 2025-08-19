@@ -1,0 +1,109 @@
+{
+  "title": "Japanisches Kana Quiz",
+  "subtitle": "Wählen Sie die Kana-Gruppen aus, die Sie üben möchten (sowohl Hiragana als auch Katakana)",
+  "navigation": {
+    "backToSelection": "← Zurück zur Auswahl"
+  },
+  "groups": {
+    "basic": "Grundlagen (あアいイうウえエおオ...)",
+    "dakuten": "Dakuten (がガ ぎギ ぐグ げゲ ごゴ...)",
+    "handakuten": "Handakuten (ぱパ ぴピ ぷプ ぺペ ぽポ)"
+  },
+  "subgroups": {
+    "vowels": "Vokale (あア いイ うウ えエ おオ)",
+    "kSeries": "K-Reihe (かカ きキ くク けケ こコ)",
+    "sSeries": "S-Reihe (さサ しシ すス せセ そソ)",
+    "tSeries": "T-Reihe (たタ ちチ つツ てテ とト)",
+    "nSeries": "N-Reihe (なナ にニ ぬヌ ねネ のノ)",
+    "hSeries": "H-Reihe (はハ ひヒ ふフ へヘ ほホ)",
+    "mSeries": "M-Reihe (まマ みミ むム めメ もモ)",
+    "ySeries": "Y-Reihe (やヤ ゆユ よヨ)",
+    "rSeries": "R-Reihe (らラ りリ るル れレ ろロ)",
+    "wSeries": "W-Reihe (わワ をヲ んン)",
+    "gSeries": "G-Reihe (がガ ぎギ ぐグ げゲ ごゴ)",
+    "zSeries": "Z-Reihe (ざザ じジ ずズ ぜゼ ぞゾ)",
+    "dSeries": "D-Reihe (だダ ぢヂ づヅ でデ どド)",
+    "bSeries": "B-Reihe (ばバ びビ ぶブ べベ ぼボ)",
+    "pSeries": "P-Reihe (ぱパ ぴピ ぷプ ぺペ ぽポ)"
+  },
+  "selection": {
+    "charactersSelected": "Zeichen ausgewählt",
+    "startQuiz": "Quiz starten"
+  },
+  "quiz": {
+    "typeRomaji": "Geben Sie das Romaji ein...",
+    "submit": "Absenden",
+    "correct": "✓ Richtig!",
+    "incorrect": "✗ Falsch",
+    "youTyped": "Sie haben eingegeben:",
+    "correctAnswer": "Richtige Antwort:",
+    "nextKanaQuick": "Nächstes Kana in 0.6s...",
+    "nextKanaSlow": "Nächstes Kana in 2s...",
+    "quizComplete": "Quiz beendet!",
+    "streak": "Serie",
+    "best": "Beste",
+    "correct_stat": "Richtig",
+    "currentStreak": "Aktuelle Serie",
+    "accuracy": "Genauigkeit",
+    "incorrect_stat": "Falsch",
+    "retryMode": "Wiederholung"
+  },
+  "results": {
+    "title": "Quiz beendet!",
+    "perfect": "Perfekt! 🎉",
+    "excellent": "Ausgezeichnet! 😊",
+    "good": "Gut gemacht! 👍",
+    "keepPracticing": "Weiter üben! 💪",
+    "correctAnswers": "Richtige Antworten",
+    "outOf": "von",
+    "bestStreak": "Beste Serie",
+    "incorrect": "Falsch",
+    "practiceSame": "Dieselben Kana nochmal üben",
+    "chooseDifferent": "Andere Kana auswählen"
+  },
+  "scripts": {
+    "hiragana": "Hiragana",
+    "katakana": "Katakana"
+  },
+  "language": {
+    "switch": "Sprache wechseln",
+    "german": "Deutsch",
+    "english": "English"
+  },
+  "statistics": {
+    "title": "Statistiken",
+    "overall": "Gesamtstatistik",
+    "practicedKana": "Geübte Kana",
+    "outOf": "von",
+    "totalCorrect": "Gesamt Richtig",
+    "totalIncorrect": "Gesamt Falsch",
+    "overallAccuracy": "Gesamtgenauigkeit",
+    "kana": "Kana",
+    "romaji": "Romaji",
+    "timesShown": "Mal gezeigt",
+    "timesCorrect": "Mal richtig",
+    "timesIncorrect": "Mal falsch",
+    "accuracy": "Genauigkeit",
+    "avgResponseTime": "Ø Antwortzeit",
+    "lastSeen": "Zuletzt gesehen",
+    "never": "Nie",
+    "export": "Exportieren",
+    "reset": "Zurücksetzen",
+    "confirmReset": "Sind Sie sicher, dass Sie alle Statistiken zurücksetzen möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
+    "noData": "Keine Daten verfügbar",
+    "startPracticing": "Beginnen Sie mit dem Üben, um Statistiken zu sehen!"
+  },
+  "progress": {
+    "notStarted": "Nicht begonnen",
+    "beginner": "Anfänger",
+    "intermediate": "Mittelstufe",
+    "advanced": "Fortgeschritten",
+    "expert": "Experte",
+    "master": "Meister",
+    "accuracy": "Genauigkeit",
+    "practiced": "geübt"
+  },
+  "footer": {
+    "madeWithLove": "mit Liebe gemacht"
+  }
+}

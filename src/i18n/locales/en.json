@@ -1,0 +1,109 @@
+{
+  "title": "Japanese Kana Quiz",
+  "subtitle": "Select the kana groups you want to practice (both hiragana and katakana)",
+  "navigation": {
+    "backToSelection": "← Back to selection"
+  },
+  "groups": {
+    "basic": "Basic (あアいイうウえエおオ...)",
+    "dakuten": "Dakuten (がガ ぎギ ぐグ げゲ ごゴ...)",
+    "handakuten": "Handakuten (ぱパ ぴピ ぷプ ぺペ ぽポ)"
+  },
+  "subgroups": {
+    "vowels": "Vowels (あア いイ うウ えエ おオ)",
+    "kSeries": "K-series (かカ きキ くク けケ こコ)",
+    "sSeries": "S-series (さサ しシ すス せセ そソ)",
+    "tSeries": "T-series (たタ ちチ つツ てテ とト)",
+    "nSeries": "N-series (なナ にニ ぬヌ ねネ のノ)",
+    "hSeries": "H-series (はハ ひヒ ふフ へヘ ほホ)",
+    "mSeries": "M-series (まマ みミ むム めメ もモ)",
+    "ySeries": "Y-series (やヤ ゆユ よヨ)",
+    "rSeries": "R-series (らラ りリ るル れレ ろロ)",
+    "wSeries": "W-series (わワ をヲ んン)",
+    "gSeries": "G-series (がガ ぎギ ぐグ げゲ ごゴ)",
+    "zSeries": "Z-series (ざザ じジ ずズ ぜゼ ぞゾ)",
+    "dSeries": "D-series (だダ ぢヂ づヅ でデ どド)",
+    "bSeries": "B-series (ばバ びビ ぶブ べベ ぼボ)",
+    "pSeries": "P-series (ぱパ ぴピ ぷプ ぺペ ぽポ)"
+  },
+  "selection": {
+    "charactersSelected": "characters selected",
+    "startQuiz": "Start Quiz"
+  },
+  "quiz": {
+    "typeRomaji": "Type the romaji...",
+    "submit": "Submit",
+    "correct": "✓ Correct!",
+    "incorrect": "✗ Incorrect",
+    "youTyped": "You typed:",
+    "correctAnswer": "Correct answer:",
+    "nextKanaQuick": "Next kana in 0.6s...",
+    "nextKanaSlow": "Next kana in 2s...",
+    "quizComplete": "Quiz complete!",
+    "streak": "Streak",
+    "best": "Best",
+    "correct_stat": "Correct",
+    "currentStreak": "Current Streak",
+    "accuracy": "Accuracy",
+    "incorrect_stat": "Incorrect",
+    "retryMode": "Retry"
+  },
+  "results": {
+    "title": "Quiz Complete!",
+    "perfect": "Perfect! 🎉",
+    "excellent": "Excellent! 😊",
+    "good": "Good job! 👍",
+    "keepPracticing": "Keep practicing! 💪",
+    "correctAnswers": "Correct Answers",
+    "outOf": "out of",
+    "bestStreak": "Best Streak",
+    "incorrect": "Incorrect",
+    "practiceSame": "Practice Same Kana Again",
+    "chooseDifferent": "Choose Different Kana"
+  },
+  "scripts": {
+    "hiragana": "Hiragana",
+    "katakana": "Katakana"
+  },
+  "language": {
+    "switch": "Switch Language",
+    "german": "Deutsch",
+    "english": "English"
+  },
+  "statistics": {
+    "title": "Statistics",
+    "overall": "Overall Statistics",
+    "practicedKana": "Practiced Kana",
+    "outOf": "out of",
+    "totalCorrect": "Total Correct",
+    "totalIncorrect": "Total Incorrect",
+    "overallAccuracy": "Overall Accuracy",
+    "kana": "Kana",
+    "romaji": "Romaji",
+    "timesShown": "Times Shown",
+    "timesCorrect": "Times Correct",
+    "timesIncorrect": "Times Incorrect",
+    "accuracy": "Accuracy",
+    "avgResponseTime": "Avg Response Time",
+    "lastSeen": "Last Seen",
+    "never": "Never",
+    "export": "Export",
+    "reset": "Reset",
+    "confirmReset": "Are you sure you want to reset all statistics? This action cannot be undone.",
+    "noData": "No data available",
+    "startPracticing": "Start practicing to see statistics!"
+  },
+  "progress": {
+    "notStarted": "Not started",
+    "beginner": "Beginner",
+    "intermediate": "Intermediate",
+    "advanced": "Advanced",
+    "expert": "Expert",
+    "master": "Master",
+    "accuracy": "accuracy",
+    "practiced": "practiced"
+  },
+  "footer": {
+    "madeWithLove": "made with love"
+  }
+}
