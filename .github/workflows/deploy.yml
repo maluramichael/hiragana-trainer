@@ -1,0 +1,17 @@
+name: Deploy to DokiDoki
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger DokiDoki Deployment
+        run: |
+          set -e  # Exit on error
+          curl -f -X POST "https://dokidoki.malura.de/webhooks/deploy/hiragana-trainer" \
+            -H "X-Webhook-Secret: ${{ secrets.DOKIDOKI_WEBHOOK_SECRET }}" \
+            -H "Content-Type: application/json" \
+            || (echo "Deployment webhook failed!" && exit 1)
