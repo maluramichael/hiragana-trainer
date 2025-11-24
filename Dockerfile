@@ -17,4 +17,4 @@ COPY nginx.conf /etc/nginx/nginx.conf
 
 EXPOSE 8000
 
-HEALTHCHECK --interval=30s --timeout=3s CMD wget -q --spider http://localhost:8000/ || exit 1
+HEALTHCHECK --interval=30s --timeout=3s CMD wget --spider http://127.0.0.1:8000/ || exit 1
