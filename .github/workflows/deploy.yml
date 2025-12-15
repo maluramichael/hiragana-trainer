@@ -9,17 +9,10 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    container: curlimages/curl:latest
     steps:
       - name: Deploy to DokiDoki
         run: |
           curl -sf -X POST https://dokidoki.malura.de/webhooks/deploy \
             -H "Content-Type: application/json" \
             -H "X-Webhook-Secret: ${{ secrets.DOKIDOKI_WEBHOOK_SECRET }}" \
-            -d '{
-              "repository_url": "${{ github.event.repository.clone_url }}",
-              "branch": "${{ github.ref_name }}",
-              "commit_sha": "${{ github.sha }}",
-              "commit_message": "${{ github.event.head_commit.message }}",
-              "actor": "${{ github.actor }}"
-            }'
+            -d '{"repository_url":"${{ github.event.repository.clone_url }}","branch":"${{ github.ref_name }}","commit_sha":"${{ github.sha }}","commit_message":${{ toJSON(github.event.head_commit.message) }},"actor":"${{ github.actor }}"}'
