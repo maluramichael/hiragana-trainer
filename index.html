@@ -38,9 +38,88 @@
     <meta name="apple-mobile-web-app-title" content="Kana Quiz" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+
+    <!-- Cookie Consent & Analytics -->
+    <style>[x-cloak] { display: none !important; }</style>
+    <script>
+      const CookieConsent = {
+        STORAGE_KEY: 'cookie_consent',
+        getConsent: function() {
+          const consent = localStorage.getItem(this.STORAGE_KEY);
+          return consent ? JSON.parse(consent) : null;
+        },
+        setConsent: function(accepted) {
+          const consent = { analytics: accepted, timestamp: new Date().toISOString(), version: 1 };
+          localStorage.setItem(this.STORAGE_KEY, JSON.stringify(consent));
+          return consent;
+        },
+        hasConsent: function() { return this.getConsent() !== null; },
+        analyticsAllowed: function() {
+          const consent = this.getConsent();
+          return consent && consent.analytics === true;
+        },
+        showBanner: function() {
+          if (this.hasConsent()) return;
+          document.getElementById('cookie-banner')?.classList.remove('hidden');
+        },
+        hideBanner: function() {
+          document.getElementById('cookie-banner')?.classList.add('hidden');
+        },
+        accept: function() {
+          this.setConsent(true);
+          this.hideBanner();
+          this.loadAnalytics();
+        },
+        reject: function() {
+          this.setConsent(false);
+          this.hideBanner();
+        },
+        loadAnalytics: function() {
+          if (!this.analyticsAllowed()) return;
+          window.owa_baseUrl = 'https://analytics.malura.de/';
+          window.owa_cmds = window.owa_cmds || [];
+          window.owa_cmds.push(['setSiteId', '82e604404dc994a836060d390e428c89']);
+          window.owa_cmds.push(['trackPageView']);
+          window.owa_cmds.push(['trackClicks']);
+          var _owa = document.createElement('script');
+          _owa.type = 'text/javascript';
+          _owa.async = true;
+          _owa.src = window.owa_baseUrl + 'modules/base/js/owa.tracker-combined-min.js';
+          var _owa_s = document.getElementsByTagName('script')[0];
+          _owa_s.parentNode.insertBefore(_owa, _owa_s);
+        },
+        init: function() {
+          document.addEventListener('DOMContentLoaded', () => {
+            if (this.analyticsAllowed()) {
+              this.loadAnalytics();
+            } else if (!this.hasConsent()) {
+              this.showBanner();
+            }
+          });
+        }
+      };
+      CookieConsent.init();
+    </script>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+
+    <!-- GDPR Cookie Consent Banner -->
+    <div id="cookie-banner" class="hidden" style="position:fixed;bottom:0;left:0;right:0;z-index:9999;padding:16px;background:#fff;border-top:1px solid #e5e7eb;box-shadow:0 -4px 6px -1px rgba(0,0,0,0.1);">
+      <div style="max-width:896px;margin:0 auto;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;">
+        <div style="flex:1;min-width:200px;">
+          <p style="margin:0;font-size:14px;color:#374151;">
+            <strong>Cookie-Hinweis:</strong> Diese Website verwendet Analyse-Cookies, um die Nutzung der Seite zu verstehen und zu verbessern.
+            Es werden keine personenbezogenen Daten an Dritte weitergegeben.
+            <a href="https://malura.de/datenschutz" style="color:#2563eb;text-decoration:underline;">Mehr erfahren</a>
+          </p>
+        </div>
+        <div style="display:flex;gap:12px;flex-shrink:0;">
+          <button onclick="CookieConsent.reject()" style="padding:8px 16px;font-size:14px;font-weight:500;color:#374151;background:#f3f4f6;border:none;border-radius:8px;cursor:pointer;">Ablehnen</button>
+          <button onclick="CookieConsent.accept()" style="padding:8px 16px;font-size:14px;font-weight:500;color:#fff;background:#2563eb;border:none;border-radius:8px;cursor:pointer;">Akzeptieren</button>
+        </div>
+      </div>
+    </div>
   </body>
 </html>
