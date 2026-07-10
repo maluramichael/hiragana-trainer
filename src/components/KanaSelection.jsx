@@ -355,20 +355,23 @@ const KanaSelection = ({ onStartQuiz, onStudy, onViewStatistics }) => {
           )}
         </div>
 
-        {/* One-click quickstart above the group picker. */}
-        <div className="mb-6 rounded-[1.75rem] bg-white/80 p-6 text-center shadow-cute ring-1 ring-white/70">
-          <button
-            data-testid="quickstart-button"
-            onClick={handleQuickstart}
-            className="group inline-flex items-center gap-2.5 rounded-[1.4rem] bg-gradient-to-r from-emerald-500 to-teal-500 px-8 py-4 text-xl font-bold text-white shadow-cute-lg transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0.5"
-          >
-            <RocketIcon className="w-6 h-6 transition-transform duration-200 group-hover:-rotate-12" />
-            {t('selection.quickstart')}
-          </button>
-          <p className="mt-3 text-sm text-slate-500">
-            {t('selection.quickstartHint')}
-          </p>
-        </div>
+        {/* One-click quickstart, shown only until the learner has practiced once.
+            After that it has served its tutorial purpose and stays hidden. */}
+        {!hasData && (
+          <div className="mb-6 rounded-[1.75rem] bg-white/80 p-6 text-center shadow-cute ring-1 ring-white/70">
+            <button
+              data-testid="quickstart-button"
+              onClick={handleQuickstart}
+              className="group inline-flex items-center gap-2.5 rounded-[1.4rem] bg-gradient-to-r from-emerald-500 to-teal-500 px-8 py-4 text-xl font-bold text-white shadow-cute-lg transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0.5"
+            >
+              <RocketIcon className="w-6 h-6 transition-transform duration-200 group-hover:-rotate-12" />
+              {t('selection.quickstart')}
+            </button>
+            <p className="mt-3 text-sm text-slate-500">
+              {t('selection.quickstartHint')}
+            </p>
+          </div>
+        )}
 
         {/* Review shortcuts: only shown once there is practice history to act on
             (#9 weak kana, #12 due kana). */}
