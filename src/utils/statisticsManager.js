@@ -1,6 +1,14 @@
 const STORAGE_KEY = 'kana-quiz-statistics';
 const STREAK_KEY = 'kana-quiz-best-streak';
+const DAILY_STREAK_KEY = 'kana-quiz-daily-streak';
 const SCHEMA_VERSION = 2;
+
+// Leitner spaced-repetition boxes 0..5 with their review intervals in days.
+// A correct answer moves the kana one box up (longer interval), a wrong answer
+// drops it back to box 0 (due again immediately).
+const SR_INTERVALS_DAYS = [0, 1, 3, 7, 14, 30];
+const SR_MAX_BOX = SR_INTERVALS_DAYS.length - 1;
+const DAY_MS = 86400000;
 
 // Single source of truth for script detection (Hiragana Unicode range, else Katakana)
 const scriptOf = (kana) => (/[぀-ゟ]/.test(kana) ? 'hiragana' : 'katakana');
@@ -11,6 +19,24 @@ const isNonEmptyString = (value) => typeof value === 'string' && value.length > 
 const toNumber = (value) => {
   const n = Number(value);
   return Number.isFinite(n) && n >= 0 ? n : 0;
+};
+
+// Normalize a Date (or date-like value) to a local calendar day 'YYYY-MM-DD'.
+// Uses local getters on purpose so a practice day is the user's wall-clock day.
+const toLocalDateString = (date) => {
+  const d = date instanceof Date ? date : new Date(date);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+};
+
+// Whole-day difference between two 'YYYY-MM-DD' strings (toStr - fromStr).
+// Anchored at UTC midnight so DST shifts cannot produce a fractional day.
+const daysBetween = (fromStr, toStr) => {
+  const [fy, fm, fd] = fromStr.split('-').map(Number);
+  const [ty, tm, td] = toStr.split('-').map(Number);
+  return Math.round((Date.UTC(ty, tm - 1, td) - Date.UTC(fy, fm - 1, fd)) / DAY_MS);
 };
 
 // Read the raw localStorage blob and return the flat stats map, migrating legacy blobs.
@@ -391,4 +417,144 @@ export const updateBestStreak = (streak) => {
   }
 
   return { bestStreak: current, isRecord: false };
+};
+
+// --- Daily practice streak (#7) -------------------------------------------
+
+// Read the persisted daily streak. Returns { current, longest, lastPracticeDate }.
+export const getDailyStreak = () => {
+  try {
+    const stored = localStorage.getItem(DAILY_STREAK_KEY);
+    if (!stored) {
+      return { current: 0, longest: 0, lastPracticeDate: null };
+    }
+    const parsed = JSON.parse(stored);
+    return {
+      current: toNumber(parsed.current),
+      longest: toNumber(parsed.longest),
+      lastPracticeDate: isNonEmptyString(parsed.lastPracticeDate) ? parsed.lastPracticeDate : null
+    };
+  } catch (error) {
+    console.error('Error reading daily streak from localStorage:', error);
+    return { current: 0, longest: 0, lastPracticeDate: null };
+  }
+};
+
+// Record that the user practiced on `date` (default today). Increments the
+// streak when the previous practice day was yesterday, keeps it when they
+// already practiced today, and resets to 1 on any gap. `date` is a parameter
+// so tests can drive consecutive/broken days deterministically.
+// Returns the updated { current, longest, lastPracticeDate }.
+export const recordPracticeDay = (date = new Date()) => {
+  const today = toLocalDateString(date);
+  const { current, longest, lastPracticeDate } = getDailyStreak();
+
+  let nextCurrent;
+  if (!lastPracticeDate) {
+    nextCurrent = 1;
+  } else {
+    const diff = daysBetween(lastPracticeDate, today);
+    if (diff === 0) {
+      nextCurrent = current > 0 ? current : 1; // already practiced today
+    } else if (diff === 1) {
+      nextCurrent = current + 1; // consecutive day
+    } else {
+      nextCurrent = 1; // gap (or clock moved backwards)
+    }
+  }
+
+  const result = {
+    current: nextCurrent,
+    longest: Math.max(longest, nextCurrent),
+    lastPracticeDate: today
+  };
+
+  try {
+    localStorage.setItem(DAILY_STREAK_KEY, JSON.stringify(result));
+  } catch (error) {
+    console.error('Error saving daily streak to localStorage:', error);
+  }
+  return result;
+};
+
+// --- Weak kana selection (#9) ---------------------------------------------
+
+// Return the stat objects for kana the learner struggles with, weakest first.
+// A kana is "weak" once it has at least `minAttempts` graded attempts AND its
+// accuracy is below `accuracyThreshold` (or it has been missed at least as
+// often as it was answered correctly). Both thresholds are configurable.
+export const getWeakKana = (options = {}) => {
+  const { minAttempts = 3, accuracyThreshold = 0.6 } = options;
+  const statistics = getStatistics();
+
+  return Object.values(statistics)
+    .map(stat => {
+      const attempts = stat.timesCorrect + stat.timesIncorrect;
+      const accuracy = attempts > 0 ? stat.timesCorrect / attempts : 1;
+      return { stat, attempts, accuracy };
+    })
+    .filter(({ stat, attempts, accuracy }) =>
+      attempts >= minAttempts &&
+      (accuracy < accuracyThreshold || stat.timesIncorrect >= stat.timesCorrect))
+    .sort((a, b) => a.accuracy - b.accuracy)
+    .map(({ stat }) => stat);
+};
+
+// --- Lightweight spaced repetition (#12) ----------------------------------
+
+// Update a kana's Leitner box + next due date after an answer. Correct moves
+// one box up (capped at SR_MAX_BOX), wrong drops to box 0. Fields are stored
+// additively on the stat object; missing box/dueAt are treated as box 0.
+// `now` is a parameter for deterministic tests.
+// Returns { key, box, dueAt }.
+export const scheduleReview = (key, wasCorrect, now = new Date()) => {
+  const statistics = getStatistics();
+  let stat = statistics[key];
+
+  if (!stat) {
+    // Reconstruct kana/romaji from the "<kana>-<romaji>" key (kana never
+    // contains '-', so the first dash is the separator).
+    const dash = key.indexOf('-');
+    const kana = dash >= 0 ? key.slice(0, dash) : key;
+    const romaji = dash >= 0 ? key.slice(dash + 1) : '';
+    stat = statistics[key] = {
+      kana,
+      romaji,
+      script: scriptOf(kana),
+      timesShown: 0,
+      timesCorrect: 0,
+      timesIncorrect: 0,
+      lastSeen: null,
+      averageResponseTime: 0,
+      responseTimes: []
+    };
+  }
+
+  const currentBox = Number.isInteger(stat.box) ? stat.box : 0;
+  const nextBox = wasCorrect ? Math.min(currentBox + 1, SR_MAX_BOX) : 0;
+  const nowMs = now instanceof Date ? now.getTime() : new Date(now).getTime();
+  const dueAt = new Date(nowMs + SR_INTERVALS_DAYS[nextBox] * DAY_MS).toISOString();
+
+  stat.box = nextBox;
+  stat.dueAt = dueAt;
+  saveStatistics(statistics);
+  return { key, box: nextBox, dueAt };
+};
+
+// Return the keys of kana due for review at `now`. Without `candidateKeys` all
+// known kana are considered. A kana with no dueAt (never scheduled) counts as
+// due immediately, so new kana surface right away.
+export const getDueKana = (candidateKeys = null, now = new Date()) => {
+  const statistics = getStatistics();
+  const keys = Array.isArray(candidateKeys) ? candidateKeys : Object.keys(statistics);
+  const nowMs = now instanceof Date ? now.getTime() : new Date(now).getTime();
+
+  return keys.filter(key => {
+    const stat = statistics[key];
+    if (!stat || !stat.dueAt) {
+      return true; // missing SR fields = due now
+    }
+    const dueMs = Date.parse(stat.dueAt);
+    return !Number.isFinite(dueMs) || dueMs <= nowMs;
+  });
 };

@@ -8,7 +8,12 @@ import {
   exportStatisticsAsBase64,
   importStatisticsFromBase64,
   getBestStreak,
-  updateBestStreak
+  updateBestStreak,
+  getDailyStreak,
+  recordPracticeDay,
+  getWeakKana,
+  scheduleReview,
+  getDueKana
 } from './statisticsManager.js';
 
 const STORAGE_KEY = 'kana-quiz-statistics';
@@ -181,5 +186,88 @@ describe('best streak persistence (#53)', () => {
     res = updateBestStreak(8);
     expect(res).toEqual({ bestStreak: 8, isRecord: true });
     expect(getBestStreak()).toBe(8);
+  });
+});
+
+describe('daily practice streak (#7)', () => {
+  it('defaults to an empty streak', () => {
+    expect(getDailyStreak()).toEqual({ current: 0, longest: 0, lastPracticeDate: null });
+  });
+
+  it('increments on consecutive days and keeps the longest', () => {
+    recordPracticeDay(new Date(2026, 0, 1));
+    recordPracticeDay(new Date(2026, 0, 2));
+    let streak = recordPracticeDay(new Date(2026, 0, 3));
+    expect(streak.current).toBe(3);
+    expect(streak.longest).toBe(3);
+    expect(streak.lastPracticeDate).toBe('2026-01-03');
+
+    // A gap resets current to 1 but longest is retained
+    streak = recordPracticeDay(new Date(2026, 0, 6));
+    expect(streak.current).toBe(1);
+    expect(streak.longest).toBe(3);
+    expect(getDailyStreak().current).toBe(1);
+  });
+
+  it('counts practicing twice on the same day only once', () => {
+    recordPracticeDay(new Date(2026, 0, 1));
+    const streak = recordPracticeDay(new Date(2026, 0, 1));
+    expect(streak.current).toBe(1);
+    expect(streak.lastPracticeDate).toBe('2026-01-01');
+  });
+});
+
+describe('getWeakKana (#9)', () => {
+  beforeEach(() => {
+    // strong: 5/5 correct; weak: 1/5 correct; too few attempts to judge
+    saveStatistics({
+      'あ-a': { kana: 'あ', romaji: 'a', script: 'hiragana', timesShown: 5, timesCorrect: 5, timesIncorrect: 0, lastSeen: null, averageResponseTime: 0, responseTimes: [] },
+      'い-i': { kana: 'い', romaji: 'i', script: 'hiragana', timesShown: 5, timesCorrect: 1, timesIncorrect: 4, lastSeen: null, averageResponseTime: 0, responseTimes: [] },
+      'う-u': { kana: 'う', romaji: 'u', script: 'hiragana', timesShown: 1, timesCorrect: 0, timesIncorrect: 1, lastSeen: null, averageResponseTime: 0, responseTimes: [] }
+    });
+  });
+
+  it('returns exactly the weak kana, not the strong or under-attempted ones', () => {
+    const weak = getWeakKana();
+    expect(weak.map(s => s.kana)).toEqual(['い']);
+  });
+
+  it('respects a lowered minAttempts threshold', () => {
+    const weak = getWeakKana({ minAttempts: 1 });
+    expect(weak.map(s => s.kana).sort()).toEqual(['い', 'う']);
+  });
+});
+
+describe('spaced repetition scheduling (#12)', () => {
+  it('schedules a correct answer further out than a wrong one', () => {
+    const now = new Date(2026, 0, 1, 12, 0, 0);
+    updateKanaStatistic('か', 'ka', true);
+    updateKanaStatistic('き', 'ki', false);
+
+    const correct = scheduleReview('か-ka', true, now);
+    const wrong = scheduleReview('き-ki', false, now);
+
+    expect(correct.box).toBe(1);
+    expect(wrong.box).toBe(0);
+    expect(Date.parse(correct.dueAt)).toBeGreaterThan(Date.parse(wrong.dueAt));
+  });
+
+  it('getDueKana filters by due date', () => {
+    const now = new Date(2026, 0, 1, 12, 0, 0);
+    updateKanaStatistic('か', 'ka', true);
+    scheduleReview('か-ka', true, now); // box 1 -> due in 1 day
+
+    // Same instant: not yet due
+    expect(getDueKana(['か-ka'], now)).toEqual([]);
+    // Two days later: due
+    const later = new Date(now.getTime() + 2 * 86400000);
+    expect(getDueKana(['か-ka'], later)).toEqual(['か-ka']);
+  });
+
+  it('treats kana without SR fields as due immediately', () => {
+    updateKanaStatistic('こ', 'ko', true); // no scheduleReview -> no dueAt
+    expect(getDueKana(['こ-ko'])).toEqual(['こ-ko']);
+    // An entirely unknown candidate key is also due (never seen)
+    expect(getDueKana(['ぬ-nu'])).toEqual(['ぬ-nu']);
   });
 });
