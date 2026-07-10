@@ -1,4 +1,4 @@
-export const hiragana = [
+const hiraganaBase = [
   { kana: 'あ', romaji: 'a' },
   { kana: 'い', romaji: 'i' },
   { kana: 'う', romaji: 'u' },
@@ -72,7 +72,7 @@ export const hiragana = [
   { kana: 'ん', romaji: 'n' }
 ];
 
-export const katakana = [
+const katakanaBase = [
   { kana: 'ア', romaji: 'a' },
   { kana: 'イ', romaji: 'i' },
   { kana: 'ウ', romaji: 'u' },
@@ -146,71 +146,76 @@ export const katakana = [
   { kana: 'ン', romaji: 'n' }
 ];
 
-export const kanaGroups = {
-  basic: {
-    vowels: { 
-      hiragana: hiragana.slice(0, 5), 
-      katakana: katakana.slice(0, 5) 
-    },
-    k: { 
-      hiragana: hiragana.slice(5, 10), 
-      katakana: katakana.slice(5, 10) 
-    },
-    s: { 
-      hiragana: hiragana.slice(15, 20), 
-      katakana: katakana.slice(15, 20) 
-    },
-    t: { 
-      hiragana: hiragana.slice(25, 30), 
-      katakana: katakana.slice(25, 30) 
-    },
-    n: { 
-      hiragana: hiragana.slice(35, 40), 
-      katakana: katakana.slice(35, 40) 
-    },
-    h: { 
-      hiragana: hiragana.slice(40, 45), 
-      katakana: katakana.slice(40, 45) 
-    },
-    m: { 
-      hiragana: hiragana.slice(55, 60), 
-      katakana: katakana.slice(55, 60) 
-    },
-    y: { 
-      hiragana: [hiragana[60], hiragana[61], hiragana[62]], 
-      katakana: [katakana[60], katakana[61], katakana[62]] 
-    },
-    r: { 
-      hiragana: hiragana.slice(63, 68), 
-      katakana: katakana.slice(63, 68) 
-    },
-    w: { 
-      hiragana: [hiragana[68], hiragana[69], hiragana[70]], 
-      katakana: [katakana[68], katakana[69], katakana[70]] 
-    }
-  },
-  dakuten: {
-    g: { 
-      hiragana: hiragana.slice(10, 15), 
-      katakana: katakana.slice(10, 15) 
-    },
-    z: { 
-      hiragana: hiragana.slice(20, 25), 
-      katakana: katakana.slice(20, 25) 
-    },
-    d: { 
-      hiragana: hiragana.slice(30, 35), 
-      katakana: katakana.slice(30, 35) 
-    },
-    b: { 
-      hiragana: hiragana.slice(45, 50), 
-      katakana: katakana.slice(45, 50) 
-    }
-  },
-  handakuten: {
-    p: { 
-      hiragana: hiragana.slice(50, 55), 
-      katakana: katakana.slice(50, 55) 
-    }
-  }
+// Serien-Layout in Array-Reihenfolge: benennt jede Kana-Serie und ihren Typ
+// genau einmal. hiragana und katakana sind index-aligned, teilen sich also
+// dasselbe Layout. Ersetzt die früheren hartkodierten slice-Indizes (#99).
+const seriesLayout = [
+  { type: 'basic', series: 'vowels', count: 5 },
+  { type: 'basic', series: 'k', count: 5 },
+  { type: 'dakuten', series: 'g', count: 5 },
+  { type: 'basic', series: 's', count: 5 },
+  { type: 'dakuten', series: 'z', count: 5 },
+  { type: 'basic', series: 't', count: 5 },
+  { type: 'dakuten', series: 'd', count: 5 },
+  { type: 'basic', series: 'n', count: 5 },
+  { type: 'basic', series: 'h', count: 5 },
+  { type: 'dakuten', series: 'b', count: 5 },
+  { type: 'handakuten', series: 'p', count: 5 },
+  { type: 'basic', series: 'm', count: 5 },
+  { type: 'basic', series: 'y', count: 3 },
+  { type: 'basic', series: 'r', count: 5 },
+  { type: 'basic', series: 'w', count: 3 }
+];
+
+// Layout auf eine flache Zuordnung pro Index expandieren, dann series/type
+// an jedes Kana-Objekt hängen (Consumer lesen weiterhin nur .kana/.romaji).
+const flatLayout = seriesLayout.flatMap(({ type, series, count }) =>
+  Array.from({ length: count }, () => ({ type, series }))
+);
+
+if (flatLayout.length !== hiraganaBase.length || flatLayout.length !== katakanaBase.length) {
+  throw new Error('kana seriesLayout deckt nicht alle Zeichen ab');
+}
+
+const withLayout = (base) => base.map((k, i) => ({ ...k, ...flatLayout[i] }));
+
+export const hiragana = withLayout(hiraganaBase);
+export const katakana = withLayout(katakanaBase);
+
+// Anzeige-Reihenfolge der Gruppen (bewusst NICHT die Array-Reihenfolge): legt
+// die Key-Reihenfolge des exportierten kanaGroups fest.
+const groupOrder = {
+  basic: ['vowels', 'k', 's', 't', 'n', 'h', 'm', 'y', 'r', 'w'],
+  dakuten: ['g', 'z', 'd', 'b'],
+  handakuten: ['p']
 };
+
+// kanaGroups aus den series/type-Eigenschaften ableiten statt aus slice-Indizes.
+// filter erhält die Array-Reihenfolge, daher bleibt die Zeichenfolge je Gruppe
+// identisch zur früheren Hand-Definition.
+export const kanaGroups = Object.fromEntries(
+  Object.entries(groupOrder).map(([type, seriesList]) => [
+    type,
+    Object.fromEntries(seriesList.map((series) => [
+      series,
+      {
+        hiragana: hiragana.filter((k) => k.type === type && k.series === series),
+        katakana: katakana.filter((k) => k.type === type && k.series === series)
+      }
+    ]))
+  ])
+);
+
+// Liefert das positionsgleiche Gegenstück im anderen Script (Hiragana ↔ Katakana)
+// per Identität/Index, NICHT per romaji — sonst kollidieren doppelte romaji wie
+// 'ji' (じ/ぢ) und 'zu' (ず/づ) (#11). Gibt null zurück, wenn kanaObj unbekannt ist.
+export function getScriptCounterpart(kanaObj) {
+  // Über den eindeutigen Kana-String suchen (robust gegen geklonte/serialisierte
+  // Objekte), Gegenstück positionsgleich im anderen Script zurückgeben.
+  if (!kanaObj || !kanaObj.kana) return null;
+  const hi = hiragana.findIndex((k) => k.kana === kanaObj.kana);
+  if (hi !== -1) return katakana[hi] ?? null;
+  const ka = katakana.findIndex((k) => k.kana === kanaObj.kana);
+  if (ka !== -1) return hiragana[ka] ?? null;
+  return null;
+}

@@ -1,0 +1,18 @@
+# Hiragana Trainer
+
+> Free, interactive quiz to learn and master Japanese Hiragana and Katakana. No signup, no ads. Available in English and German.
+
+Hiragana Trainer is a browser-based learning app for the two Japanese kana syllabaries. It quizzes you on individual characters, tracks accuracy and response time per character, and stores all progress locally in your browser (localStorage) — no account and no backend required.
+
+## Features
+
+- Practice both Hiragana (あ) and Katakana (ア) writing systems.
+- Choose which kana series to study (e.g. a-i-u-e-o, k-series, etc.).
+- Per-character statistics: accuracy and average response time.
+- Progress tracking persisted client-side in localStorage — nothing leaves your device.
+- Bilingual interface: English and German.
+- Completely free, no signup, no ads.
+
+## Links
+
+- App: https://hiragana-trainer.malura.de/

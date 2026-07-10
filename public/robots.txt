@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://hiragana-trainer.malura.de/sitemap.xml

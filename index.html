@@ -1,43 +1,72 @@
 <!doctype html>
-<html lang="en">
+<html lang="de">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    
+
     <!-- Primary Meta Tags -->
-    <title>Kana Quiz - Learn Japanese Hiragana & Katakana</title>
-    <meta name="title" content="Kana Quiz - Learn Japanese Hiragana & Katakana" />
-    <meta name="description" content="Master Japanese Hiragana and Katakana characters with our interactive quiz app. Track your progress, practice at your own pace, and build a strong foundation for learning Japanese." />
-    <meta name="keywords" content="Japanese, Hiragana, Katakana, Kana, Quiz, Learning, Education, Language, Practice, Interactive" />
+    <title>Hiragana Trainer - Learn Japanese Hiragana & Katakana</title>
+    <meta name="title" content="Hiragana Trainer - Learn Japanese Hiragana & Katakana" />
+    <meta name="description" content="Free Hiragana & Katakana quiz — no signup, no ads. Track accuracy & response time per character and master Japanese kana at your own pace." />
+    <meta name="keywords" content="Japanese, Hiragana, Katakana, Kana, Quiz, Learn Japanese, Kana practice, Education, Language, Free, No signup" />
     <meta name="author" content="Michael" />
     <meta name="robots" content="index, follow" />
-    <meta name="language" content="English" />
-    
+
+    <!-- hreflang: bis W5 echte Routen bringt, zeigen alle Varianten auf dieselbe URL -->
+    <link rel="alternate" hreflang="de" href="https://hiragana-trainer.malura.de/" />
+    <link rel="alternate" hreflang="en" href="https://hiragana-trainer.malura.de/" />
+    <link rel="alternate" hreflang="x-default" href="https://hiragana-trainer.malura.de/" />
+
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://malura.de/" />
-    <meta property="og:title" content="Kana Quiz - Learn Japanese Hiragana & Katakana" />
-    <meta property="og:description" content="Master Japanese Hiragana and Katakana characters with our interactive quiz app. Track your progress, practice at your own pace, and build a strong foundation for learning Japanese." />
-    <meta property="og:site_name" content="Kana Quiz" />
-    
+    <meta property="og:url" content="https://hiragana-trainer.malura.de/" />
+    <meta property="og:title" content="Hiragana Trainer - Learn Japanese Hiragana & Katakana" />
+    <meta property="og:description" content="Free Hiragana & Katakana quiz — no signup, no ads. Track accuracy & response time per character and master Japanese kana at your own pace." />
+    <meta property="og:site_name" content="Hiragana Trainer" />
+    <!-- lazy: SVG-OG-Image; manche Plattformen rendern SVG schlecht → PNG-Export empfohlen (Backlog) -->
+    <meta property="og:image" content="https://hiragana-trainer.malura.de/og-image.svg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:url" content="https://malura.de/" />
-    <meta property="twitter:title" content="Kana Quiz - Learn Japanese Hiragana & Katakana" />
-    <meta property="twitter:description" content="Master Japanese Hiragana and Katakana characters with our interactive quiz app. Track your progress, practice at your own pace, and build a strong foundation for learning Japanese." />
-    
+    <meta property="twitter:url" content="https://hiragana-trainer.malura.de/" />
+    <meta property="twitter:title" content="Hiragana Trainer - Learn Japanese Hiragana & Katakana" />
+    <meta property="twitter:description" content="Free Hiragana & Katakana quiz — no signup, no ads. Track accuracy & response time per character and master Japanese kana at your own pace." />
+    <meta property="twitter:image" content="https://hiragana-trainer.malura.de/og-image.svg" />
+
     <!-- Favicon -->
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/favicon.svg" />
+
     <!-- Theme Color -->
     <meta name="theme-color" content="#2563eb" />
     <meta name="msapplication-TileColor" content="#2563eb" />
-    
+
     <!-- Additional Meta -->
-    <meta name="application-name" content="Kana Quiz" />
-    <meta name="apple-mobile-web-app-title" content="Kana Quiz" />
+    <meta name="application-name" content="Hiragana Trainer" />
+    <meta name="apple-mobile-web-app-title" content="Hiragana Trainer" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Hiragana Trainer",
+        "description": "Free Hiragana & Katakana quiz — no signup, no ads. Track accuracy & response time per character and master Japanese kana at your own pace.",
+        "url": "https://hiragana-trainer.malura.de/",
+        "applicationCategory": "EducationalApplication",
+        "operatingSystem": "Any",
+        "inLanguage": ["de", "en"],
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "EUR"
+        }
+      }
+    </script>
 
     <!-- Cookie Consent & Analytics -->
     <style>[x-cloak] { display: none !important; }</style>
@@ -84,6 +113,9 @@
           var _owa = document.createElement('script');
           _owa.type = 'text/javascript';
           _owa.async = true;
+          // lazy: crossOrigin gesetzt; echte SRI bräuchte einen fixen integrity-Hash,
+          // der bei OWA-Updates der selbst-gehosteten Datei still bricht (→ Backlog).
+          _owa.crossOrigin = 'anonymous';
           _owa.src = window.owa_baseUrl + 'modules/base/js/owa.tracker-combined-min.js';
           var _owa_s = document.getElementsByTagName('script')[0];
           _owa_s.parentNode.insertBefore(_owa, _owa_s);
@@ -102,7 +134,30 @@
     </script>
   </head>
   <body>
-    <div id="root"></div>
+    <!-- Above-the-fold Fallback für Crawler ohne JS; React ersetzt #root beim Mounten -->
+    <div id="root">
+      <main style="max-width:720px;margin:0 auto;padding:48px 20px;font-family:system-ui,sans-serif;color:#1f2937;text-align:center;">
+        <h1 style="font-size:2rem;font-weight:700;margin:0 0 16px;">Free Hiragana &amp; Katakana Quiz</h1>
+        <p style="font-size:1.05rem;line-height:1.6;margin:0 0 12px;">
+          Learn the two Japanese kana syllabaries at your own pace. Hiragana Trainer quizzes you on
+          each character, tracks your accuracy and response time, and keeps all progress in your
+          browser — no signup, no ads, completely free.
+        </p>
+        <p style="font-size:1.05rem;line-height:1.6;margin:0 0 20px;">
+          Available in English and German. Pick the kana series you want to study and start practicing.
+        </p>
+        <ul style="list-style:none;padding:0;margin:0;font-size:1rem;line-height:1.9;">
+          <li>Hiragana (あ) &amp; Katakana (ア) practice</li>
+          <li>Per-character accuracy &amp; response-time statistics</li>
+          <li>Progress saved locally — nothing leaves your device</li>
+        </ul>
+        <noscript>
+          <p style="margin-top:24px;font-weight:600;color:#b91c1c;">
+            This app needs JavaScript enabled to run the interactive quiz.
+          </p>
+        </noscript>
+      </main>
+    </div>
     <script type="module" src="/src/main.jsx"></script>
 
     <!-- GDPR Cookie Consent Banner -->
