@@ -193,5 +193,30 @@
   },
   "footer": {
     "madeWithLove": "made with love"
+  },
+  "landing": {
+    "hero": {
+      "title": "Learn to read Hiragana and Katakana for real",
+      "subtitle": "You see a Japanese character and type how it sounds. Short rounds, clear feedback, visible progress.",
+      "cta": "Start for free",
+      "ctaHint": "Starts right away with the five vowels.",
+      "secondary": "Pick characters yourself",
+      "trust": "Free. No signup. Runs offline in your browser."
+    },
+    "features": {
+      "heading": "What you get",
+      "accuracy": {
+        "title": "Accuracy and speed per character",
+        "body": "For every kana you see how confidently and how quickly you recognize it."
+      },
+      "repeat": {
+        "title": "Wrong characters come back",
+        "body": "Whatever you mix up returns automatically until it sticks (spaced repetition)."
+      },
+      "offline": {
+        "title": "Offline and no account",
+        "body": "Your progress stays local on your device. No signup required."
+      }
+    }
   }
 }

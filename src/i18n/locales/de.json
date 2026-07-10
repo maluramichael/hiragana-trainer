@@ -193,5 +193,30 @@
   },
   "footer": {
     "madeWithLove": "mit Liebe gemacht"
+  },
+  "landing": {
+    "hero": {
+      "title": "Hiragana und Katakana sicher lesen lernen",
+      "subtitle": "Du siehst ein japanisches Zeichen und tippst seine Aussprache. Kurze Runden, klares Feedback, sichtbarer Fortschritt.",
+      "cta": "Kostenlos starten",
+      "ctaHint": "Startet sofort mit den fünf Vokalen.",
+      "secondary": "Zeichen selbst auswählen",
+      "trust": "Kostenlos. Keine Anmeldung. Läuft offline im Browser."
+    },
+    "features": {
+      "heading": "Was dich erwartet",
+      "accuracy": {
+        "title": "Trefferquote und Zeit pro Zeichen",
+        "body": "Für jedes Kana siehst du, wie sicher und wie schnell du es erkennst."
+      },
+      "repeat": {
+        "title": "Falsche Zeichen kommen zurück",
+        "body": "Was du verwechselst, taucht automatisch wieder auf, bis es sitzt (Spaced Repetition)."
+      },
+      "offline": {
+        "title": "Offline und ohne Konto",
+        "body": "Dein Fortschritt bleibt lokal auf deinem Gerät. Keine Anmeldung nötig."
+      }
+    }
   }
 }

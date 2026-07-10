@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 import KanaSelection from './components/KanaSelection';
+import LandingPage from './components/LandingPage';
 import LanguageSwitcher from './components/LanguageSwitcher';
 import { initializeStatistics } from './utils/statisticsManager.js';
 import { trackEvent } from './utils/analytics.js';
-import { hiragana, katakana } from './data/kana.js';
+import { hiragana, katakana, kanaGroups } from './data/kana.js';
 import './i18n/i18n.js';
 
 // #22: base64-Challenge-Parameter zu einer gültigen kanaList auflösen.
@@ -39,7 +40,9 @@ const ScreenFallback = () => (
 
 function App() {
   const { t, i18n } = useTranslation();
-  const [currentView, setCurrentView] = useState('selection');
+  // #landing: the app opens on a marketing landing page; the primary CTA jumps
+  // straight into the quiz, a secondary link leads to the full picker.
+  const [currentView, setCurrentView] = useState('landing');
   const [selectedKana, setSelectedKana] = useState([]);
   // Which script(s) the quiz drills; 'both' keeps the legacy behaviour (#72).
   const [scriptMode, setScriptMode] = useState('both');
@@ -87,7 +90,7 @@ function App() {
   // #80/#64: popstate is the single source of truth for backward view changes.
   useEffect(() => {
     const handlePopState = (event) => {
-      const targetView = event.state?.view ?? 'selection';
+      const targetView = event.state?.view ?? 'landing';
 
       // #64: don't drop quiz progress on browser-back without asking.
       if (currentView === 'quiz' && !intentionalLeaveRef.current) {
@@ -100,7 +103,7 @@ function App() {
       intentionalLeaveRef.current = false;
 
       setCurrentView(targetView);
-      if (targetView === 'selection') {
+      if (targetView === 'selection' || targetView === 'landing') {
         setSelectedKana([]);
         setQuizResults(null);
       }
@@ -120,6 +123,12 @@ function App() {
     setSelectedKana(kanaList);
     setScriptMode(options.scriptMode ?? 'both');
     navigateTo('quiz');
+  };
+
+  // Landing CTA: one click jumps straight into a quiz on the five hiragana
+  // vowels, the natural first thing a learner drills.
+  const handleStartFromLanding = () => {
+    handleStartQuiz(kanaGroups.basic.vowels.hiragana, { scriptMode: 'hiragana' });
   };
 
   // #4: study the picked kana as flashcards before quizzing.
@@ -174,6 +183,13 @@ function App() {
   return (
     <div className="App pb-16">
       <LanguageSwitcher />
+
+      {currentView === 'landing' && (
+        <LandingPage
+          onStart={handleStartFromLanding}
+          onChooseCharacters={() => navigateTo('selection')}
+        />
+      )}
 
       {currentView === 'selection' && (
         <KanaSelection

@@ -9,6 +9,11 @@ import { hiragana } from './data/kana.js'
 // for "are we on the selection screen?" that doesn't depend on translations.
 const SELECTION_MARKER = /Hiragana & Katakana/
 
+// The app now opens on the landing page; its CTA is the stable anchor for
+// "are we on the landing screen?". Helper to leave it for the picker.
+const goToSelection = async (user) =>
+  user.click(screen.getByRole('button', { name: /Zeichen selbst auswählen/i }))
+
 // #22: mirror the encoder in QuizResults so the test can build a valid challenge.
 const encodeChallenge = (chars) =>
   encodeURIComponent(btoa(String.fromCharCode(...new TextEncoder().encode(JSON.stringify(chars)))))
@@ -23,9 +28,28 @@ afterEach(async () => {
 })
 
 describe('App', () => {
-  it('renders the initial selection screen without crashing', () => {
+  it('renders the landing page as the initial screen', () => {
     render(<App />)
-    expect(screen.getByText(SELECTION_MARKER)).toBeInTheDocument()
+    expect(screen.getByRole('heading', { level: 1 })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Kostenlos starten/i })).toBeInTheDocument()
+    // The picker only appears after choosing to select characters.
+    expect(screen.queryByText(SELECTION_MARKER)).not.toBeInTheDocument()
+  })
+
+  it('landing CTA jumps straight into the quiz', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+
+    await user.click(screen.getByRole('button', { name: /Kostenlos starten/i }))
+    expect(await screen.findByPlaceholderText(/Romaji/i)).toBeInTheDocument()
+  })
+
+  it('landing secondary link leads to the selection screen', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+
+    await goToSelection(user)
+    expect(await screen.findByText(SELECTION_MARKER)).toBeInTheDocument()
   })
 
   it('keeps <html lang> in sync with the i18n language (#14)', async () => {
@@ -41,7 +65,10 @@ describe('App', () => {
   it('navigates forward to statistics, and back to selection via popstate (#80)', async () => {
     const user = userEvent.setup()
     render(<App />)
-    expect(screen.getByText(SELECTION_MARKER)).toBeInTheDocument()
+
+    // Leave the landing page for the picker first.
+    await goToSelection(user)
+    expect(await screen.findByText(SELECTION_MARKER)).toBeInTheDocument()
 
     // Forward navigation pushes a history entry and swaps the view.
     // (#51 turned the prominent 📊 button into a deemphasized "view statistics" link.)
@@ -50,9 +77,9 @@ describe('App', () => {
       expect(screen.queryByText(SELECTION_MARKER)).not.toBeInTheDocument()
     )
 
-    // Browser-back (base entry has no view state) is the only source of the reverse switch.
+    // Browser-back to the selection entry is the only source of the reverse switch.
     await act(async () => {
-      window.dispatchEvent(new PopStateEvent('popstate', { state: null }))
+      window.dispatchEvent(new PopStateEvent('popstate', { state: { view: 'selection' } }))
     })
     expect(await screen.findByText(SELECTION_MARKER)).toBeInTheDocument()
   })
@@ -61,7 +88,8 @@ describe('App', () => {
     const user = userEvent.setup()
     render(<App />)
 
-    await user.click(screen.getByRole('checkbox', { name: /Vokale/i }))
+    await goToSelection(user)
+    await user.click(await screen.findByRole('checkbox', { name: /Vokale/i }))
     await user.click(screen.getByRole('button', { name: /Erst lernen/i }))
 
     // The lazy study screen appears in place of the selection.
