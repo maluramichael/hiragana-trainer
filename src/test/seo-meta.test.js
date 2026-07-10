@@ -8,8 +8,8 @@ describe('index.html SEO/meta', () => {
   const html = read('index.html')
 
   it('uses the canonical domain in og:url and twitter:url', () => {
-    expect(html).toContain('property="og:url" content="https://hiragana-trainer.malura.de/"')
-    expect(html).toContain('property="twitter:url" content="https://hiragana-trainer.malura.de/"')
+    expect(html).toContain('property="og:url" content="https://hiragana-trainer.de/"')
+    expect(html).toContain('property="twitter:url" content="https://hiragana-trainer.de/"')
   })
 
   it('no longer points og:url at the bare malura.de root', () => {
@@ -58,11 +58,11 @@ describe('public/ static assets', () => {
 
   it('robots.txt references the sitemap', () => {
     expect(read('public/robots.txt')).toContain(
-      'Sitemap: https://hiragana-trainer.malura.de/sitemap.xml',
+      'Sitemap: https://hiragana-trainer.de/sitemap.xml',
     )
   })
 
   it('sitemap.xml lists the canonical URL', () => {
-    expect(read('public/sitemap.xml')).toContain('https://hiragana-trainer.malura.de/')
+    expect(read('public/sitemap.xml')).toContain('https://hiragana-trainer.de/')
   })
 })

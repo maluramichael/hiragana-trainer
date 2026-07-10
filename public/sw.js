@@ -1,5 +1,5 @@
 // Minimaler Service Worker für die App-Shell (PWA-Installierbarkeit + Offline-Fallback).
-const CACHE = 'hiragana-trainer-v1'
+const CACHE = 'hiragana-trainer-v2'
 const APP_SHELL = [
   '/',
   '/index.html',

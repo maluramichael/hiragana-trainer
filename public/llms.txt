@@ -15,4 +15,4 @@ Hiragana Trainer is a browser-based learning app for the two Japanese kana sylla
 
 ## Links
 
-- App: https://hiragana-trainer.malura.de/
+- App: https://hiragana-trainer.de/
