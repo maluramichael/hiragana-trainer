@@ -325,9 +325,6 @@ const KanaSelection = ({ onStartQuiz, onStudy, onViewStatistics }) => {
             <h1 className="mb-2 text-4xl font-extrabold tracking-tight text-slate-900">
               {t('selection.headline')}
             </h1>
-            <p className="mb-2 text-slate-600">
-              {t('selection.payoff')}
-            </p>
             <p className="text-sm text-slate-500">
               {t('selection.trust')}{' '}
               <a
@@ -357,11 +354,6 @@ const KanaSelection = ({ onStartQuiz, onStudy, onViewStatistics }) => {
             </button>
           )}
         </div>
-
-        {/* First-run onboarding: one calm sentence on how the quiz works. */}
-        <p className="mb-6 rounded-2xl bg-white/70 px-4 py-3 text-slate-600 ring-1 ring-white/60">
-          {t('selection.intro')}
-        </p>
 
         {/* One-click quickstart above the group picker. */}
         <div className="mb-6 rounded-[1.75rem] bg-white/80 p-6 text-center shadow-cute ring-1 ring-white/70">
