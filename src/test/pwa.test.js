@@ -30,12 +30,13 @@ describe('PWA wiring', () => {
   it('main.jsx registers the service worker only in production', () => {
     const main = read('src/main.jsx')
     expect(main).toContain('import.meta.env.PROD')
-    expect(main).toContain("navigator.serviceWorker.register('/sw.js')")
+    expect(main).toContain('virtual:pwa-register')
+    expect(main).toContain('registerSW')
   })
 
-  it('service worker handles install and fetch', () => {
-    const sw = read('public/sw.js')
-    expect(sw).toContain("addEventListener('install'")
-    expect(sw).toContain("addEventListener('fetch'")
+  it('vite config wires vite-plugin-pwa with auto-update', () => {
+    const config = read('vite.config.js')
+    expect(config).toContain('VitePWA')
+    expect(config).toContain("registerType: 'autoUpdate'")
   })
 })
