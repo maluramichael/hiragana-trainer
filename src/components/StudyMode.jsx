@@ -40,7 +40,7 @@ const StudyMode = ({ kanaList, scriptMode = 'both', onStartQuiz, onBack }) => {
   const startQuiz = () => onStartQuiz(kanaList, { scriptMode });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-violet-100 via-fuchsia-50 to-rose-100 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-violet-100 via-fuchsia-50 to-rose-100 p-6 pb-24">
       <div className="max-w-2xl mx-auto">
         <div className="mb-8 flex items-center justify-between">
           <button

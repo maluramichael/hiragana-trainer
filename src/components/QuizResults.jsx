@@ -77,7 +77,7 @@ const QuizResults = ({ results, onRestart, onNewSelection, kanaList = [] }) => {
   };
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-emerald-50 via-fuchsia-50 to-indigo-100 p-6">
+    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-emerald-50 via-fuchsia-50 to-indigo-100 p-6 pb-24">
       <KanaBackground />
       <div className="relative max-w-2xl mx-auto">
         <div className="animate-pop-in rounded-[1.75rem] bg-white/90 p-8 text-center shadow-cute-lg ring-1 ring-white/70">

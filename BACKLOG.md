@@ -1,8 +1,8 @@
 # Backlog
 
-Aus dem Project-Booster-Report abgeleitete Punkte, die bewusst NICHT als Code umgesetzt wurden,
-weil sie reine Strategie sind oder eine externe Abhängigkeit (Konto, Partner-ID, Backend) brauchen.
-Der Code-Anteil der jeweiligen Tickets ist umgesetzt; hier steht nur der offene Rest.
+Punkte, die bewusst NICHT als Code umgesetzt wurden, weil sie reine Strategie sind oder eine
+externe Abhängigkeit (Konto, Partner-ID, Backend) brauchen. Der Code-Anteil ist jeweils
+umgesetzt; hier steht nur der offene Rest.
 
 ## Reine Strategie (kein Code)
 
@@ -24,8 +24,8 @@ als Premium-Haken) braucht ein Backend und eine Produktentscheidung. Bewusst off
 
 ### #41 Premium-Content-Moat (Business-Teil)
 Kana bleibt gratis (Top-of-Funnel). Ein optionales Premium-Deck (JLPT-N5-Vokabular oder Grund-Kanji)
-als einmaliger Kauf ist ein Geschäftsmodell, kein reines Code-Ticket. Der Code-/Integrationsrahmen wird
-in Welle 5 gebaut; die Inhalte, Preisgestaltung und der echte Zahlungsanbieter kommen vom Betreiber.
+als einmaliger Kauf ist ein Geschäftsmodell, kein reines Code-Ticket. Der Code-/Integrationsrahmen ist
+vorbereitet; die Inhalte, Preisgestaltung und der echte Zahlungsanbieter kommen vom Betreiber.
 
 ## Größere Umbauten (bewusst zurückgestellt)
 

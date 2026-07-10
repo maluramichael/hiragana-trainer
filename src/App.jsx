@@ -142,7 +142,7 @@ function App() {
   };
 
   return (
-    <div className="App pb-16">
+    <div className="App">
       <LanguageSwitcher />
 
       {currentView === 'landing' && (
@@ -197,7 +197,7 @@ function App() {
         <div className="flex items-center justify-center gap-1.5 text-sm text-slate-600">
           <span>{t('footer.madeWithLove')}</span>
           <HeartIcon className="w-4 h-4 text-pink-500 fill-pink-500" />
-          <span aria-hidden="true">·</span>
+          <span>{t('footer.by')}</span>
           <a
             href="https://malura.de"
             target="_blank"

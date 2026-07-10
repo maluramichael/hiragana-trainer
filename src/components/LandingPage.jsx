@@ -1,10 +1,11 @@
-import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import KanaBackground from './KanaBackground.jsx';
-import { hiragana, katakana } from '../data/kana.js';
 import { RocketIcon, SparkleIcon, RepeatIcon, HeartIcon } from './icons.jsx';
 
-const randomKana = (list) => list[Math.floor(Math.random() * list.length)].kana;
+// The hero spells out the two syllabaries as bobbing badges: "hiragana" and
+// "katakana", both written in hiragana.
+const HIRAGANA_WORD = ['ひ', 'ら', 'が', 'な'];
+const KATAKANA_WORD = ['か', 'た', 'か', 'な'];
 
 // The three feature cards, each with a soft colored badge, a decorative kana and
 // a matching icon. Copy lives in i18n under landing.features.<key>.
@@ -19,9 +20,6 @@ const FEATURES = [
 // character picker.
 const LandingPage = ({ onStart, onChooseCharacters }) => {
   const { t } = useTranslation();
-  // Fresh hero characters each visit: a random hiragana + katakana pair.
-  const heroHiragana = useMemo(() => randomKana(hiragana), []);
-  const heroKatakana = useMemo(() => randomKana(katakana), []);
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-gradient-to-b from-rose-50 via-fuchsia-50 to-indigo-100 text-slate-800">
@@ -29,20 +27,30 @@ const LandingPage = ({ onStart, onChooseCharacters }) => {
 
       <div className="relative max-w-3xl mx-auto px-6 py-16 sm:py-24">
         <section className="text-center">
-          {/* Decorative kana motif in playful rounded badges. */}
-          <div
-            aria-hidden="true"
-            className="mb-10 flex justify-center gap-5"
-          >
-            <span className="font-kana animate-bob grid h-24 w-24 sm:h-28 sm:w-28 place-items-center rounded-[2rem] bg-gradient-to-br from-pink-400 to-fuchsia-500 text-6xl sm:text-7xl font-bold text-white shadow-cute-lg">
-              {heroHiragana}
-            </span>
-            <span
-              style={{ animationDelay: '0.4s' }}
-              className="font-kana animate-bob grid h-24 w-24 sm:h-28 sm:w-28 place-items-center rounded-[2rem] bg-gradient-to-br from-violet-400 to-indigo-500 text-6xl sm:text-7xl font-bold text-white shadow-cute-lg"
-            >
-              {heroKatakana}
-            </span>
+          {/* Decorative motif: the words hiragana / katakana as bobbing badges. */}
+          <div aria-hidden="true" className="mb-10 flex flex-col items-center gap-3">
+            <div className="flex gap-2 sm:gap-3">
+              {HIRAGANA_WORD.map((ch, i) => (
+                <span
+                  key={i}
+                  style={{ animationDelay: `${i * 0.12}s` }}
+                  className="font-kana animate-bob grid h-14 w-14 sm:h-16 sm:w-16 place-items-center rounded-2xl bg-gradient-to-br from-pink-400 to-fuchsia-500 text-3xl sm:text-4xl font-bold text-white shadow-cute"
+                >
+                  {ch}
+                </span>
+              ))}
+            </div>
+            <div className="flex gap-2 sm:gap-3">
+              {KATAKANA_WORD.map((ch, i) => (
+                <span
+                  key={i}
+                  style={{ animationDelay: `${(i + 4) * 0.12}s` }}
+                  className="font-kana animate-bob grid h-14 w-14 sm:h-16 sm:w-16 place-items-center rounded-2xl bg-gradient-to-br from-violet-400 to-indigo-500 text-3xl sm:text-4xl font-bold text-white shadow-cute"
+                >
+                  {ch}
+                </span>
+              ))}
+            </div>
           </div>
 
           <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-slate-900">

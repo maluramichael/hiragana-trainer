@@ -1,55 +1,51 @@
-# Kana Quiz 🇯🇵
+# Hiragana Trainer 🇯🇵
 
-A modern, interactive web application for learning Japanese Hiragana and Katakana characters. Master the foundation of Japanese writing through engaging quizzes and track your progress along the way.
+A free web app for learning the two Japanese kana syllabaries, Hiragana and Katakana.
+You see a character, type its reading, and get instant feedback. Progress stays on your
+device. No signup, no ads.
+
+Live at [hiragana-trainer.de](https://hiragana-trainer.de).
 
 ## Features
 
-**🎯 Interactive Learning**
-- Choose from basic kana, dakuten, and handakuten character groups
-- Practice individual series (vowels, k-series, s-series, etc.) or mix them up
-- Real-time feedback with correct/incorrect responses
+**Practice that fits how you learn**
+- Pick whole groups (basic, dakuten, handakuten) or single series (vowels, k-series, and so on)
+- Drill Hiragana only, Katakana only, or both together
+- Study characters as flashcards first, then start the quiz
+- One click starts a round on the five vowels, so the first visit is productive right away
 
-**📊 Progress Tracking**
-- Detailed statistics for each character including accuracy rates
-- Track response times and identify characters that need more practice
-- Visual progress indicators showing mastery levels
-- Export your statistics for external analysis
+**Type the reading, get feedback**
+- Each character is shown on its own; you type the romaji and submit
+- Correct and incorrect answers are marked immediately
+- Characters you get wrong come back at the end of the round until they stick
 
-**🌐 Multilingual Support**
+**Progress you can see**
+- Per character: accuracy, number of attempts, and average response time
+- Weak characters and characters due for review can be practised in a focused round
+- A daily streak and your best answer streak
+- Export or import your progress with a short code to move between devices
+
+**Yours, and only yours**
+- Everything is stored locally in your browser, nothing leaves your device
+- Installable as a PWA and works offline
 - Available in German and English
-- Localized date formatting and interface elements
-- Easy language switching
-
-**🎨 Beautiful Design**
-- Clean, modern interface built with React and Tailwind CSS
-- Responsive design that works on desktop and mobile
-- Smooth animations and intuitive user experience
 
 ## Getting Started
 
 ### Prerequisites
-- Node.js (version 16 or higher)
-- npm or yarn
+- Node.js 18 or higher
+- npm
 
 ### Installation
 
-1. Clone the repository
 ```bash
 git clone git@github.com:maluramichael/hiragana-trainer.git
-cd kana
-```
-
-2. Install dependencies
-```bash
+cd hiragana-trainer
 npm install
-```
-
-3. Start the development server
-```bash
 npm run dev
 ```
 
-4. Open your browser and navigate to `http://localhost:5173`
+Then open `http://localhost:5173`.
 
 ### Building for Production
 
@@ -57,28 +53,35 @@ npm run dev
 npm run build
 ```
 
-The built files will be available in the `dist` directory.
+The built files land in the `dist` directory.
+
+### Tests and Linting
+
+```bash
+npm run test:run   # run the test suite once
+npm run lint       # lint the codebase
+```
 
 ## How to Use
 
-1. **Select Characters**: Choose which kana groups you want to practice from the main screen
-2. **Start Quiz**: Click the start button to begin your practice session
-3. **Type Romaji**: For each kana character shown, type the corresponding romaji
-4. **Track Progress**: View detailed statistics to see your improvement over time
-5. **Export Data**: Download your progress data for further analysis
+1. Start for free on the landing page, or pick the characters you want yourself
+2. Choose your groups and whether to drill Hiragana, Katakana, or both
+3. Optionally study the characters as flashcards first
+4. For each character shown, type the romaji and submit
+5. Check your statistics to see accuracy and response time per character
 
 ## Technology Stack
 
 - **Frontend**: React 19 with Vite
 - **Styling**: Tailwind CSS 4
 - **Internationalization**: react-i18next
-- **Language Detection**: i18next-browser-languagedetector
-- **Build Tool**: Vite with fast refresh
+- **Testing**: Vitest with Testing Library
+- **PWA**: manifest and service worker for offline use
 
 ## Contributing
 
-Contributions are welcome! Feel free to open issues or submit pull requests to help improve the application.
+Contributions are welcome. Feel free to open an issue or a pull request.
 
 ## License
 
-This project is open source and available under the MIT License.
+Open source under the MIT License.

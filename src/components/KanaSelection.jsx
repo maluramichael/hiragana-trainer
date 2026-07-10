@@ -317,7 +317,7 @@ const KanaSelection = ({ onStartQuiz, onStudy, onViewStatistics }) => {
   );
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-rose-50 via-fuchsia-50 to-indigo-100 p-6">
+    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-rose-50 via-fuchsia-50 to-indigo-100 p-6 pb-24">
       <KanaBackground />
       <div className="relative max-w-4xl mx-auto">
         <div className="mb-6 flex items-start justify-between gap-4">
@@ -488,7 +488,7 @@ const KanaSelection = ({ onStartQuiz, onStudy, onViewStatistics }) => {
                       : 'cursor-not-allowed bg-slate-200 text-slate-400'
                   }`}
                 >
-                  {selectedCount > 0 && <RocketIcon className="w-6 h-6" />}
+                  <RocketIcon className="w-6 h-6" />
                   {t('selection.startQuiz')}
                 </button>
               </div>

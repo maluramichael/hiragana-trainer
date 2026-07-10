@@ -31,7 +31,7 @@
     "startQuiz": "Quiz starten",
     "headline": "Lerne alle Hiragana und Katakana",
     "payoff": "Sieh pro Zeichen deine Trefferquote und Reaktionszeit. Zeichen, die du falsch hast, kommen automatisch zurück.",
-    "intro": "So läuft es: Du siehst ein Zeichen und tippst das Romaji.",
+    "intro": "So läuft es: Du siehst ein Zeichen und tippst ein, wie es ausgesprochen wird.",
     "trust": "Kostenlos. Keine Anmeldung. Open Source.",
     "github": "Auf GitHub ansehen",
     "quickstart": "Sofort loslegen",
@@ -189,7 +189,8 @@
     "practiced": "geübt"
   },
   "footer": {
-    "madeWithLove": "mit Liebe gemacht"
+    "madeWithLove": "mit Liebe gemacht",
+    "by": "von"
   },
   "landing": {
     "hero": {

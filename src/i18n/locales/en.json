@@ -31,7 +31,7 @@
     "startQuiz": "Start Quiz",
     "headline": "Learn every Hiragana and Katakana",
     "payoff": "See your accuracy and response time for each character. The ones you miss come back automatically.",
-    "intro": "How it works: you see a character and type the romaji.",
+    "intro": "How it works: you see a character and type how it is pronounced.",
     "trust": "Free. No signup. Open source.",
     "github": "View on GitHub",
     "quickstart": "Start right away",
@@ -189,7 +189,8 @@
     "practiced": "practiced"
   },
   "footer": {
-    "madeWithLove": "made with love"
+    "madeWithLove": "made with love",
+    "by": "by"
   },
   "landing": {
     "hero": {
