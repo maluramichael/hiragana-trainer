@@ -64,26 +64,26 @@ const ImportModal = ({ onClose, onImported }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm">
       <div
         ref={modalRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="bg-white rounded-xl shadow-2xl max-w-2xl w-full p-6"
+        className="w-full max-w-2xl animate-pop-in rounded-[1.75rem] bg-white p-6 shadow-cute-lg"
       >
-        <div className="flex justify-between items-center mb-4">
-          <h2 id={titleId} className="text-2xl font-bold text-gray-800">{t('statistics.importCodeTitle')}</h2>
+        <div className="mb-4 flex items-center justify-between">
+          <h2 id={titleId} className="text-2xl font-extrabold text-slate-800">{t('statistics.importCodeTitle')}</h2>
           <button
             onClick={onClose}
             aria-label={t('statistics.closeModal')}
-            className="text-gray-500 hover:text-gray-700 text-2xl"
+            className="grid h-9 w-9 place-items-center rounded-full text-2xl text-slate-400 transition-colors hover:bg-fuchsia-50 hover:text-fuchsia-600"
           >
             <span aria-hidden="true">×</span>
           </button>
         </div>
 
-        <p className="text-gray-600 mb-4">{t('statistics.importCodeDescription')}</p>
+        <p className="mb-4 text-slate-600">{t('statistics.importCodeDescription')}</p>
 
         <textarea
           ref={textareaRef}
@@ -91,31 +91,31 @@ const ImportModal = ({ onClose, onImported }) => {
           onChange={(e) => setImportCode(e.target.value)}
           placeholder={t('statistics.importCodePlaceholder')}
           aria-label={t('statistics.importCodeLabel')}
-          className="w-full h-32 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
+          className="h-32 w-full rounded-2xl border-2 border-fuchsia-200 px-4 py-2 font-mono text-sm transition-colors focus:border-fuchsia-400 focus:ring-2 focus:ring-fuchsia-300"
         />
 
         <div role="status" aria-live="polite">
           {importMessage.text && (
-            <div className={`mt-4 p-3 rounded-lg ${
+            <div className={`mt-4 rounded-2xl p-3 ${
               importMessage.type === 'success'
-                ? 'bg-green-100 text-green-800'
-                : 'bg-red-100 text-red-800'
+                ? 'bg-emerald-100 text-emerald-800'
+                : 'bg-rose-100 text-rose-800'
             }`}>
               {importMessage.text}
             </div>
           )}
         </div>
 
-        <div className="flex gap-3 mt-6">
+        <div className="mt-6 flex gap-3">
           <button
             onClick={handleImportFromCode}
-            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors font-semibold"
+            className="flex-1 rounded-[1.4rem] bg-gradient-to-r from-fuchsia-500 to-violet-500 px-6 py-3 font-bold text-white shadow-cute transition-all hover:-translate-y-0.5"
           >
             {t('statistics.importButton')}
           </button>
           <button
             onClick={onClose}
-            className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 px-6 py-3 rounded-lg transition-colors font-semibold"
+            className="flex-1 rounded-[1.4rem] bg-slate-100 px-6 py-3 font-bold text-slate-600 transition-colors hover:bg-slate-200"
           >
             {t('statistics.cancelButton')}
           </button>

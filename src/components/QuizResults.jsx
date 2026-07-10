@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { exportStatisticsAsBase64 } from '../utils/statisticsManager';
 import { calculateGroupProgress, getProgressDescription } from '../utils/progressCalculator';
 import { trackEvent } from '../utils/analytics';
+import KanaBackground from './KanaBackground.jsx';
+import { SparkleIcon, ShareIcon, RepeatIcon, RocketIcon, StarIcon, HeartIcon } from './icons.jsx';
 
 const APP_URL = 'https://hiragana-trainer.malura.de';
 const GITHUB_URL = 'https://github.com/maluramichael/hiragana-trainer';
@@ -50,10 +52,10 @@ const QuizResults = ({ results, onRestart, onNewSelection, kanaList = [] }) => {
   }, [kanaList]);
 
   const getPerformanceMessage = () => {
-    if (accuracy >= 95) return { message: t('results.perfect'), color: "text-green-600" };
-    if (accuracy >= 80) return { message: t('results.excellent'), color: "text-blue-600" };
-    if (accuracy >= 65) return { message: t('results.good'), color: "text-yellow-600" };
-    return { message: t('results.keepPracticing'), color: "text-red-600" };
+    if (accuracy >= 95) return { message: t('results.perfect'), color: "text-emerald-500" };
+    if (accuracy >= 80) return { message: t('results.excellent'), color: "text-violet-500" };
+    if (accuracy >= 65) return { message: t('results.good'), color: "text-amber-500" };
+    return { message: t('results.keepPracticing'), color: "text-rose-500" };
   };
 
   const performance = getPerformanceMessage();
@@ -95,19 +97,25 @@ const QuizResults = ({ results, onRestart, onNewSelection, kanaList = [] }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-100 p-6">
-      <div className="max-w-2xl mx-auto">
-        <div className="bg-white rounded-2xl shadow-xl p-8 text-center">
-          <h1 className="text-4xl font-bold text-gray-800 mb-2">{t('results.title')}</h1>
+    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-emerald-50 via-fuchsia-50 to-indigo-100 p-6">
+      <KanaBackground />
+      <div className="relative max-w-2xl mx-auto">
+        <div className="animate-pop-in rounded-[1.75rem] bg-white/90 p-8 text-center shadow-cute-lg ring-1 ring-white/70">
+          <div aria-hidden="true" className="mx-auto mb-4 grid h-16 w-16 place-items-center rounded-3xl bg-gradient-to-br from-amber-300 to-pink-400 text-white shadow-cute">
+            <SparkleIcon className="w-8 h-8" />
+          </div>
+          <h1 className="mb-2 text-4xl font-extrabold text-slate-900">{t('results.title')}</h1>
 
-          <div className={`text-2xl font-semibold mb-8 ${performance.color}`}>
+          <div className={`mb-8 text-2xl font-bold ${performance.color}`}>
             {performance.message}
           </div>
 
           {/* Mastery-Feier (#52): nur echte, aus den Daten ableitbare Meilensteine */}
           {masteredSeries.length > 0 && (
-            <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-8 text-left">
-              <div className="font-semibold text-amber-800 mb-1">{t('mastery.title')}</div>
+            <div className="mb-8 rounded-2xl bg-amber-50 p-4 text-left ring-1 ring-amber-200">
+              <div className="mb-1 flex items-center gap-2 font-bold text-amber-800">
+                <StarIcon className="w-5 h-5 fill-amber-400 text-amber-400" /> {t('mastery.title')}
+              </div>
               <ul className="space-y-1 text-sm text-amber-700">
                 {masteredSeries.map((s) => (
                   <li key={s.series}>
@@ -122,110 +130,110 @@ const QuizResults = ({ results, onRestart, onNewSelection, kanaList = [] }) => {
           )}
 
           {/* Results Grid */}
-          <div className="grid grid-cols-2 gap-6 mb-8">
-            <div className="bg-blue-50 rounded-xl p-6">
-              <div className="text-3xl font-bold text-blue-600 mb-2">{results.correct}</div>
-              <div className="text-gray-600">{t('results.correctAnswers')}</div>
-              <div className="text-sm text-gray-500">{t('results.outOf')} {results.total}</div>
+          <div className="mb-8 grid grid-cols-2 gap-4">
+            <div className="rounded-2xl bg-fuchsia-50 p-6 ring-1 ring-fuchsia-100">
+              <div className="mb-2 text-3xl font-extrabold text-fuchsia-600">{results.correct}</div>
+              <div className="text-slate-600">{t('results.correctAnswers')}</div>
+              <div className="text-sm text-slate-400">{t('results.outOf')} {results.total}</div>
             </div>
 
-            <div className="bg-purple-50 rounded-xl p-6">
-              <div className="text-3xl font-bold text-purple-600 mb-2">{accuracy}%</div>
-              <div className="text-gray-600">{t('quiz.accuracy')}</div>
+            <div className="rounded-2xl bg-violet-50 p-6 ring-1 ring-violet-100">
+              <div className="mb-2 text-3xl font-extrabold text-violet-600">{accuracy}%</div>
+              <div className="text-slate-600">{t('quiz.accuracy')}</div>
             </div>
 
-            <div className="bg-green-50 rounded-xl p-6">
-              <div className="text-3xl font-bold text-green-600 mb-2">{results.bestStreak}</div>
-              <div className="text-gray-600">{t('results.bestStreak')}</div>
+            <div className="rounded-2xl bg-emerald-50 p-6 ring-1 ring-emerald-100">
+              <div className="mb-2 text-3xl font-extrabold text-emerald-600">{results.bestStreak}</div>
+              <div className="text-slate-600">{t('results.bestStreak')}</div>
             </div>
 
-            <div className="bg-yellow-50 rounded-xl p-6">
-              <div className="text-3xl font-bold text-yellow-600 mb-2">{incorrect}</div>
-              <div className="text-gray-600">{t('results.incorrect')}</div>
+            <div className="rounded-2xl bg-rose-50 p-6 ring-1 ring-rose-100">
+              <div className="mb-2 text-3xl font-extrabold text-rose-500">{incorrect}</div>
+              <div className="text-slate-600">{t('results.incorrect')}</div>
             </div>
           </div>
 
           {/* Next step (#37): concrete recommendation out of this screen */}
-          <div className="bg-blue-50 border border-blue-100 rounded-xl p-5 mb-8 text-left">
-            <div className="font-semibold text-gray-800 mb-1">{t('results.nextStepTitle')}</div>
-            <p className="text-gray-600 text-sm">
+          <div className="mb-8 rounded-2xl bg-indigo-50 p-5 text-left ring-1 ring-indigo-100">
+            <div className="mb-1 font-bold text-slate-800">{t('results.nextStepTitle')}</div>
+            <p className="text-sm text-slate-600">
               {incorrect > 0 ? t('results.nextStepReview') : t('results.nextStepKeepGoing')}
             </p>
           </div>
 
           {/* Action Buttons */}
-          <div className="space-y-4">
+          <div className="space-y-3">
             <button
               onClick={onRestart}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 px-6 rounded-xl transition-all hover:scale-105 shadow-lg"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-[1.4rem] bg-gradient-to-r from-pink-500 to-fuchsia-600 px-6 py-4 font-bold text-white shadow-cute transition-all hover:-translate-y-0.5 active:translate-y-0.5"
             >
-              {t('results.practiceSame')}
+              <RepeatIcon className="w-5 h-5" /> {t('results.practiceSame')}
             </button>
 
             <button
               onClick={onNewSelection}
-              className="w-full bg-gray-600 hover:bg-gray-700 text-white font-semibold py-4 px-6 rounded-xl transition-all hover:scale-105 shadow-lg"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-[1.4rem] bg-gradient-to-r from-violet-500 to-indigo-500 px-6 py-4 font-bold text-white shadow-cute transition-all hover:-translate-y-0.5 active:translate-y-0.5"
             >
-              {t('results.chooseDifferent')}
+              <RocketIcon className="w-5 h-5" /> {t('results.chooseDifferent')}
             </button>
 
             <button
               onClick={handleShare}
-              className="w-full bg-white border border-gray-300 hover:bg-gray-50 text-gray-800 font-semibold py-3 px-6 rounded-xl transition-all"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-[1.4rem] bg-white px-6 py-3 font-bold text-slate-700 ring-2 ring-fuchsia-100 transition-all hover:bg-fuchsia-50"
             >
-              {t('results.share')}
+              <ShareIcon className="w-5 h-5" /> {t('results.share')}
             </button>
             {shareStatus === 'copied' && (
-              <p className="text-sm text-green-600">{t('results.shareCopied')}</p>
+              <p className="text-sm font-medium text-emerald-600">{t('results.shareCopied')}</p>
             )}
 
             {/* Challenge a friend (#22): only when we know what was practiced */}
             {kanaList.length > 0 && (
               <button
                 onClick={handleChallenge}
-                className="w-full bg-white border border-gray-300 hover:bg-gray-50 text-gray-800 font-semibold py-3 px-6 rounded-xl transition-all"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-[1.4rem] bg-white px-6 py-3 font-bold text-slate-700 ring-2 ring-fuchsia-100 transition-all hover:bg-fuchsia-50"
               >
-                {t('results.challenge')}
+                <HeartIcon className="w-5 h-5 text-pink-500" /> {t('results.challenge')}
               </button>
             )}
             {challengeStatus === 'copied' && (
-              <p className="text-sm text-green-600">{t('results.challengeCopied')}</p>
+              <p className="text-sm font-medium text-emerald-600">{t('results.challengeCopied')}</p>
             )}
             {challengeStatus === 'error' && (
-              <p className="text-sm text-red-600">{t('results.challengeError')}</p>
+              <p className="text-sm font-medium text-rose-500">{t('results.challengeError')}</p>
             )}
           </div>
 
           {/* Cross-device (#87): dezenter Zugang zum Export-Code */}
-          <div className="mt-6 text-sm text-gray-500">
+          <div className="mt-6 text-sm text-slate-400">
             <button
               onClick={handleCopyExport}
-              className="underline hover:text-gray-700 transition-colors"
+              className="underline transition-colors hover:text-fuchsia-600"
             >
               {t('results.crossDevice')}
             </button>
             {exportStatus === 'copied' && (
-              <span className="ml-2 text-green-600">{t('results.crossDeviceCopied')}</span>
+              <span className="ml-2 text-emerald-600">{t('results.crossDeviceCopied')}</span>
             )}
             {exportStatus === 'error' && (
-              <span className="ml-2 text-red-600">{t('results.crossDeviceError')}</span>
+              <span className="ml-2 text-rose-500">{t('results.crossDeviceError')}</span>
             )}
           </div>
         </div>
 
         {/* Recommended resources (#93) */}
-        <div className="bg-white rounded-2xl shadow p-6 mt-6 text-left">
-          <div className="font-semibold text-gray-800 mb-3">{t('results.recommendedTitle')}</div>
+        <div className="mt-6 rounded-2xl bg-white/85 p-6 text-left shadow-cute ring-1 ring-white/60">
+          <div className="mb-3 font-bold text-slate-800">{t('results.recommendedTitle')}</div>
           <ul className="space-y-2 text-sm">
             <li>
               <a href={TOFUGU_HIRAGANA_URL} target="_blank" rel="noopener noreferrer"
-                className="text-blue-600 hover:underline">
+                className="font-semibold text-fuchsia-600 hover:underline">
                 {t('results.recommendedHiragana')}
               </a>
             </li>
             <li>
               <a href={TOFUGU_KATAKANA_URL} target="_blank" rel="noopener noreferrer"
-                className="text-blue-600 hover:underline">
+                className="font-semibold text-fuchsia-600 hover:underline">
                 {t('results.recommendedKatakana')}
               </a>
             </li>
@@ -233,22 +241,24 @@ const QuizResults = ({ results, onRestart, onNewSelection, kanaList = [] }) => {
         </div>
 
         {/* Support (#26) + About (#78) */}
-        <div className="bg-white rounded-2xl shadow p-6 mt-6 text-left">
-          <div className="font-semibold text-gray-800 mb-3">{t('results.supportTitle')}</div>
-          <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm mb-4">
+        <div className="mt-6 rounded-2xl bg-white/85 p-6 text-left shadow-cute ring-1 ring-white/60">
+          <div className="mb-3 flex items-center gap-2 font-bold text-slate-800">
+            <StarIcon className="w-5 h-5 fill-amber-400 text-amber-400" /> {t('results.supportTitle')}
+          </div>
+          <div className="mb-4 flex flex-wrap gap-x-6 gap-y-2 text-sm">
             <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer"
-              className="text-blue-600 hover:underline">
+              className="font-semibold text-fuchsia-600 hover:underline">
               {t('results.starGithub')}
             </a>
             <a href={SPONSORS_URL} target="_blank" rel="noopener noreferrer"
-              className="text-blue-600 hover:underline">
+              className="font-semibold text-fuchsia-600 hover:underline">
               {t('results.sponsor')}
             </a>
           </div>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-slate-500">
             {t('results.aboutBy')}{' '}
             <a href={AUTHOR_URL} target="_blank" rel="noopener noreferrer"
-              className="text-blue-600 hover:underline">
+              className="font-semibold text-fuchsia-600 hover:underline">
               Michael Malura
             </a>
           </p>

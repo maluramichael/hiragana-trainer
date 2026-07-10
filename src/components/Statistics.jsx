@@ -8,6 +8,7 @@ import {
   exportStatisticsAsBase64
 } from '../utils/statisticsManager.js';
 import ImportModal from './ImportModal.jsx';
+import { ArrowLeftIcon } from './icons.jsx';
 
 const Statistics = ({ onBack }) => {
   const { t, i18n } = useTranslation();
@@ -135,44 +136,44 @@ const Statistics = ({ onBack }) => {
   }, [statisticsData, activeTab, sortBy, sortOrder]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-100 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-violet-50 via-fuchsia-50 to-indigo-100 p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="flex justify-between items-center mb-8">
+        <div className="mb-8 flex items-center justify-between">
           <div>
             <button
               onClick={onBack}
-              className="text-gray-600 hover:text-gray-800 transition-colors mb-4"
+              className="mb-4 inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-semibold text-slate-500 transition-colors hover:bg-white/70 hover:text-slate-700"
             >
-              {t('navigation.backToSelection')}
+              <ArrowLeftIcon className="w-4 h-4" /> {t('navigation.backToSelection')}
             </button>
-            <h1 className="text-4xl font-bold text-gray-800">
+            <h1 className="text-4xl font-extrabold text-slate-900">
               {t('statistics.title')}
             </h1>
           </div>
-          
-          <div className="flex gap-3 flex-wrap">
+
+          <div className="flex flex-wrap gap-2.5">
             <button
               onClick={handleExportAsCode}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+              className="rounded-xl bg-gradient-to-r from-fuchsia-500 to-violet-500 px-4 py-2 font-semibold text-white shadow-cute transition-all hover:-translate-y-0.5"
             >
               {t('statistics.exportCode')}
             </button>
             <button
               onClick={() => setShowImportModal(true)}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg transition-colors"
+              className="rounded-xl bg-gradient-to-r from-violet-500 to-indigo-500 px-4 py-2 font-semibold text-white shadow-cute transition-all hover:-translate-y-0.5"
             >
               {t('statistics.importCode')}
             </button>
             <button
               onClick={handleExport}
-              className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors"
+              className="rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 px-4 py-2 font-semibold text-white shadow-cute transition-all hover:-translate-y-0.5"
             >
               {t('statistics.export')}
             </button>
             <button
               onClick={handleReset}
-              className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors"
+              className="rounded-xl bg-white px-4 py-2 font-semibold text-rose-500 ring-2 ring-rose-200 transition-all hover:bg-rose-50"
             >
               {t('statistics.reset')}
             </button>
@@ -180,50 +181,50 @@ const Statistics = ({ onBack }) => {
         </div>
 
         {/* Overall Statistics */}
-        <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
-          <h2 className="text-2xl font-semibold text-gray-800 mb-4">
+        <div className="mb-8 rounded-[1.75rem] bg-white/85 p-6 shadow-cute ring-1 ring-white/60">
+          <h2 className="mb-4 text-2xl font-bold text-slate-800">
             {t('statistics.overall')}
           </h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-blue-50 rounded-lg p-4 text-center">
-              <div className="text-3xl font-bold text-blue-600">{overallStats.practicedKana || 0}</div>
-              <div className="text-sm text-gray-600">{t('statistics.practicedKana')}</div>
-              <div className="text-xs text-gray-500">{t('statistics.outOf')} {overallStats.totalKana || 0}</div>
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+            <div className="rounded-2xl bg-fuchsia-50 p-4 text-center ring-1 ring-fuchsia-100">
+              <div className="text-3xl font-extrabold text-fuchsia-600">{overallStats.practicedKana || 0}</div>
+              <div className="text-sm text-slate-600">{t('statistics.practicedKana')}</div>
+              <div className="text-xs text-slate-400">{t('statistics.outOf')} {overallStats.totalKana || 0}</div>
             </div>
-            <div className="bg-green-50 rounded-lg p-4 text-center">
-              <div className="text-3xl font-bold text-green-600">{overallStats.totalCorrect || 0}</div>
-              <div className="text-sm text-gray-600">{t('statistics.totalCorrect')}</div>
+            <div className="rounded-2xl bg-emerald-50 p-4 text-center ring-1 ring-emerald-100">
+              <div className="text-3xl font-extrabold text-emerald-600">{overallStats.totalCorrect || 0}</div>
+              <div className="text-sm text-slate-600">{t('statistics.totalCorrect')}</div>
             </div>
-            <div className="bg-red-50 rounded-lg p-4 text-center">
-              <div className="text-3xl font-bold text-red-600">{overallStats.totalIncorrect || 0}</div>
-              <div className="text-sm text-gray-600">{t('statistics.totalIncorrect')}</div>
+            <div className="rounded-2xl bg-rose-50 p-4 text-center ring-1 ring-rose-100">
+              <div className="text-3xl font-extrabold text-rose-500">{overallStats.totalIncorrect || 0}</div>
+              <div className="text-sm text-slate-600">{t('statistics.totalIncorrect')}</div>
             </div>
-            <div className="bg-purple-50 rounded-lg p-4 text-center">
-              <div className="text-3xl font-bold text-purple-600">{overallStats.overallAccuracy || 0}%</div>
-              <div className="text-sm text-gray-600">{t('statistics.overallAccuracy')}</div>
+            <div className="rounded-2xl bg-violet-50 p-4 text-center ring-1 ring-violet-100">
+              <div className="text-3xl font-extrabold text-violet-600">{overallStats.overallAccuracy || 0}%</div>
+              <div className="text-sm text-slate-600">{t('statistics.overallAccuracy')}</div>
             </div>
           </div>
         </div>
 
         {/* Script Tabs */}
-        <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-          <div className="flex border-b">
+        <div className="overflow-hidden rounded-[1.75rem] bg-white/90 shadow-cute ring-1 ring-white/60">
+          <div className="flex border-b border-fuchsia-100">
             <button
               onClick={() => setActiveTab('hiragana')}
-              className={`flex-1 py-4 px-6 text-lg font-semibold transition-colors ${
+              className={`flex-1 px-6 py-4 text-lg font-bold transition-colors ${
                 activeTab === 'hiragana'
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
+                  ? 'bg-gradient-to-r from-fuchsia-500 to-violet-500 text-white'
+                  : 'bg-white/50 text-slate-600 hover:bg-fuchsia-50'
               }`}
             >
               {t('scripts.hiragana')} ({statisticsData.hiragana?.length || 0})
             </button>
             <button
               onClick={() => setActiveTab('katakana')}
-              className={`flex-1 py-4 px-6 text-lg font-semibold transition-colors ${
+              className={`flex-1 px-6 py-4 text-lg font-bold transition-colors ${
                 activeTab === 'katakana'
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
+                  ? 'bg-gradient-to-r from-fuchsia-500 to-violet-500 text-white'
+                  : 'bg-white/50 text-slate-600 hover:bg-fuchsia-50'
               }`}
             >
               {t('scripts.katakana')} ({statisticsData.katakana?.length || 0})
@@ -233,7 +234,7 @@ const Statistics = ({ onBack }) => {
           {/* Statistics Table */}
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-gray-50">
+              <thead className="bg-fuchsia-50/60">
                 <tr>
                   {renderSortHeader('kana', 'statistics.kana')}
                   {renderSortHeader('romaji', 'statistics.romaji')}
@@ -247,9 +248,9 @@ const Statistics = ({ onBack }) => {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {currentData.map((stat, index) => (
-                  <tr key={`${stat.kana}-${stat.romaji}`} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                  <tr key={`${stat.kana}-${stat.romaji}`} className={index % 2 === 0 ? 'bg-white' : 'bg-fuchsia-50/40'}>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div lang="ja" className="text-2xl font-bold text-gray-900">{stat.kana}</div>
+                      <div lang="ja" className="font-kana text-2xl font-bold text-slate-800">{stat.kana}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-mono text-gray-900">{stat.romaji}</div>

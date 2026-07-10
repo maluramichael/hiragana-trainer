@@ -2,7 +2,7 @@
   "title": "Japanisches Kana Quiz",
   "subtitle": "Wählen Sie die Kana-Gruppen aus, die Sie üben möchten (sowohl Hiragana als auch Katakana)",
   "navigation": {
-    "backToSelection": "← Zurück zur Auswahl"
+    "backToSelection": "Zurück zur Auswahl"
   },
   "groups": {
     "basic": "Grundlagen (あアいイうウえエおオ...)",
@@ -51,7 +51,7 @@
   },
   "study": {
     "title": "Zeichen lernen",
-    "back": "← Zurück zur Auswahl",
+    "back": "Zurück zur Auswahl",
     "cardPosition": "Karte {{current}} von {{total}}",
     "previous": "Zurück",
     "next": "Weiter",

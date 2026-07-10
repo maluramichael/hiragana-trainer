@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { getScriptCounterpart } from '../data/kana.js';
 import { updateKanaStatistics, getBestStreak, updateBestStreak, scheduleReview } from '../utils/statisticsManager.js';
+import { ArrowLeftIcon } from './icons.jsx';
 
 // Accept common Kunrei/Hepburn spelling variants, not only the canonical romaji (#29).
 // Keyed on the canonical romaji stored in kana.js (always the Hepburn form).
@@ -184,31 +185,37 @@ const KanaQuiz = ({ kanaList, onFinish, scriptMode = 'both' }) => {
 
   if (!currentPair) return <div>Loading...</div>;
 
+  const kanaStateClass = feedback?.isCorrect
+    ? 'text-emerald-500 scale-110'
+    : feedback?.isCorrect === false
+      ? 'text-rose-500 scale-90'
+      : 'text-slate-800';
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-100 to-purple-100 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-violet-100 via-fuchsia-50 to-rose-100 p-6">
       <div className="max-w-2xl mx-auto">
         {/* Header with progress */}
         <div className="mb-8">
-          <div className="flex justify-between items-center mb-4">
+          <div className="mb-4 flex items-center justify-between">
             <button
               onClick={handleBack}
-              className="text-gray-600 hover:text-gray-800 transition-colors"
+              className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-semibold text-slate-500 transition-colors hover:bg-white/70 hover:text-slate-700"
             >
-              {t('navigation.backToSelection')}
+              <ArrowLeftIcon className="w-4 h-4" /> {t('navigation.backToSelection')}
             </button>
             <div className="text-right">
-              <div className="text-sm text-gray-600">
+              <div className="text-sm font-semibold text-slate-600">
                 {currentIndex + 1} / {totalQuestions}
                 {isRetryAttempt && (
-                  <span className="ml-2 px-2 py-1 bg-orange-100 text-orange-700 rounded text-xs">
+                  <span className="ml-2 rounded-full bg-orange-100 px-2.5 py-1 text-xs font-semibold text-orange-700">
                     {t('quiz.retryMode')}
                   </span>
                 )}
               </div>
-              <div className="text-sm text-gray-600">
+              <div className="text-sm text-slate-500">
                 {t('quiz.streak')}: {streak} | {t('quiz.best')}: {bestStreak}
                 {isNewRecord && (
-                  <span className="ml-2 px-2 py-1 bg-green-100 text-green-700 rounded text-xs">
+                  <span className="ml-2 rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-700">
                     {t('quiz.newRecord')}
                   </span>
                 )}
@@ -217,7 +224,7 @@ const KanaQuiz = ({ kanaList, onFinish, scriptMode = 'both' }) => {
           </div>
 
           <div
-            className="w-full bg-gray-200 rounded-full h-2"
+            className="h-3 w-full rounded-full bg-white/70 ring-1 ring-white/60"
             role="progressbar"
             aria-valuenow={currentIndex + 1}
             aria-valuemin={0}
@@ -225,27 +232,23 @@ const KanaQuiz = ({ kanaList, onFinish, scriptMode = 'both' }) => {
             aria-label={t('quiz.progressLabel')}
           >
             <div
-              className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full transition-all duration-500"
+              className="h-3 rounded-full bg-gradient-to-r from-fuchsia-500 to-violet-500 transition-all duration-500"
               style={{ width: `${progress}%` }}
             />
           </div>
         </div>
 
         {/* Main Quiz Card */}
-        <div className="bg-white rounded-2xl shadow-xl p-8 mb-6">
+        <div className="mb-6 rounded-[1.75rem] bg-white/90 p-8 shadow-cute-lg ring-1 ring-white/70">
           {/* Kana Display */}
-          <div className="text-center mb-8">
-            <div className="flex justify-center items-center gap-8 mb-4">
+          <div className="mb-8 text-center">
+            <div className="flex items-center justify-center gap-8">
               {showHiragana && (
                 <div className="text-center">
-                  <div className="text-sm text-gray-500 mb-2">{t('scripts.hiragana')}</div>
+                  <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-fuchsia-400">{t('scripts.hiragana')}</div>
                   <div
                     lang="ja"
-                    className={`text-6xl font-bold transition-all duration-300 ${
-                      feedback?.isCorrect ? 'text-green-500 scale-110' :
-                      feedback?.isCorrect === false ? 'text-red-500 scale-90' :
-                      'text-gray-800'
-                    }`}
+                    className={`font-kana text-7xl font-bold transition-all duration-300 ${kanaStateClass}`}
                   >
                     {currentPair.hiragana}
                   </div>
@@ -253,19 +256,15 @@ const KanaQuiz = ({ kanaList, onFinish, scriptMode = 'both' }) => {
               )}
 
               {showHiragana && showKatakana && (
-                <div className="text-4xl text-gray-400 font-light">|</div>
+                <div className="h-16 w-px bg-fuchsia-200" />
               )}
 
               {showKatakana && (
                 <div className="text-center">
-                  <div className="text-sm text-gray-500 mb-2">{t('scripts.katakana')}</div>
+                  <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-violet-400">{t('scripts.katakana')}</div>
                   <div
                     lang="ja"
-                    className={`text-6xl font-bold transition-all duration-300 ${
-                      feedback?.isCorrect ? 'text-green-500 scale-110' :
-                      feedback?.isCorrect === false ? 'text-red-500 scale-90' :
-                      'text-gray-800'
-                    }`}
+                    className={`font-kana text-7xl font-bold transition-all duration-300 ${kanaStateClass}`}
                   >
                     {currentPair.katakana}
                   </div>
@@ -283,19 +282,19 @@ const KanaQuiz = ({ kanaList, onFinish, scriptMode = 'both' }) => {
                 value={userInput}
                 onChange={(e) => setUserInput(e.target.value)}
                 placeholder={t('quiz.typeRomaji')}
-                className="w-full max-w-xs px-4 py-3 text-xl text-center border-2 border-gray-300 rounded-xl focus:border-blue-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 transition-colors"
+                className="w-full max-w-xs rounded-2xl border-2 border-fuchsia-200 px-4 py-3 text-center text-xl transition-colors focus:border-fuchsia-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-400"
                 autoComplete="off"
                 autoCapitalize="off"
                 autoCorrect="off"
               />
-              <div className="mt-4">
+              <div className="mt-5">
                 <button
                   type="submit"
                   disabled={!userInput.trim()}
-                  className={`px-8 py-3 rounded-xl text-lg font-semibold transition-all ${
+                  className={`rounded-[1.4rem] px-8 py-3 text-lg font-bold transition-all ${
                     userInput.trim()
-                      ? 'bg-blue-600 hover:bg-blue-700 text-white hover:scale-105'
-                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                      ? 'bg-gradient-to-r from-fuchsia-500 to-violet-500 text-white shadow-cute hover:-translate-y-0.5 active:translate-y-0.5'
+                      : 'cursor-not-allowed bg-slate-200 text-slate-400'
                   }`}
                 >
                   {t('quiz.submit')}
@@ -306,29 +305,29 @@ const KanaQuiz = ({ kanaList, onFinish, scriptMode = 'both' }) => {
 
           {/* Feedback */}
           {feedback && (
-            <div className="text-center" role="status" aria-live="assertive">
-              <div className={`text-2xl font-bold mb-2 ${
-                feedback.isCorrect ? 'text-green-600' : 'text-red-600'
+            <div className="animate-pop-in text-center" role="status" aria-live="assertive">
+              <div className={`mb-2 text-3xl font-extrabold ${
+                feedback.isCorrect ? 'text-emerald-500' : 'text-rose-500'
               }`}>
                 {feedback.isCorrect ? t('quiz.correct') : t('quiz.incorrect')}
               </div>
 
               {!feedback.isCorrect && (
-                <div className="text-lg text-gray-600 mb-2">
-                  {t('quiz.youTyped')}: <span className="font-mono bg-red-100 px-2 py-1 rounded">{feedback.userAnswer}</span>
+                <div className="mb-2 text-lg text-slate-500">
+                  {t('quiz.youTyped')}: <span className="rounded-lg bg-rose-100 px-2 py-1 font-mono text-rose-700">{feedback.userAnswer}</span>
                 </div>
               )}
 
-              <div className="text-lg text-gray-700">
-                {t('quiz.correctAnswer')} <span className="font-mono bg-green-100 px-2 py-1 rounded font-semibold">{feedback.correctAnswer}</span>
+              <div className="text-lg text-slate-600">
+                {t('quiz.correctAnswer')} <span className="rounded-lg bg-emerald-100 px-2 py-1 font-mono font-bold text-emerald-700">{feedback.correctAnswer}</span>
               </div>
 
-              <div className="mt-4">
+              <div className="mt-5">
                 <button
                   ref={advanceButtonRef}
                   type="button"
                   onClick={handleAdvance}
-                  className="px-8 py-3 rounded-xl text-lg font-semibold bg-blue-600 hover:bg-blue-700 text-white hover:scale-105 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
+                  className="rounded-[1.4rem] bg-gradient-to-r from-fuchsia-500 to-violet-500 px-8 py-3 text-lg font-bold text-white shadow-cute transition-all hover:-translate-y-0.5 active:translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-400"
                 >
                   {currentIndex < totalQuestions - 1 ? t('quiz.next') : t('quiz.finish')}
                 </button>
@@ -339,19 +338,19 @@ const KanaQuiz = ({ kanaList, onFinish, scriptMode = 'both' }) => {
 
         {/* Stats */}
         <div className="grid grid-cols-3 gap-4">
-          <div className="bg-white rounded-xl p-4 text-center shadow-md">
-            <div className="text-2xl font-bold text-blue-600">{correctCount}</div>
-            <div className="text-sm text-gray-600">{t('quiz.correct_stat')}</div>
+          <div className="rounded-2xl bg-white/85 p-4 text-center shadow-cute ring-1 ring-white/60">
+            <div className="text-2xl font-extrabold text-fuchsia-600">{correctCount}</div>
+            <div className="text-sm text-slate-500">{t('quiz.correct_stat')}</div>
           </div>
-          <div className="bg-white rounded-xl p-4 text-center shadow-md">
-            <div className="text-2xl font-bold text-purple-600">{streak}</div>
-            <div className="text-sm text-gray-600">{t('quiz.currentStreak')}</div>
+          <div className="rounded-2xl bg-white/85 p-4 text-center shadow-cute ring-1 ring-white/60">
+            <div className="text-2xl font-extrabold text-violet-600">{streak}</div>
+            <div className="text-sm text-slate-500">{t('quiz.currentStreak')}</div>
           </div>
-          <div className="bg-white rounded-xl p-4 text-center shadow-md">
-            <div className="text-2xl font-bold text-green-600">
+          <div className="rounded-2xl bg-white/85 p-4 text-center shadow-cute ring-1 ring-white/60">
+            <div className="text-2xl font-extrabold text-emerald-600">
               {Math.round((correctCount / Math.max(currentIndex, 1)) * 100)}%
             </div>
-            <div className="text-sm text-gray-600">{t('quiz.accuracy')}</div>
+            <div className="text-sm text-slate-500">{t('quiz.accuracy')}</div>
           </div>
         </div>
       </div>

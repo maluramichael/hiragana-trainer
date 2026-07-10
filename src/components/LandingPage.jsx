@@ -1,11 +1,13 @@
 import { useTranslation } from 'react-i18next';
+import KanaBackground from './KanaBackground.jsx';
+import { RocketIcon, SparkleIcon, RepeatIcon, HeartIcon } from './icons.jsx';
 
-// The three feature cards, each tagged with a decorative kana. Copy lives in
-// i18n under landing.features.<key>; the mark is purely visual.
+// The three feature cards, each with a soft colored badge, a decorative kana and
+// a matching icon. Copy lives in i18n under landing.features.<key>.
 const FEATURES = [
-  { key: 'accuracy', mark: 'あ' },
-  { key: 'repeat', mark: 'カ' },
-  { key: 'offline', mark: 'ぬ' }
+  { key: 'accuracy', mark: 'あ', Icon: SparkleIcon, tint: 'from-pink-400 to-fuchsia-500' },
+  { key: 'repeat', mark: 'カ', Icon: RepeatIcon, tint: 'from-violet-400 to-indigo-500' },
+  { key: 'offline', mark: 'ぬ', Icon: HeartIcon, tint: 'from-sky-400 to-cyan-500' },
 ];
 
 // First screen of the app. The primary CTA jumps straight into a quiz (the
@@ -15,72 +17,82 @@ const LandingPage = ({ onStart, onChooseCharacters }) => {
   const { t } = useTranslation();
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-slate-50 to-indigo-50 text-slate-800 dark:from-slate-950 dark:to-slate-900 dark:text-slate-100">
-      <div className="max-w-3xl mx-auto px-6 py-20 sm:py-28">
+    <main className="relative min-h-screen overflow-hidden bg-gradient-to-b from-rose-50 via-fuchsia-50 to-indigo-100 text-slate-800">
+      <KanaBackground />
+
+      <div className="relative max-w-3xl mx-auto px-6 py-16 sm:py-24">
         <section className="text-center">
-          {/* Decorative kana motif, announced to nobody. */}
+          {/* Decorative kana motif in playful rounded badges. */}
           <div
             aria-hidden="true"
-            className="pointer-events-none select-none mb-8 flex justify-center gap-5 text-7xl sm:text-8xl font-light text-indigo-300/70 dark:text-indigo-400/30"
+            className="mb-10 flex justify-center gap-5"
           >
-            <span>あ</span>
-            <span>ア</span>
+            <span className="font-kana animate-bob grid h-24 w-24 sm:h-28 sm:w-28 place-items-center rounded-[2rem] bg-gradient-to-br from-pink-400 to-fuchsia-500 text-6xl sm:text-7xl font-bold text-white shadow-cute-lg">
+              あ
+            </span>
+            <span
+              style={{ animationDelay: '0.4s' }}
+              className="font-kana animate-bob grid h-24 w-24 sm:h-28 sm:w-28 place-items-center rounded-[2rem] bg-gradient-to-br from-violet-400 to-indigo-500 text-6xl sm:text-7xl font-bold text-white shadow-cute-lg"
+            >
+              ア
+            </span>
           </div>
 
-          <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-slate-900 dark:text-white">
+          <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-slate-900">
             {t('landing.hero.title')}
           </h1>
 
-          <p className="mt-5 text-lg text-slate-600 dark:text-slate-300 max-w-xl mx-auto">
+          <p className="mt-5 text-lg text-slate-600 max-w-xl mx-auto">
             {t('landing.hero.subtitle')}
           </p>
 
-          <div className="mt-10 flex flex-col items-center gap-3">
+          <div className="mt-10 flex flex-col items-center gap-4">
             <button
               type="button"
               onClick={onStart}
-              className="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-8 py-4 text-lg font-semibold text-white shadow-lg shadow-indigo-600/20 transition hover:bg-indigo-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 dark:focus-visible:outline-indigo-400"
+              className="group inline-flex items-center gap-2.5 rounded-[1.4rem] bg-gradient-to-r from-pink-500 to-fuchsia-600 px-9 py-4 text-lg font-bold text-white shadow-cute-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-cute-lg active:translate-y-0.5"
             >
+              <RocketIcon className="w-6 h-6 transition-transform duration-200 group-hover:-rotate-12" />
               {t('landing.hero.cta')}
             </button>
-            <p className="text-sm text-slate-500 dark:text-slate-400">
+            <p className="text-sm text-slate-500">
               {t('landing.hero.ctaHint')}
             </p>
             <button
               type="button"
               onClick={onChooseCharacters}
-              className="mt-1 rounded text-sm font-medium text-indigo-700 underline underline-offset-4 hover:text-indigo-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 dark:text-indigo-300 dark:hover:text-indigo-200"
+              className="mt-1 rounded-full px-4 py-1.5 text-sm font-semibold text-fuchsia-700 transition-colors hover:bg-fuchsia-100"
             >
               {t('landing.hero.secondary')}
             </button>
           </div>
 
-          <p className="mt-8 text-sm text-slate-500 dark:text-slate-400">
+          <p className="mt-8 inline-flex items-center gap-2 rounded-full bg-white/70 px-4 py-2 text-sm font-medium text-slate-500 shadow-sm ring-1 ring-white/60">
             {t('landing.hero.trust')}
           </p>
         </section>
 
-        <section aria-labelledby="landing-features" className="mt-20 sm:mt-28">
+        <section aria-labelledby="landing-features" className="mt-20 sm:mt-24">
           <h2 id="landing-features" className="sr-only">
             {t('landing.features.heading')}
           </h2>
           <ul className="grid gap-6 sm:grid-cols-3">
-            {FEATURES.map(({ key, mark }) => (
+            {FEATURES.map((feature) => (
               <li
-                key={key}
-                className="rounded-2xl border border-slate-200 bg-white/70 p-6 dark:border-slate-800 dark:bg-slate-900/60"
+                key={feature.key}
+                className="group rounded-[1.75rem] bg-white/80 p-6 shadow-cute ring-1 ring-white/70 backdrop-blur-sm transition-transform duration-200 hover:-translate-y-1"
               >
-                <div
-                  aria-hidden="true"
-                  className="text-3xl font-light text-indigo-500 dark:text-indigo-400"
-                >
-                  {mark}
+                <div className={`relative grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br ${feature.tint} text-white shadow-md`}>
+                  <feature.Icon className="w-7 h-7" />
+                  <span aria-hidden="true" className="font-kana absolute -right-2 -top-2 grid h-7 w-7 place-items-center rounded-full bg-white text-sm font-bold text-slate-700 shadow">
+                    {feature.mark}
+                  </span>
                 </div>
-                <h3 className="mt-3 font-semibold text-slate-900 dark:text-white">
-                  {t(`landing.features.${key}.title`)}
+                <h3 className="mt-4 text-lg font-bold text-slate-900">
+                  {t(`landing.features.${feature.key}.title`)}
                 </h3>
-                <p className="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-                  {t(`landing.features.${key}.body`)}
+                <p className="mt-2 text-sm leading-relaxed text-slate-600">
+                  {t(`landing.features.${feature.key}.body`)}
                 </p>
               </li>
             ))}

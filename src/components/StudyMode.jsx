@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import { ArrowLeftIcon, RocketIcon } from './icons.jsx';
 
 // Hiragana Unicode block; anything else is treated as Katakana.
 const isHiragana = (char) => /[぀-ゟ]/.test(char);
@@ -39,22 +40,22 @@ const StudyMode = ({ kanaList, scriptMode = 'both', onStartQuiz, onBack }) => {
   const startQuiz = () => onStartQuiz(kanaList, { scriptMode });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-100 to-purple-100 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-violet-100 via-fuchsia-50 to-rose-100 p-6">
       <div className="max-w-2xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
+        <div className="mb-8 flex items-center justify-between">
           <button
             onClick={onBack}
-            className="text-gray-600 hover:text-gray-800 transition-colors"
+            className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-semibold text-slate-500 transition-colors hover:bg-white/70 hover:text-slate-700"
           >
-            {t('study.back')}
+            <ArrowLeftIcon className="w-4 h-4" /> {t('study.back')}
           </button>
-          <h1 className="text-xl font-semibold text-gray-800">
+          <h1 className="text-xl font-bold text-slate-800">
             {t('study.title')}
           </h1>
         </div>
 
         {card && (
-          <div className="bg-white rounded-xl shadow-lg p-10 mb-6 text-center">
+          <div className="mb-6 animate-pop-in rounded-[1.75rem] bg-white/90 p-12 text-center shadow-cute-lg ring-1 ring-white/70">
             <div
               ref={cardRef}
               tabIndex={-1}
@@ -65,12 +66,12 @@ const StudyMode = ({ kanaList, scriptMode = 'both', onStartQuiz, onBack }) => {
               })}
               className="outline-none"
             >
-              <div className="text-8xl mb-6 text-gray-800">{card.kana}</div>
-              <div className="text-3xl text-indigo-600 font-medium">
+              <div lang="ja" className="font-kana mb-6 text-9xl font-bold text-slate-800">{card.kana}</div>
+              <div className="inline-block rounded-full bg-fuchsia-100 px-5 py-1.5 text-3xl font-bold text-fuchsia-600">
                 {card.romaji}
               </div>
             </div>
-            <p className="mt-6 text-sm text-gray-500">
+            <p className="mt-8 text-sm font-medium text-slate-400">
               {t('study.cardPosition', {
                 current: index + 1,
                 total: cards.length
@@ -79,37 +80,38 @@ const StudyMode = ({ kanaList, scriptMode = 'both', onStartQuiz, onBack }) => {
           </div>
         )}
 
-        <div className="flex justify-between gap-4 mb-8">
+        <div className="mb-8 flex justify-between gap-4">
           <button
             onClick={goPrev}
             disabled={atStart}
-            className={`px-6 py-3 rounded-lg font-medium transition-colors ${
+            className={`inline-flex items-center gap-2 rounded-2xl px-6 py-3 font-bold transition-all ${
               atStart
-                ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                : 'bg-white text-gray-700 hover:bg-gray-50 shadow'
+                ? 'cursor-not-allowed bg-slate-100 text-slate-400'
+                : 'bg-white text-slate-600 shadow-cute ring-1 ring-white/60 hover:-translate-y-0.5'
             }`}
           >
-            {t('study.previous')}
+            <ArrowLeftIcon className="w-4 h-4" /> {t('study.previous')}
           </button>
           <button
             onClick={goNext}
             disabled={atEnd}
-            className={`px-6 py-3 rounded-lg font-medium transition-colors ${
+            className={`inline-flex items-center gap-2 rounded-2xl px-6 py-3 font-bold transition-all ${
               atEnd
-                ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                : 'bg-white text-gray-700 hover:bg-gray-50 shadow'
+                ? 'cursor-not-allowed bg-slate-100 text-slate-400'
+                : 'bg-white text-slate-600 shadow-cute ring-1 ring-white/60 hover:-translate-y-0.5'
             }`}
           >
-            {t('study.next')}
+            {t('study.next')} <ArrowLeftIcon className="w-4 h-4 rotate-180" />
           </button>
         </div>
 
         <div className="text-center">
           <button
             onClick={startQuiz}
-            className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-8 py-4 rounded-xl text-xl font-semibold transition-all transform hover:scale-105 shadow-lg hover:shadow-xl"
+            className="group inline-flex items-center gap-2.5 rounded-[1.4rem] bg-gradient-to-r from-pink-500 to-fuchsia-600 px-8 py-4 text-xl font-bold text-white shadow-cute-lg transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0.5"
           >
-            🚀 {t('study.startQuiz')}
+            <RocketIcon className="w-6 h-6 transition-transform duration-200 group-hover:-rotate-12" />
+            {t('study.startQuiz')}
           </button>
         </div>
       </div>

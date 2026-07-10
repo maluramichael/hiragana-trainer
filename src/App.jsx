@@ -6,6 +6,7 @@ import LanguageSwitcher from './components/LanguageSwitcher';
 import { initializeStatistics } from './utils/statisticsManager.js';
 import { trackEvent } from './utils/analytics.js';
 import { hiragana, katakana, kanaGroups } from './data/kana.js';
+import { HeartIcon } from './components/icons.jsx';
 import './i18n/i18n.js';
 
 // #22: base64-Challenge-Parameter zu einer gültigen kanaList auflösen.
@@ -33,8 +34,8 @@ const StudyMode = lazy(() => import('./components/StudyMode'));
 
 // Dezenter Fallback, während ein Screen-Chunk nachgeladen wird.
 const ScreenFallback = () => (
-  <div className="min-h-screen flex items-center justify-center" aria-hidden="true">
-    <div className="h-8 w-8 rounded-full border-2 border-indigo-300 border-t-indigo-600 animate-spin" />
+  <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-rose-50 to-indigo-100" aria-hidden="true">
+    <div className="h-9 w-9 rounded-full border-[3px] border-pink-200 border-t-fuchsia-500 animate-spin" />
   </div>
 );
 
@@ -232,13 +233,16 @@ function App() {
       </Suspense>
 
       {/* Footer */}
-      <footer className="fixed bottom-0 left-0 right-0 bg-gradient-to-r from-blue-50/90 to-indigo-100/90 backdrop-blur-sm border-t border-indigo-200/50 py-2">
-        <div className="text-center text-sm text-gray-700">
-          {t('footer.madeWithLove')} 💖 - <a
+      <footer className="fixed bottom-0 left-0 right-0 bg-gradient-to-r from-rose-50/90 to-fuchsia-100/90 backdrop-blur-sm border-t border-fuchsia-200/60 py-2">
+        <div className="flex items-center justify-center gap-1.5 text-sm text-slate-600">
+          <span>{t('footer.madeWithLove')}</span>
+          <HeartIcon className="w-4 h-4 text-pink-500 fill-pink-500" />
+          <span aria-hidden="true">·</span>
+          <a
             href="https://malura.de"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-blue-600 hover:text-blue-800 transition-colors"
+            className="font-semibold text-fuchsia-600 hover:text-fuchsia-800 transition-colors"
           >
             michael
           </a>

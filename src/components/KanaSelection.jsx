@@ -9,6 +9,8 @@ import {
   getDueKana
 } from '../utils/statisticsManager.js';
 import ProgressBar from './ProgressBar.jsx';
+import KanaBackground from './KanaBackground.jsx';
+import { RocketIcon, ChartIcon, BookIcon, RepeatIcon, ClockIcon } from './icons.jsx';
 
 // Hiragana Unicode block; anything else is treated as Katakana.
 const isHiragana = (char) => /[぀-ゟ]/.test(char);
@@ -256,29 +258,83 @@ const KanaSelection = ({ onStartQuiz, onStudy, onViewStatistics }) => {
   const selectedCount = getKanaForSelection(selectedGroups).length;
 
   const RecommendedBadge = () => (
-    <span className="ml-2 inline-block bg-green-100 text-green-700 text-xs font-medium px-2 py-0.5 rounded-full">
+    <span className="ml-2 inline-block rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-700">
       {t('selection.recommended')}
     </span>
   );
 
+  // One reusable, cutely-styled group block (main checkbox + hint + progress +
+  // its sub-series checkboxes), so the three sections stay identical in look.
+  // A plain function (not a nested component) so toggling never remounts the
+  // inputs and loses focus.
+  const renderGroup = (group, hint, subs) => (
+    <div className="rounded-2xl bg-fuchsia-50/60 p-4 ring-1 ring-fuchsia-100">
+      <label className="flex items-center cursor-pointer">
+        <input
+          type="checkbox"
+          checked={selectedGroups[group]}
+          onChange={() => handleMainGroupToggle(group)}
+          className="h-5 w-5 rounded-md accent-fuchsia-500"
+        />
+        <span className="ml-3 flex-1 font-bold text-slate-700">
+          {t(`groups.${group}`)}
+          {group === 'basic' && <RecommendedBadge />}
+        </span>
+      </label>
+      <p className="ml-8 mt-1 text-xs text-slate-500">{hint}</p>
+
+      {progress && (
+        <div className="mt-2 ml-8">
+          <ProgressBar {...progress[group].overall} showDetails={true} t={t} />
+        </div>
+      )}
+
+      <div className="ml-8 mt-3 space-y-1.5">
+        {subs.map(({ key, translationKey, recommended }) => (
+          <div key={key} className="rounded-xl p-2 transition-colors hover:bg-white/70">
+            <label className="mb-1 flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={selectedGroups[`${group}Subs`][key]}
+                onChange={() => handleSubGroupToggle(group, key)}
+                className="h-4 w-4 rounded accent-fuchsia-500"
+              />
+              <span className="ml-3 flex-1 text-sm text-slate-600">
+                {t(translationKey)}
+                {recommended && <RecommendedBadge />}
+              </span>
+            </label>
+
+            {progress && progress[group].subgroups[key] && (
+              <div className="ml-7">
+                <ProgressBar {...progress[group].subgroups[key]} showDetails={false} t={t} />
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
-      <div className="max-w-4xl mx-auto">
-        <div className="flex justify-between items-start mb-6 gap-4">
+    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-rose-50 via-fuchsia-50 to-indigo-100 p-6">
+      <KanaBackground />
+      <div className="relative max-w-4xl mx-auto">
+        <div className="mb-6 flex items-start justify-between gap-4">
           <div className="flex-1">
-            <h1 className="text-4xl font-bold text-gray-800 mb-2">
+            <h1 className="mb-2 text-4xl font-extrabold tracking-tight text-slate-900">
               {t('selection.headline')}
             </h1>
-            <p className="text-gray-600 mb-2">
+            <p className="mb-2 text-slate-600">
               {t('selection.payoff')}
             </p>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-slate-500">
               {t('selection.trust')}{' '}
               <a
                 href={GITHUB_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-600 hover:text-blue-700 underline"
+                className="font-semibold text-fuchsia-600 underline hover:text-fuchsia-800"
               >
                 {t('selection.github')}
               </a>
@@ -288,35 +344,36 @@ const KanaSelection = ({ onStartQuiz, onStudy, onViewStatistics }) => {
           {hasData ? (
             <button
               onClick={onViewStatistics}
-              className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors shadow-md whitespace-nowrap"
+              className="inline-flex items-center gap-2 whitespace-nowrap rounded-2xl bg-gradient-to-r from-violet-500 to-purple-600 px-4 py-2.5 font-semibold text-white shadow-cute transition-all hover:-translate-y-0.5"
             >
-              📊 {t('statistics.title')}
+              <ChartIcon className="w-5 h-5" /> {t('statistics.title')}
             </button>
           ) : (
             <button
               onClick={onViewStatistics}
-              className="text-sm text-gray-500 hover:text-gray-700 underline whitespace-nowrap"
+              className="inline-flex items-center gap-1.5 whitespace-nowrap text-sm font-medium text-slate-500 underline hover:text-fuchsia-600"
             >
-              {t('selection.viewStats')}
+              <ChartIcon className="w-4 h-4" /> {t('selection.viewStats')}
             </button>
           )}
         </div>
 
         {/* First-run onboarding: one calm sentence on how the quiz works. */}
-        <p className="text-gray-600 bg-white/60 rounded-lg px-4 py-3 mb-6">
+        <p className="mb-6 rounded-2xl bg-white/70 px-4 py-3 text-slate-600 ring-1 ring-white/60">
           {t('selection.intro')}
         </p>
 
         {/* One-click quickstart above the group picker. */}
-        <div className="bg-white rounded-xl shadow-lg p-6 mb-6 text-center">
+        <div className="mb-6 rounded-[1.75rem] bg-white/80 p-6 text-center shadow-cute ring-1 ring-white/70">
           <button
             data-testid="quickstart-button"
             onClick={handleQuickstart}
-            className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-8 py-4 rounded-xl text-xl font-semibold transition-all transform hover:scale-105 shadow-lg hover:shadow-xl"
+            className="group inline-flex items-center gap-2.5 rounded-[1.4rem] bg-gradient-to-r from-emerald-500 to-teal-500 px-8 py-4 text-xl font-bold text-white shadow-cute-lg transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0.5"
           >
-            🚀 {t('selection.quickstart')}
+            <RocketIcon className="w-6 h-6 transition-transform duration-200 group-hover:-rotate-12" />
+            {t('selection.quickstart')}
           </button>
-          <p className="text-sm text-gray-500 mt-3">
+          <p className="mt-3 text-sm text-slate-500">
             {t('selection.quickstartHint')}
           </p>
         </div>
@@ -324,34 +381,34 @@ const KanaSelection = ({ onStartQuiz, onStudy, onViewStatistics }) => {
         {/* Review shortcuts: only shown once there is practice history to act on
             (#9 weak kana, #12 due kana). */}
         {(weakKana.length > 0 || dueKana.length > 0) && (
-          <div className="flex flex-col sm:flex-row justify-center gap-3 mb-6">
+          <div className="mb-6 flex flex-col justify-center gap-3 sm:flex-row">
             {weakKana.length > 0 && (
               <button
                 onClick={handlePracticeWeak}
-                className="bg-rose-600 hover:bg-rose-700 text-white px-6 py-3 rounded-lg font-medium transition-colors shadow-md"
+                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-rose-500 to-pink-500 px-6 py-3 font-semibold text-white shadow-cute transition-all hover:-translate-y-0.5"
               >
-                🔁 {t('selection.practiceWeak')}
+                <RepeatIcon className="w-5 h-5" /> {t('selection.practiceWeak')}
               </button>
             )}
             {dueKana.length > 0 && (
               <button
                 onClick={handleReviewDue}
-                className="bg-amber-600 hover:bg-amber-700 text-white px-6 py-3 rounded-lg font-medium transition-colors shadow-md"
+                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 px-6 py-3 font-semibold text-white shadow-cute transition-all hover:-translate-y-0.5"
               >
-                ⏰ {t('selection.reviewDue')}
+                <ClockIcon className="w-5 h-5" /> {t('selection.reviewDue')}
               </button>
             )}
           </div>
         )}
 
-        <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
-          <h2 className="text-2xl font-semibold text-gray-800 mb-4 text-center">
+        <div className="mb-8 rounded-[1.75rem] bg-white/85 p-6 shadow-cute ring-1 ring-white/70">
+          <h2 className="font-kana mb-4 text-center text-2xl font-bold text-slate-800">
             ひらがな & カタカナ (Hiragana & Katakana)
           </h2>
 
           {/* Script mode: drill only Hiragana, only Katakana, or both (#72). */}
           <fieldset className="mb-6">
-            <legend className="text-sm font-medium text-gray-700 mb-2 text-center w-full">
+            <legend className="mb-2 w-full text-center text-sm font-semibold text-slate-600">
               {t('selection.scriptMode')}
             </legend>
             <div className="flex justify-center gap-2">
@@ -362,10 +419,10 @@ const KanaSelection = ({ onStartQuiz, onStudy, onViewStatistics }) => {
               ].map(({ value, label }) => (
                 <label
                   key={value}
-                  className={`cursor-pointer px-4 py-2 rounded-lg border text-sm transition-colors ${
+                  className={`cursor-pointer rounded-full px-5 py-2 text-sm font-semibold transition-all ${
                     scriptMode === value
-                      ? 'bg-blue-600 border-blue-600 text-white'
-                      : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
+                      ? 'bg-gradient-to-r from-fuchsia-500 to-violet-500 text-white shadow-cute'
+                      : 'bg-fuchsia-50 text-slate-600 ring-1 ring-fuchsia-100 hover:bg-fuchsia-100'
                   }`}
                 >
                   <input
@@ -383,238 +440,61 @@ const KanaSelection = ({ onStartQuiz, onStudy, onViewStatistics }) => {
           </fieldset>
 
           <div className="space-y-4">
-            {/* Basic Section */}
-            <div>
-              <div className="p-3 rounded-lg bg-gray-50 mb-2">
-                <label className="flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={selectedGroups.basic}
-                    onChange={() => handleMainGroupToggle('basic')}
-                    className="w-5 h-5 text-blue-600 rounded"
-                  />
-                  <span className="ml-3 text-gray-700 font-semibold flex-1">
-                    {t('groups.basic')}
-                    <RecommendedBadge />
-                  </span>
-                </label>
-                <p className="ml-8 mt-1 text-xs text-gray-500">
-                  {t('selection.basicHint')}
-                </p>
-
-                {progress && (
-                  <div className="mt-2 ml-8">
-                    <ProgressBar
-                      {...progress.basic.overall}
-                      showDetails={true}
-                      t={t}
-                    />
-                  </div>
-                )}
-              </div>
-
-              <div className="ml-8 space-y-2 mt-2">
-                {[
-                  { key: 'vowels', translationKey: 'subgroups.vowels', recommended: true },
-                  { key: 'k', translationKey: 'subgroups.kSeries' },
-                  { key: 's', translationKey: 'subgroups.sSeries' },
-                  { key: 't', translationKey: 'subgroups.tSeries' },
-                  { key: 'n', translationKey: 'subgroups.nSeries' },
-                  { key: 'h', translationKey: 'subgroups.hSeries' },
-                  { key: 'm', translationKey: 'subgroups.mSeries' },
-                  { key: 'y', translationKey: 'subgroups.ySeries' },
-                  { key: 'r', translationKey: 'subgroups.rSeries' },
-                  { key: 'w', translationKey: 'subgroups.wSeries' }
-                ].map(({ key, translationKey, recommended }) => (
-                  <div key={key} className="p-2 rounded hover:bg-gray-50">
-                    <label className="flex items-center cursor-pointer mb-1">
-                      <input
-                        type="checkbox"
-                        checked={selectedGroups.basicSubs[key]}
-                        onChange={() => handleSubGroupToggle('basic', key)}
-                        className="w-4 h-4 text-blue-600 rounded"
-                      />
-                      <span className="ml-3 text-sm text-gray-600 flex-1">
-                        {t(translationKey)}
-                        {recommended && <RecommendedBadge />}
-                      </span>
-                    </label>
-
-                    {progress && progress.basic.subgroups[key] && (
-                      <div className="ml-7">
-                        <ProgressBar
-                          {...progress.basic.subgroups[key]}
-                          showDetails={false}
-                          t={t}
-                        />
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Dakuten Section */}
-            <div>
-              <div className="p-3 rounded-lg bg-gray-50 mb-2">
-                <label className="flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={selectedGroups.dakuten}
-                    onChange={() => handleMainGroupToggle('dakuten')}
-                    className="w-5 h-5 text-blue-600 rounded"
-                  />
-                  <span className="ml-3 text-gray-700 font-semibold flex-1">
-                    {t('groups.dakuten')}
-                  </span>
-                </label>
-                <p className="ml-8 mt-1 text-xs text-gray-500">
-                  {t('selection.dakutenHint')}
-                </p>
-
-                {progress && (
-                  <div className="mt-2 ml-8">
-                    <ProgressBar
-                      {...progress.dakuten.overall}
-                      showDetails={true}
-                      t={t}
-                    />
-                  </div>
-                )}
-              </div>
-
-              <div className="ml-8 space-y-2 mt-2">
-                {[
-                  { key: 'g', translationKey: 'subgroups.gSeries' },
-                  { key: 'z', translationKey: 'subgroups.zSeries' },
-                  { key: 'd', translationKey: 'subgroups.dSeries' },
-                  { key: 'b', translationKey: 'subgroups.bSeries' }
-                ].map(({ key, translationKey }) => (
-                  <div key={key} className="p-2 rounded hover:bg-gray-50">
-                    <label className="flex items-center cursor-pointer mb-1">
-                      <input
-                        type="checkbox"
-                        checked={selectedGroups.dakutenSubs[key]}
-                        onChange={() => handleSubGroupToggle('dakuten', key)}
-                        className="w-4 h-4 text-blue-600 rounded"
-                      />
-                      <span className="ml-3 text-sm text-gray-600 flex-1">
-                        {t(translationKey)}
-                      </span>
-                    </label>
-
-                    {progress && progress.dakuten.subgroups[key] && (
-                      <div className="ml-7">
-                        <ProgressBar
-                          {...progress.dakuten.subgroups[key]}
-                          showDetails={false}
-                          t={t}
-                        />
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Handakuten Section */}
-            <div>
-              <div className="p-3 rounded-lg bg-gray-50 mb-2">
-                <label className="flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={selectedGroups.handakuten}
-                    onChange={() => handleMainGroupToggle('handakuten')}
-                    className="w-5 h-5 text-blue-600 rounded"
-                  />
-                  <span className="ml-3 text-gray-700 font-semibold flex-1">
-                    {t('groups.handakuten')}
-                  </span>
-                </label>
-                <p className="ml-8 mt-1 text-xs text-gray-500">
-                  {t('selection.handakutenHint')}
-                </p>
-
-                {progress && (
-                  <div className="mt-2 ml-8">
-                    <ProgressBar
-                      {...progress.handakuten.overall}
-                      showDetails={true}
-                      t={t}
-                    />
-                  </div>
-                )}
-              </div>
-
-              <div className="ml-8 space-y-2 mt-2">
-                {[
-                  { key: 'p', translationKey: 'subgroups.pSeries' }
-                ].map(({ key, translationKey }) => (
-                  <div key={key} className="p-2 rounded hover:bg-gray-50">
-                    <label className="flex items-center cursor-pointer mb-1">
-                      <input
-                        type="checkbox"
-                        checked={selectedGroups.handakutenSubs[key]}
-                        onChange={() => handleSubGroupToggle('handakuten', key)}
-                        className="w-4 h-4 text-blue-600 rounded"
-                      />
-                      <span className="ml-3 text-sm text-gray-600 flex-1">
-                        {t(translationKey)}
-                      </span>
-                    </label>
-
-                    {progress && progress.handakuten.subgroups[key] && (
-                      <div className="ml-7">
-                        <ProgressBar
-                          {...progress.handakuten.subgroups[key]}
-                          showDetails={false}
-                          t={t}
-                        />
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
+            {renderGroup('basic', t('selection.basicHint'), [
+              { key: 'vowels', translationKey: 'subgroups.vowels', recommended: true },
+              { key: 'k', translationKey: 'subgroups.kSeries' },
+              { key: 's', translationKey: 'subgroups.sSeries' },
+              { key: 't', translationKey: 'subgroups.tSeries' },
+              { key: 'n', translationKey: 'subgroups.nSeries' },
+              { key: 'h', translationKey: 'subgroups.hSeries' },
+              { key: 'm', translationKey: 'subgroups.mSeries' },
+              { key: 'y', translationKey: 'subgroups.ySeries' },
+              { key: 'r', translationKey: 'subgroups.rSeries' },
+              { key: 'w', translationKey: 'subgroups.wSeries' }
+            ])}
+            {renderGroup('dakuten', t('selection.dakutenHint'), [
+              { key: 'g', translationKey: 'subgroups.gSeries' },
+              { key: 'z', translationKey: 'subgroups.zSeries' },
+              { key: 'd', translationKey: 'subgroups.dSeries' },
+              { key: 'b', translationKey: 'subgroups.bSeries' }
+            ])}
+            {renderGroup('handakuten', t('selection.handakutenHint'), [
+              { key: 'p', translationKey: 'subgroups.pSeries' }
+            ])}
           </div>
 
           {/* Start Quiz Button */}
-          <div className="mt-8 pt-6 border-t border-gray-200">
+          <div className="mt-8 border-t border-fuchsia-100 pt-6">
             <div className="text-center">
-              <div className="flex flex-col sm:flex-row justify-center items-center gap-3">
+              <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
                 <button
                   onClick={handleStudy}
                   disabled={selectedCount === 0}
-                  className={`px-6 py-4 rounded-xl text-lg font-semibold transition-all transform ${
+                  className={`inline-flex items-center gap-2 rounded-[1.4rem] px-6 py-4 text-lg font-bold transition-all ${
                     selectedCount > 0
-                      ? 'bg-white border-2 border-indigo-600 text-indigo-700 hover:bg-indigo-50 hover:scale-105 shadow'
-                      : 'bg-gray-100 border-2 border-gray-200 text-gray-400 cursor-not-allowed'
+                      ? 'bg-white text-indigo-600 ring-2 ring-indigo-300 shadow-cute hover:-translate-y-0.5'
+                      : 'cursor-not-allowed bg-slate-100 text-slate-400 ring-2 ring-slate-200'
                   }`}
                 >
-                  📖 {t('selection.studyFirst')}
+                  <BookIcon className="w-5 h-5" /> {t('selection.studyFirst')}
                 </button>
 
                 <button
                   onClick={handleStartQuiz}
                   disabled={selectedCount === 0}
-                  className={`px-8 py-4 rounded-xl text-xl font-semibold transition-all transform ${
+                  className={`inline-flex items-center gap-2.5 rounded-[1.4rem] px-8 py-4 text-xl font-bold transition-all ${
                     selectedCount > 0
-                      ? 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white hover:scale-105 shadow-lg hover:shadow-xl'
-                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                      ? 'bg-gradient-to-r from-pink-500 to-fuchsia-600 text-white shadow-cute-lg hover:-translate-y-0.5 active:translate-y-0.5'
+                      : 'cursor-not-allowed bg-slate-200 text-slate-400'
                   }`}
                 >
-                  {selectedCount > 0 ? (
-                    <>
-                      🚀 {t('selection.startQuiz')}
-                    </>
-                  ) : (
-                    t('selection.startQuiz')
-                  )}
+                  {selectedCount > 0 && <RocketIcon className="w-6 h-6" />}
+                  {t('selection.startQuiz')}
                 </button>
               </div>
 
               {selectedCount > 0 && (
-                <p className="mt-3 text-sm text-gray-600">
+                <p className="mt-3 text-sm text-slate-500">
                   {selectedCount} {t('selection.charactersSelected')}
                 </p>
               )}

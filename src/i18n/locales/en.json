@@ -2,7 +2,7 @@
   "title": "Japanese Kana Quiz",
   "subtitle": "Select the kana groups you want to practice (both hiragana and katakana)",
   "navigation": {
-    "backToSelection": "← Back to selection"
+    "backToSelection": "Back to selection"
   },
   "groups": {
     "basic": "Basic (あアいイうウえエおオ...)",
@@ -51,7 +51,7 @@
   },
   "study": {
     "title": "Study characters",
-    "back": "← Back to selection",
+    "back": "Back to selection",
     "cardPosition": "Card {{current}} of {{total}}",
     "previous": "Previous",
     "next": "Next",
