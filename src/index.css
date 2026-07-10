@@ -1,1 +1,27 @@
 @import "tailwindcss";
+
+/* Sichtbarer Fokus-Ring für Tastaturnutzer (Tailwind-Preflight resettet das Outline). */
+@layer base {
+  button:focus-visible,
+  a:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible,
+  [tabindex]:focus-visible {
+    outline: 2px solid #2563eb;
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+}
+
+/* Nutzerpräferenz "reduzierte Bewegung" respektieren (Feedback-Scale, Hover, Transitions). */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

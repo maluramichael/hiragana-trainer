@@ -46,7 +46,12 @@
     "currentStreak": "Current Streak",
     "accuracy": "Accuracy",
     "incorrect_stat": "Incorrect",
-    "retryMode": "Retry"
+    "retryMode": "Retry",
+    "next": "Next",
+    "finish": "Finish Quiz",
+    "newRecord": "New record!",
+    "progressLabel": "Quiz progress",
+    "confirmLeave": "Leave the quiz? Your current progress will be lost."
   },
   "results": {
     "title": "Quiz Complete!",

@@ -1,7 +1,26 @@
 import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { hiragana, katakana } from '../data/kana.js';
-import { updateKanaStatistic } from '../utils/statisticsManager.js';
+import { getScriptCounterpart } from '../data/kana.js';
+import { updateKanaStatistics, getBestStreak, updateBestStreak } from '../utils/statisticsManager.js';
+
+// Accept common Kunrei/Hepburn spelling variants, not only the canonical romaji (#29).
+// Keyed on the canonical romaji stored in kana.js (always the Hepburn form).
+const romajiAliases = {
+  shi: ['si'],
+  chi: ['ti'],
+  tsu: ['tu'],
+  fu: ['hu'],
+  ji: ['zi', 'di'],
+  zu: ['du']
+};
+
+const isRomajiCorrect = (input, romaji) => {
+  const normalized = input.toLowerCase().trim();
+  return normalized === romaji || (romajiAliases[romaji] || []).includes(normalized);
+};
+
+// Hiragana Unicode block; anything else in a pair is the Katakana side.
+const isHiragana = (char) => /[぀-ゟ]/.test(char);
 
 const KanaQuiz = ({ kanaList, onFinish }) => {
   const { t } = useTranslation();
@@ -10,34 +29,35 @@ const KanaQuiz = ({ kanaList, onFinish }) => {
   const [feedback, setFeedback] = useState(null);
   const [correctCount, setCorrectCount] = useState(0);
   const [streak, setStreak] = useState(0);
-  const [bestStreak, setBestStreak] = useState(0);
+  const [bestStreak, setBestStreak] = useState(() => getBestStreak());
   const [shuffledPairs, setShuffledPairs] = useState([]);
   const [questionStartTime, setQuestionStartTime] = useState(null);
   const [incorrectQueue, setIncorrectQueue] = useState([]);
-  const [isRetryAttempt, setIsRetryAttempt] = useState(false);
   const inputRef = useRef(null);
+  const advanceButtonRef = useRef(null);
+  // Best streak persisted before this session started — used to flag a new record.
+  const persistedBestRef = useRef(getBestStreak());
 
   useEffect(() => {
-    // Group hiragana and katakana by romaji
+    // Pair each selected kana with its positional counterpart in the other script.
+    // Dedupe on the actual character pair (not romaji) so ぢ/づ stay distinct from
+    // じ/ず despite sharing romaji (#11).
+    const seen = new Set();
     const kanaPairs = [];
-    const processedRomaji = new Set();
-    
+
     kanaList.forEach(kana => {
-      if (!processedRomaji.has(kana.romaji)) {
-        const hiraganaChar = hiragana.find(h => h.romaji === kana.romaji);
-        const katakanaChar = katakana.find(k => k.romaji === kana.romaji);
-        
-        if (hiraganaChar && katakanaChar) {
-          kanaPairs.push({
-            romaji: kana.romaji,
-            hiragana: hiraganaChar.kana,
-            katakana: katakanaChar.kana
-          });
-          processedRomaji.add(kana.romaji);
-        }
-      }
+      const counterpart = getScriptCounterpart(kana);
+      if (!counterpart) return;
+
+      const hiraganaChar = isHiragana(kana.kana) ? kana.kana : counterpart.kana;
+      const katakanaChar = isHiragana(kana.kana) ? counterpart.kana : kana.kana;
+      const key = `${hiraganaChar}-${katakanaChar}`;
+      if (seen.has(key)) return;
+      seen.add(key);
+
+      kanaPairs.push({ romaji: kana.romaji, hiragana: hiraganaChar, katakana: katakanaChar });
     });
-    
+
     const shuffled = [...kanaPairs].sort(() => Math.random() - 0.5);
     setShuffledPairs(shuffled);
   }, [kanaList]);
@@ -49,6 +69,13 @@ const KanaQuiz = ({ kanaList, onFinish }) => {
     // Start timing for new question
     setQuestionStartTime(Date.now());
   }, [currentIndex]);
+
+  // Move focus to the "next" button once feedback appears so Enter/Space advances.
+  useEffect(() => {
+    if (feedback && advanceButtonRef.current) {
+      advanceButtonRef.current.focus();
+    }
+  }, [feedback]);
 
   // Get current question from main queue or retry queue
   const getCurrentQuestion = () => {
@@ -65,24 +92,23 @@ const KanaQuiz = ({ kanaList, onFinish }) => {
   const currentPair = getCurrentQuestion();
   const totalQuestions = shuffledPairs.length + incorrectQueue.length;
   const progress = ((currentIndex + 1) / totalQuestions) * 100;
-  
-  // Check if we're in retry mode
-  useEffect(() => {
-    const inRetryMode = currentIndex >= shuffledPairs.length;
-    setIsRetryAttempt(inRetryMode);
-  }, [currentIndex, shuffledPairs.length]);
+  // Retry phase begins once we've walked past the main queue (#95, derived inline).
+  const isRetryAttempt = currentIndex >= shuffledPairs.length;
+  const isNewRecord = bestStreak > persistedBestRef.current;
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!userInput.trim()) return;
+    if (!userInput.trim() || feedback) return;
 
-    const isCorrect = userInput.toLowerCase().trim() === currentPair.romaji.toLowerCase();
+    const isCorrect = isRomajiCorrect(userInput, currentPair.romaji);
     const responseTime = questionStartTime ? Date.now() - questionStartTime : null;
-    
-    // Update statistics for both hiragana and katakana (always track for statistics)
-    updateKanaStatistic(currentPair.hiragana, currentPair.romaji, isCorrect, responseTime);
-    updateKanaStatistic(currentPair.katakana, currentPair.romaji, isCorrect, responseTime);
-    
+
+    // Update statistics for both hiragana and katakana in a single get/save (#83).
+    updateKanaStatistics([
+      { kana: currentPair.hiragana, romaji: currentPair.romaji, isCorrect, responseTime },
+      { kana: currentPair.katakana, romaji: currentPair.romaji, isCorrect, responseTime }
+    ]);
+
     setFeedback({
       isCorrect,
       correctAnswer: currentPair.romaji,
@@ -94,7 +120,7 @@ const KanaQuiz = ({ kanaList, onFinish }) => {
       if (!isRetryAttempt) {
         setCorrectCount(prev => prev + 1);
       }
-      
+
       setStreak(prev => {
         const newStreak = prev + 1;
         setBestStreak(current => Math.max(current, newStreak));
@@ -102,67 +128,44 @@ const KanaQuiz = ({ kanaList, onFinish }) => {
       });
     } else {
       setStreak(0);
-      
+
       // Add to incorrect queue if not already there and not a retry
       if (!isRetryAttempt) {
         setIncorrectQueue(prev => {
-          // Check if this pair is already in the queue
-          const alreadyQueued = prev.some(pair => 
-            pair.hiragana === currentPair.hiragana && 
+          const alreadyQueued = prev.some(pair =>
+            pair.hiragana === currentPair.hiragana &&
             pair.katakana === currentPair.katakana
           );
-          
-          if (!alreadyQueued) {
-            return [...prev, currentPair];
-          }
-          return prev;
+          return alreadyQueued ? prev : [...prev, currentPair];
         });
       }
     }
+  };
 
-    if (isCorrect) {
-      // Immediate transition for correct answers
-      setTimeout(() => {
-        const totalQuestions = shuffledPairs.length + incorrectQueue.length;
-        
-        if (currentIndex < totalQuestions - 1) {
-          setCurrentIndex(prev => prev + 1);
-          setUserInput('');
-          setFeedback(null);
-        } else {
-          // Quiz complete
-          onFinish({
-            total: shuffledPairs.length,
-            correct: correctCount + (!isRetryAttempt ? 1 : 0),
-            bestStreak: Math.max(bestStreak, streak + 1)
-          });
-        }
-      }, 600);
+  // Advance runs on a click (a later render), so incorrectQueue/streak/counts are
+  // already up to date — no stale-closure end/progress decision from a timeout (#79).
+  const handleAdvance = () => {
+    const total = shuffledPairs.length + incorrectQueue.length;
+
+    if (currentIndex < total - 1) {
+      setCurrentIndex(prev => prev + 1);
+      setUserInput('');
+      setFeedback(null);
     } else {
-      // Longer delay for incorrect answers to show the correct answer
-      setTimeout(() => {
-        const totalQuestions = shuffledPairs.length + incorrectQueue.length;
-        
-        if (currentIndex < totalQuestions - 1) {
-          setCurrentIndex(prev => prev + 1);
-          setUserInput('');
-          setFeedback(null);
-        } else {
-          // Quiz complete
-          onFinish({
-            total: shuffledPairs.length,
-            correct: correctCount,
-            bestStreak: bestStreak
-          });
-        }
-      }, 2000);
+      // Quiz complete — persist the best streak reached this session (#53).
+      updateBestStreak(bestStreak);
+      onFinish({
+        total: shuffledPairs.length,
+        correct: correctCount,
+        bestStreak
+      });
     }
   };
 
-  const handleKeyPress = (e) => {
-    if (e.key === 'Enter') {
-      handleSubmit(e);
-    }
+  const handleBack = () => {
+    // Guard against losing in-progress answers (#64).
+    if (currentIndex > 0 && !window.confirm(t('quiz.confirmLeave'))) return;
+    onFinish(null);
   };
 
   if (!currentPair) return <div>Loading...</div>;
@@ -174,7 +177,7 @@ const KanaQuiz = ({ kanaList, onFinish }) => {
         <div className="mb-8">
           <div className="flex justify-between items-center mb-4">
             <button
-              onClick={() => onFinish(null)}
+              onClick={handleBack}
               className="text-gray-600 hover:text-gray-800 transition-colors"
             >
               {t('navigation.backToSelection')}
@@ -190,12 +193,24 @@ const KanaQuiz = ({ kanaList, onFinish }) => {
               </div>
               <div className="text-sm text-gray-600">
                 {t('quiz.streak')}: {streak} | {t('quiz.best')}: {bestStreak}
+                {isNewRecord && (
+                  <span className="ml-2 px-2 py-1 bg-green-100 text-green-700 rounded text-xs">
+                    {t('quiz.newRecord')}
+                  </span>
+                )}
               </div>
             </div>
           </div>
-          
-          <div className="w-full bg-gray-200 rounded-full h-2">
-            <div 
+
+          <div
+            className="w-full bg-gray-200 rounded-full h-2"
+            role="progressbar"
+            aria-valuenow={currentIndex + 1}
+            aria-valuemin={0}
+            aria-valuemax={totalQuestions}
+            aria-label={t('quiz.progressLabel')}
+          >
+            <div
               className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full transition-all duration-500"
               style={{ width: `${progress}%` }}
             />
@@ -209,25 +224,27 @@ const KanaQuiz = ({ kanaList, onFinish }) => {
             <div className="flex justify-center items-center gap-8 mb-4">
               <div className="text-center">
                 <div className="text-sm text-gray-500 mb-2">{t('scripts.hiragana')}</div>
-                <div 
+                <div
+                  lang="ja"
                   className={`text-6xl font-bold transition-all duration-300 ${
-                    feedback?.isCorrect ? 'text-green-500 scale-110' : 
-                    feedback?.isCorrect === false ? 'text-red-500 scale-90' : 
+                    feedback?.isCorrect ? 'text-green-500 scale-110' :
+                    feedback?.isCorrect === false ? 'text-red-500 scale-90' :
                     'text-gray-800'
                   }`}
                 >
                   {currentPair.hiragana}
                 </div>
               </div>
-              
+
               <div className="text-4xl text-gray-400 font-light">|</div>
-              
+
               <div className="text-center">
                 <div className="text-sm text-gray-500 mb-2">{t('scripts.katakana')}</div>
-                <div 
+                <div
+                  lang="ja"
                   className={`text-6xl font-bold transition-all duration-300 ${
-                    feedback?.isCorrect ? 'text-green-500 scale-110' : 
-                    feedback?.isCorrect === false ? 'text-red-500 scale-90' : 
+                    feedback?.isCorrect ? 'text-green-500 scale-110' :
+                    feedback?.isCorrect === false ? 'text-red-500 scale-90' :
                     'text-gray-800'
                   }`}
                 >
@@ -245,9 +262,8 @@ const KanaQuiz = ({ kanaList, onFinish }) => {
                 type="text"
                 value={userInput}
                 onChange={(e) => setUserInput(e.target.value)}
-                onKeyPress={handleKeyPress}
                 placeholder={t('quiz.typeRomaji')}
-                className="w-full max-w-xs px-4 py-3 text-xl text-center border-2 border-gray-300 rounded-xl focus:outline-none focus:border-blue-500 transition-colors"
+                className="w-full max-w-xs px-4 py-3 text-xl text-center border-2 border-gray-300 rounded-xl focus:border-blue-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 transition-colors"
                 autoComplete="off"
                 autoCapitalize="off"
                 autoCorrect="off"
@@ -270,27 +286,32 @@ const KanaQuiz = ({ kanaList, onFinish }) => {
 
           {/* Feedback */}
           {feedback && (
-            <div className="text-center">
+            <div className="text-center" role="status" aria-live="assertive">
               <div className={`text-2xl font-bold mb-2 ${
                 feedback.isCorrect ? 'text-green-600' : 'text-red-600'
               }`}>
                 {feedback.isCorrect ? t('quiz.correct') : t('quiz.incorrect')}
               </div>
-              
+
               {!feedback.isCorrect && (
                 <div className="text-lg text-gray-600 mb-2">
                   {t('quiz.youTyped')}: <span className="font-mono bg-red-100 px-2 py-1 rounded">{feedback.userAnswer}</span>
                 </div>
               )}
-              
+
               <div className="text-lg text-gray-700">
                 {t('quiz.correctAnswer')}: <span className="font-mono bg-green-100 px-2 py-1 rounded font-semibold">{feedback.correctAnswer}</span>
               </div>
-              
-              <div className="mt-4 text-gray-500">
-                {currentIndex < shuffledPairs.length - 1 ? 
-                  (feedback.isCorrect ? t('quiz.nextKanaQuick') : t('quiz.nextKanaSlow')) : 
-                  t('quiz.quizComplete')}
+
+              <div className="mt-4">
+                <button
+                  ref={advanceButtonRef}
+                  type="button"
+                  onClick={handleAdvance}
+                  className="px-8 py-3 rounded-xl text-lg font-semibold bg-blue-600 hover:bg-blue-700 text-white hover:scale-105 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
+                >
+                  {currentIndex < totalQuestions - 1 ? t('quiz.next') : t('quiz.finish')}
+                </button>
               </div>
             </div>
           )}

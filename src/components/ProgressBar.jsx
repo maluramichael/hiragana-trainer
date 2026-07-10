@@ -3,14 +3,23 @@ import { getProgressBarSegments, getProgressDescription } from '../utils/progres
 const ProgressBar = ({ level, accuracy, coverage, totalKana, practicedKana, showDetails = false, t }) => {
   const segments = getProgressBarSegments(level);
   const description = getProgressDescription(level, t);
+  const label = `${t?.('progress.level') || 'Level'} ${level}/10 – ${description}`;
 
   return (
     <div className="flex flex-col gap-1">
       {/* Progress Bar */}
-      <div className="flex gap-1">
+      <div
+        role="progressbar"
+        aria-valuenow={level}
+        aria-valuemin={0}
+        aria-valuemax={10}
+        aria-label={label}
+        className="flex gap-1"
+      >
         {segments.map((segment, index) => (
           <div
             key={index}
+            aria-hidden="true"
             className={`h-2 flex-1 rounded-sm transition-colors duration-300 ${
               segment.active ? 'opacity-100' : 'opacity-30'
             }`}

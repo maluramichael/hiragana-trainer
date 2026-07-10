@@ -1,124 +1,151 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 import KanaSelection from './components/KanaSelection';
-import KanaQuiz from './components/KanaQuiz';
-import QuizResults from './components/QuizResults';
-import Statistics from './components/Statistics';
 import LanguageSwitcher from './components/LanguageSwitcher';
 import { initializeStatistics } from './utils/statisticsManager.js';
 import './i18n/i18n.js';
 
+// #62: only the initial screen ships in the main bundle; the rest are split out.
+const KanaQuiz = lazy(() => import('./components/KanaQuiz'));
+const QuizResults = lazy(() => import('./components/QuizResults'));
+const Statistics = lazy(() => import('./components/Statistics'));
+
+// Dezenter Fallback, während ein Screen-Chunk nachgeladen wird.
+const ScreenFallback = () => (
+  <div className="min-h-screen flex items-center justify-center" aria-hidden="true">
+    <div className="h-8 w-8 rounded-full border-2 border-indigo-300 border-t-indigo-600 animate-spin" />
+  </div>
+);
+
 function App() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [currentView, setCurrentView] = useState('selection');
   const [selectedKana, setSelectedKana] = useState([]);
   const [quizResults, setQuizResults] = useState(null);
+  // Marks a back navigation we triggered ourselves, so popstate skips the quiz-leave prompt.
+  const intentionalLeaveRef = useRef(false);
 
   useEffect(() => {
     // Initialize statistics on app load
     initializeStatistics();
   }, []);
 
-  // Handle browser back button
+  // #14: keep <html lang> in sync so screen readers announce the right language.
   useEffect(() => {
-    const handlePopState = () => {
-      if (currentView === 'quiz') {
-        setCurrentView('selection');
+    document.documentElement.lang = i18n.language;
+    const handler = (lng) => {
+      document.documentElement.lang = lng;
+    };
+    i18n.on('languageChanged', handler);
+    return () => i18n.off('languageChanged', handler);
+  }, [i18n]);
+
+  // #80/#64: popstate is the single source of truth for backward view changes.
+  useEffect(() => {
+    const handlePopState = (event) => {
+      const targetView = event.state?.view ?? 'selection';
+
+      // #64: don't drop quiz progress on browser-back without asking.
+      if (currentView === 'quiz' && !intentionalLeaveRef.current) {
+        if (!window.confirm(t('quiz.confirmLeave'))) {
+          // Re-push the quiz entry so history stack and view stay in sync.
+          window.history.pushState({ view: 'quiz' }, '', window.location.pathname);
+          return;
+        }
+      }
+      intentionalLeaveRef.current = false;
+
+      setCurrentView(targetView);
+      if (targetView === 'selection') {
         setSelectedKana([]);
         setQuizResults(null);
-      } else if (currentView === 'results') {
-        setCurrentView('selection');
-        setSelectedKana([]);
-        setQuizResults(null);
-      } else if (currentView === 'statistics') {
-        setCurrentView('selection');
       }
     };
 
     window.addEventListener('popstate', handlePopState);
-    
-    // Add history entry for current view
-    if (currentView !== 'selection') {
-      window.history.pushState({ view: currentView }, '', window.location.pathname);
-    }
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [currentView, t]);
 
-    return () => {
-      window.removeEventListener('popstate', handlePopState);
-    };
-  }, [currentView]);
+  // Forward navigation: add a history entry so browser-back has somewhere to go.
+  const navigateTo = (view) => {
+    window.history.pushState({ view }, '', window.location.pathname);
+    setCurrentView(view);
+  };
 
   const handleStartQuiz = (kanaList) => {
     setSelectedKana(kanaList);
-    setCurrentView('quiz');
+    navigateTo('quiz');
   };
 
   const handleQuizFinish = (results) => {
     if (results === null) {
-      // User clicked "Back to selection" - go directly to selection
-      setCurrentView('selection');
-      setSelectedKana([]);
-      setQuizResults(null);
+      // In-quiz "back to selection": leave via history, without a redundant prompt.
+      intentionalLeaveRef.current = true;
+      window.history.back();
     } else {
-      // Quiz completed normally - show results
+      // Quiz done: swap the quiz entry for results, so Back returns to selection.
       setQuizResults(results);
+      window.history.replaceState({ view: 'results' }, '', window.location.pathname);
       setCurrentView('results');
     }
   };
 
   const handleRestart = () => {
+    // Play again: swap the results entry back to a fresh quiz entry.
+    window.history.replaceState({ view: 'quiz' }, '', window.location.pathname);
     setCurrentView('quiz');
   };
 
   const handleNewSelection = () => {
-    setCurrentView('selection');
-    setSelectedKana([]);
-    setQuizResults(null);
+    window.history.back();
   };
 
   const handleViewStatistics = () => {
-    setCurrentView('statistics');
+    navigateTo('statistics');
   };
 
   const handleBackToSelection = () => {
-    setCurrentView('selection');
+    window.history.back();
   };
 
   return (
-    <div className="App">
+    <div className="App pb-16">
       <LanguageSwitcher />
-      
+
       {currentView === 'selection' && (
-        <KanaSelection 
-          onStartQuiz={handleStartQuiz} 
+        <KanaSelection
+          onStartQuiz={handleStartQuiz}
           onViewStatistics={handleViewStatistics}
         />
       )}
-      
-      {currentView === 'quiz' && (
-        <KanaQuiz 
-          kanaList={selectedKana}
-          onFinish={handleQuizFinish}
-        />
-      )}
-      
-      {currentView === 'results' && (
-        <QuizResults 
-          results={quizResults}
-          onRestart={handleRestart}
-          onNewSelection={handleNewSelection}
-        />
-      )}
 
-      {currentView === 'statistics' && (
-        <Statistics onBack={handleBackToSelection} />
-      )}
-      
+      <Suspense fallback={<ScreenFallback />}>
+        {currentView === 'quiz' && (
+          <KanaQuiz
+            kanaList={selectedKana}
+            onFinish={handleQuizFinish}
+          />
+        )}
+
+        {currentView === 'results' && (
+          <QuizResults
+            results={quizResults}
+            onRestart={handleRestart}
+            onNewSelection={handleNewSelection}
+          />
+        )}
+
+        {currentView === 'statistics' && (
+          <Statistics onBack={handleBackToSelection} />
+        )}
+      </Suspense>
+
       {/* Footer */}
       <footer className="fixed bottom-0 left-0 right-0 bg-gradient-to-r from-blue-50/90 to-indigo-100/90 backdrop-blur-sm border-t border-indigo-200/50 py-2">
         <div className="text-center text-sm text-gray-700">
-          {t('footer.madeWithLove')} 💖 - <a 
-            href="https://malura.de" 
-            target="_blank" 
+          {t('footer.madeWithLove')} 💖 - <a
+            href="https://malura.de"
+            target="_blank"
             rel="noopener noreferrer"
             className="text-blue-600 hover:text-blue-800 transition-colors"
           >

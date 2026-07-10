@@ -46,7 +46,12 @@
     "currentStreak": "Aktuelle Serie",
     "accuracy": "Genauigkeit",
     "incorrect_stat": "Falsch",
-    "retryMode": "Wiederholung"
+    "retryMode": "Wiederholung",
+    "next": "Weiter",
+    "finish": "Quiz beenden",
+    "newRecord": "Neuer Rekord!",
+    "progressLabel": "Quiz-Fortschritt",
+    "confirmLeave": "Quiz verlassen? Dein aktueller Fortschritt geht verloren."
   },
   "results": {
     "title": "Quiz beendet!",
