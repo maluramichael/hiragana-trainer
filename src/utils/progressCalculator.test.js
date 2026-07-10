@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import { getLevelColor } from './progressCalculator.js';
+import { describe, it, expect, vi } from 'vitest';
+import { getLevelColor, getAllGroupProgress } from './progressCalculator.js';
 
 // Extract the hue (in degrees) from an "hsl(h, s%, l%)" string.
 const hueOf = (color) => {
@@ -45,5 +45,15 @@ describe('getLevelColor', () => {
 
   it('clamps out-of-range levels to the highest color', () => {
     expect(getLevelColor(11)).toBe(getLevelColor(10));
+  });
+});
+
+describe('getAllGroupProgress (#61)', () => {
+  it('reads localStorage only once, not once per group', () => {
+    const spy = vi.spyOn(Storage.prototype, 'getItem');
+    getAllGroupProgress();
+    const statsReads = spy.mock.calls.filter((c) => c[0] === 'kana-quiz-statistics').length;
+    expect(statsReads).toBe(1);
+    spy.mockRestore();
   });
 });

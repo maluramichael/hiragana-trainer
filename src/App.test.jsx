@@ -37,7 +37,8 @@ describe('App', () => {
     expect(screen.getByText(SELECTION_MARKER)).toBeInTheDocument()
 
     // Forward navigation pushes a history entry and swaps the view.
-    await user.click(screen.getByRole('button', { name: /📊/ }))
+    // (#51 turned the prominent 📊 button into a deemphasized "view statistics" link.)
+    await user.click(screen.getByRole('button', { name: /Statistik|statistics/i }))
     await waitFor(() =>
       expect(screen.queryByText(SELECTION_MARKER)).not.toBeInTheDocument()
     )

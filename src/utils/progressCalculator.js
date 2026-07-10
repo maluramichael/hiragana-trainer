@@ -2,8 +2,10 @@ import { getStatistics } from './statisticsManager.js';
 import { kanaGroups } from '../data/kana.js';
 
 // Calculate progress for a specific kana group
-export const calculateGroupProgress = (groupType, subGroupKey = null) => {
-  const statistics = getStatistics();
+// #61: statistics can be passed in so getAllGroupProgress parses localStorage once
+// instead of ~16 times; falls back to a fresh read for standalone callers.
+export const calculateGroupProgress = (groupType, subGroupKey = null, statistics = null) => {
+  statistics = statistics ?? getStatistics();
   let relevantKana = [];
 
   // Get the relevant kana for this group
@@ -107,35 +109,36 @@ export const getLevelColor = (level) => {
 
 // Get progress for all groups (for displaying on selection screen)
 export const getAllGroupProgress = () => {
+  const statistics = getStatistics();
   const progress = {
     basic: {
-      overall: calculateGroupProgress('basic'),
+      overall: calculateGroupProgress('basic', null, statistics),
       subgroups: {
-        vowels: calculateGroupProgress('basic', 'vowels'),
-        k: calculateGroupProgress('basic', 'k'),
-        s: calculateGroupProgress('basic', 's'),
-        t: calculateGroupProgress('basic', 't'),
-        n: calculateGroupProgress('basic', 'n'),
-        h: calculateGroupProgress('basic', 'h'),
-        m: calculateGroupProgress('basic', 'm'),
-        y: calculateGroupProgress('basic', 'y'),
-        r: calculateGroupProgress('basic', 'r'),
-        w: calculateGroupProgress('basic', 'w')
+        vowels: calculateGroupProgress('basic', 'vowels', statistics),
+        k: calculateGroupProgress('basic', 'k', statistics),
+        s: calculateGroupProgress('basic', 's', statistics),
+        t: calculateGroupProgress('basic', 't', statistics),
+        n: calculateGroupProgress('basic', 'n', statistics),
+        h: calculateGroupProgress('basic', 'h', statistics),
+        m: calculateGroupProgress('basic', 'm', statistics),
+        y: calculateGroupProgress('basic', 'y', statistics),
+        r: calculateGroupProgress('basic', 'r', statistics),
+        w: calculateGroupProgress('basic', 'w', statistics)
       }
     },
     dakuten: {
-      overall: calculateGroupProgress('dakuten'),
+      overall: calculateGroupProgress('dakuten', null, statistics),
       subgroups: {
-        g: calculateGroupProgress('dakuten', 'g'),
-        z: calculateGroupProgress('dakuten', 'z'),
-        d: calculateGroupProgress('dakuten', 'd'),
-        b: calculateGroupProgress('dakuten', 'b')
+        g: calculateGroupProgress('dakuten', 'g', statistics),
+        z: calculateGroupProgress('dakuten', 'z', statistics),
+        d: calculateGroupProgress('dakuten', 'd', statistics),
+        b: calculateGroupProgress('dakuten', 'b', statistics)
       }
     },
     handakuten: {
-      overall: calculateGroupProgress('handakuten'),
+      overall: calculateGroupProgress('handakuten', null, statistics),
       subgroups: {
-        p: calculateGroupProgress('handakuten', 'p')
+        p: calculateGroupProgress('handakuten', 'p', statistics)
       }
     }
   };

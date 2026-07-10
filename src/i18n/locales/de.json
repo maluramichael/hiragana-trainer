@@ -28,7 +28,19 @@
   },
   "selection": {
     "charactersSelected": "Zeichen ausgewählt",
-    "startQuiz": "Quiz starten"
+    "startQuiz": "Quiz starten",
+    "headline": "Lerne alle Hiragana und Katakana",
+    "payoff": "Sieh pro Zeichen deine Trefferquote und Reaktionszeit. Zeichen, die du falsch hast, kommen automatisch zurück.",
+    "intro": "So läuft es: Du siehst ein Zeichen und tippst das Romaji.",
+    "trust": "Kostenlos. Keine Anmeldung. Open Source.",
+    "github": "Auf GitHub ansehen",
+    "quickstart": "Sofort loslegen",
+    "quickstartHint": "Beginnt direkt mit den Vokalen.",
+    "recommended": "Empfohlen für Anfänger",
+    "basicHint": "Grundzeichen, hier anfangen.",
+    "dakutenHint": "Zeichen mit zwei Strichen, für später.",
+    "handakutenHint": "Zeichen mit kleinem Kreis.",
+    "viewStats": "Statistik ansehen"
   },
   "quiz": {
     "typeRomaji": "Geben Sie das Romaji ein...",
@@ -64,7 +76,24 @@
     "bestStreak": "Beste Serie",
     "incorrect": "Falsch",
     "practiceSame": "Dieselben Kana nochmal üben",
-    "chooseDifferent": "Andere Kana auswählen"
+    "chooseDifferent": "Andere Kana auswählen",
+    "share": "Ergebnis teilen",
+    "shareTitle": "Mein Kana-Ergebnis",
+    "shareText": "Ich habe {{accuracy}}% bei Kana geschafft. Kostenlos üben: {{url}}",
+    "shareCopied": "In die Zwischenablage kopiert.",
+    "nextStepTitle": "Nächster Schritt",
+    "nextStepReview": "Übe die Zeichen, die du noch verwechselst, gleich noch einmal.",
+    "nextStepKeepGoing": "Starke Runde. Nimm dir als Nächstes eine neue Gruppe vor.",
+    "crossDevice": "Fortschritt sichern oder auf anderem Gerät fortsetzen",
+    "crossDeviceCopied": "Code kopiert.",
+    "crossDeviceError": "Kopieren fehlgeschlagen.",
+    "recommendedTitle": "Zum Weiterlernen",
+    "recommendedHiragana": "Tofugu: Hiragana lernen",
+    "recommendedKatakana": "Tofugu: Katakana lernen",
+    "supportTitle": "Projekt unterstützen",
+    "starGithub": "Auf GitHub sternen",
+    "sponsor": "GitHub Sponsors",
+    "aboutBy": "Gebaut von"
   },
   "scripts": {
     "hiragana": "Hiragana",
@@ -108,7 +137,9 @@
     "importCodeSuccess": "Fortschritt erfolgreich importiert!",
     "importCodeError": "Fehler beim Importieren des Fortschritts. Bitte überprüfen Sie den Code und versuchen Sie es erneut.",
     "importButton": "Importieren",
-    "cancelButton": "Abbrechen"
+    "cancelButton": "Abbrechen",
+    "closeModal": "Schließen",
+    "importCodeLabel": "Fortschrittscode"
   },
   "progress": {
     "level": "Level",

@@ -1,13 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   getStatisticsByScript,
   getOverallStatistics,
   resetStatistics,
   exportStatistics,
-  exportStatisticsAsBase64,
-  importStatisticsFromBase64
+  exportStatisticsAsBase64
 } from '../utils/statisticsManager.js';
+import ImportModal from './ImportModal.jsx';
 
 const Statistics = ({ onBack }) => {
   const { t, i18n } = useTranslation();
@@ -17,8 +17,6 @@ const Statistics = ({ onBack }) => {
   const [sortBy, setSortBy] = useState('romaji');
   const [sortOrder, setSortOrder] = useState('asc');
   const [showImportModal, setShowImportModal] = useState(false);
-  const [importCode, setImportCode] = useState('');
-  const [importMessage, setImportMessage] = useState({ text: '', type: '' });
 
   useEffect(() => {
     loadStatistics();
@@ -36,30 +34,6 @@ const Statistics = ({ onBack }) => {
       setSortBy(column);
       setSortOrder('asc');
     }
-  };
-
-  const sortData = (data) => {
-    return [...data].sort((a, b) => {
-      let aValue = a[sortBy];
-      let bValue = b[sortBy];
-      
-      // Handle special cases
-      if (sortBy === 'accuracy') {
-        aValue = a.timesShown > 0 ? (a.timesCorrect / a.timesShown) * 100 : 0;
-        bValue = b.timesShown > 0 ? (b.timesCorrect / b.timesShown) * 100 : 0;
-      } else if (sortBy === 'lastSeen') {
-        aValue = a.lastSeen ? new Date(a.lastSeen) : new Date(0);
-        bValue = b.lastSeen ? new Date(b.lastSeen) : new Date(0);
-      }
-      
-      if (typeof aValue === 'string') {
-        return sortOrder === 'asc' 
-          ? aValue.localeCompare(bValue)
-          : bValue.localeCompare(aValue);
-      }
-      
-      return sortOrder === 'asc' ? aValue - bValue : bValue - aValue;
-    });
   };
 
   const handleReset = () => {
@@ -93,27 +67,6 @@ const Statistics = ({ onBack }) => {
     }
   };
 
-  const handleImportFromCode = () => {
-    if (!importCode.trim()) {
-      setImportMessage({ text: t('statistics.importCodeEmpty'), type: 'error' });
-      return;
-    }
-
-    const result = importStatisticsFromBase64(importCode.trim());
-
-    if (result.success) {
-      setImportMessage({ text: t('statistics.importCodeSuccess'), type: 'success' });
-      loadStatistics();
-      setTimeout(() => {
-        setShowImportModal(false);
-        setImportCode('');
-        setImportMessage({ text: '', type: '' });
-      }, 2000);
-    } else {
-      setImportMessage({ text: t('statistics.importCodeError'), type: 'error' });
-    }
-  };
-
   const getAccuracy = (stat) => {
     return stat.timesShown > 0 ? Math.round((stat.timesCorrect / stat.timesShown) * 100) : 0;
   };
@@ -134,7 +87,52 @@ const Statistics = ({ onBack }) => {
     return sortOrder === 'asc' ? '↑' : '↓';
   };
 
-  const currentData = sortData(statisticsData[activeTab] || []);
+  // A color-independent accuracy indicator (issue #68): the symbol conveys the
+  // same threshold as the color, so it works without color perception.
+  const accuracySymbol = (accuracy) => (accuracy >= 80 ? '✓' : accuracy >= 60 ? '•' : '✗');
+
+  // Accessible sortable column header (issues #48): the click target is a real
+  // <button> (keyboard-focusable, Enter/Space activate it) and the <th> carries
+  // aria-sort so assistive tech announces the current sort state.
+  const renderSortHeader = (column, labelKey) => (
+    <th
+      aria-sort={sortBy === column ? (sortOrder === 'asc' ? 'ascending' : 'descending') : 'none'}
+      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+    >
+      <button
+        type="button"
+        onClick={() => handleSort(column)}
+        className="flex items-center gap-1 uppercase tracking-wider hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded"
+      >
+        {t(labelKey)} <span aria-hidden="true">{getSortIcon(column)}</span>
+      </button>
+    </th>
+  );
+
+  const currentData = useMemo(() => {
+    const data = statisticsData[activeTab] || [];
+    return [...data].sort((a, b) => {
+      let aValue = a[sortBy];
+      let bValue = b[sortBy];
+
+      // Handle special cases
+      if (sortBy === 'accuracy') {
+        aValue = a.timesShown > 0 ? (a.timesCorrect / a.timesShown) * 100 : 0;
+        bValue = b.timesShown > 0 ? (b.timesCorrect / b.timesShown) * 100 : 0;
+      } else if (sortBy === 'lastSeen') {
+        aValue = a.lastSeen ? new Date(a.lastSeen) : new Date(0);
+        bValue = b.lastSeen ? new Date(b.lastSeen) : new Date(0);
+      }
+
+      if (typeof aValue === 'string') {
+        return sortOrder === 'asc'
+          ? aValue.localeCompare(bValue)
+          : bValue.localeCompare(aValue);
+      }
+
+      return sortOrder === 'asc' ? aValue - bValue : bValue - aValue;
+    });
+  }, [statisticsData, activeTab, sortBy, sortOrder]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-100 p-6">
@@ -237,61 +235,21 @@ const Statistics = ({ onBack }) => {
             <table className="w-full">
               <thead className="bg-gray-50">
                 <tr>
-                  <th
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                    onClick={() => handleSort('kana')}
-                  >
-                    {t('statistics.kana')} {getSortIcon('kana')}
-                  </th>
-                  <th
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                    onClick={() => handleSort('romaji')}
-                  >
-                    {t('statistics.romaji')} {getSortIcon('romaji')}
-                  </th>
-                  <th
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                    onClick={() => handleSort('timesShown')}
-                  >
-                    {t('statistics.timesShown')} {getSortIcon('timesShown')}
-                  </th>
-                  <th
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                    onClick={() => handleSort('timesCorrect')}
-                  >
-                    {t('statistics.timesCorrect')} {getSortIcon('timesCorrect')}
-                  </th>
-                  <th
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                    onClick={() => handleSort('timesIncorrect')}
-                  >
-                    {t('statistics.timesIncorrect')} {getSortIcon('timesIncorrect')}
-                  </th>
-                  <th
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                    onClick={() => handleSort('accuracy')}
-                  >
-                    {t('statistics.accuracy')} {getSortIcon('accuracy')}
-                  </th>
-                  <th
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                    onClick={() => handleSort('averageResponseTime')}
-                  >
-                    {t('statistics.avgResponseTime')} {getSortIcon('averageResponseTime')}
-                  </th>
-                  <th
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                    onClick={() => handleSort('lastSeen')}
-                  >
-                    {t('statistics.lastSeen')} {getSortIcon('lastSeen')}
-                  </th>
+                  {renderSortHeader('kana', 'statistics.kana')}
+                  {renderSortHeader('romaji', 'statistics.romaji')}
+                  {renderSortHeader('timesShown', 'statistics.timesShown')}
+                  {renderSortHeader('timesCorrect', 'statistics.timesCorrect')}
+                  {renderSortHeader('timesIncorrect', 'statistics.timesIncorrect')}
+                  {renderSortHeader('accuracy', 'statistics.accuracy')}
+                  {renderSortHeader('averageResponseTime', 'statistics.avgResponseTime')}
+                  {renderSortHeader('lastSeen', 'statistics.lastSeen')}
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {currentData.map((stat, index) => (
                   <tr key={`${stat.kana}-${stat.romaji}`} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-2xl font-bold text-gray-900">{stat.kana}</div>
+                      <div lang="ja" className="text-2xl font-bold text-gray-900">{stat.kana}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-mono text-gray-900">{stat.romaji}</div>
@@ -306,11 +264,16 @@ const Statistics = ({ onBack }) => {
                       <div className="text-sm text-red-600 font-semibold">{stat.timesIncorrect}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className={`text-sm font-semibold ${
+                      <div className={`flex items-center gap-1 text-sm font-semibold ${
                         getAccuracy(stat) >= 80 ? 'text-green-600' :
                         getAccuracy(stat) >= 60 ? 'text-yellow-600' : 'text-red-600'
                       }`}>
-                        {stat.timesShown > 0 ? `${getAccuracy(stat)}%` : '-'}
+                        {stat.timesShown > 0 ? (
+                          <>
+                            <span aria-hidden="true">{accuracySymbol(getAccuracy(stat))}</span>
+                            <span>{getAccuracy(stat)}%</span>
+                          </>
+                        ) : '-'}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -336,61 +299,10 @@ const Statistics = ({ onBack }) => {
 
       {/* Import Modal */}
       {showImportModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full p-6">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-bold text-gray-800">{t('statistics.importCodeTitle')}</h2>
-              <button
-                onClick={() => {
-                  setShowImportModal(false);
-                  setImportCode('');
-                  setImportMessage({ text: '', type: '' });
-                }}
-                className="text-gray-500 hover:text-gray-700 text-2xl"
-              >
-                ×
-              </button>
-            </div>
-
-            <p className="text-gray-600 mb-4">{t('statistics.importCodeDescription')}</p>
-
-            <textarea
-              value={importCode}
-              onChange={(e) => setImportCode(e.target.value)}
-              placeholder={t('statistics.importCodePlaceholder')}
-              className="w-full h-32 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
-            />
-
-            {importMessage.text && (
-              <div className={`mt-4 p-3 rounded-lg ${
-                importMessage.type === 'success'
-                  ? 'bg-green-100 text-green-800'
-                  : 'bg-red-100 text-red-800'
-              }`}>
-                {importMessage.text}
-              </div>
-            )}
-
-            <div className="flex gap-3 mt-6">
-              <button
-                onClick={handleImportFromCode}
-                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors font-semibold"
-              >
-                {t('statistics.importButton')}
-              </button>
-              <button
-                onClick={() => {
-                  setShowImportModal(false);
-                  setImportCode('');
-                  setImportMessage({ text: '', type: '' });
-                }}
-                className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 px-6 py-3 rounded-lg transition-colors font-semibold"
-              >
-                {t('statistics.cancelButton')}
-              </button>
-            </div>
-          </div>
-        </div>
+        <ImportModal
+          onClose={() => setShowImportModal(false)}
+          onImported={loadStatistics}
+        />
       )}
     </div>
   );

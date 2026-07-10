@@ -28,7 +28,19 @@
   },
   "selection": {
     "charactersSelected": "characters selected",
-    "startQuiz": "Start Quiz"
+    "startQuiz": "Start Quiz",
+    "headline": "Learn every Hiragana and Katakana",
+    "payoff": "See your accuracy and response time for each character. The ones you miss come back automatically.",
+    "intro": "How it works: you see a character and type the romaji.",
+    "trust": "Free. No signup. Open source.",
+    "github": "View on GitHub",
+    "quickstart": "Start right away",
+    "quickstartHint": "Begins right away with the vowels.",
+    "recommended": "Recommended for beginners",
+    "basicHint": "Basic characters, start here.",
+    "dakutenHint": "Characters with two strokes, for later.",
+    "handakutenHint": "Characters with a small circle.",
+    "viewStats": "View statistics"
   },
   "quiz": {
     "typeRomaji": "Type the romaji...",
@@ -64,7 +76,24 @@
     "bestStreak": "Best Streak",
     "incorrect": "Incorrect",
     "practiceSame": "Practice Same Kana Again",
-    "chooseDifferent": "Choose Different Kana"
+    "chooseDifferent": "Choose Different Kana",
+    "share": "Share result",
+    "shareTitle": "My kana result",
+    "shareText": "I scored {{accuracy}}% on kana. Practice for free: {{url}}",
+    "shareCopied": "Copied to clipboard.",
+    "nextStepTitle": "Next step",
+    "nextStepReview": "Practice the characters you still mix up one more time.",
+    "nextStepKeepGoing": "Strong round. Try a new group next.",
+    "crossDevice": "Save your progress or continue on another device",
+    "crossDeviceCopied": "Code copied.",
+    "crossDeviceError": "Copy failed.",
+    "recommendedTitle": "Keep learning",
+    "recommendedHiragana": "Tofugu: learn Hiragana",
+    "recommendedKatakana": "Tofugu: learn Katakana",
+    "supportTitle": "Support the project",
+    "starGithub": "Star on GitHub",
+    "sponsor": "GitHub Sponsors",
+    "aboutBy": "Built by"
   },
   "scripts": {
     "hiragana": "Hiragana",
@@ -108,7 +137,9 @@
     "importCodeSuccess": "Progress imported successfully!",
     "importCodeError": "Failed to import progress. Please check the code and try again.",
     "importButton": "Import",
-    "cancelButton": "Cancel"
+    "cancelButton": "Cancel",
+    "closeModal": "Close",
+    "importCodeLabel": "Progress code"
   },
   "progress": {
     "level": "Level",
