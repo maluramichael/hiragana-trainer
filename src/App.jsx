@@ -21,7 +21,7 @@ function App() {
 
   // Handle browser back button
   useEffect(() => {
-    const handlePopState = (event) => {
+    const handlePopState = () => {
       if (currentView === 'quiz') {
         setCurrentView('selection');
         setSelectedKana([]);
