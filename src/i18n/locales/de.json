@@ -91,7 +91,19 @@
     "reset": "Zurücksetzen",
     "confirmReset": "Sind Sie sicher, dass Sie alle Statistiken zurücksetzen möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
     "noData": "Keine Daten verfügbar",
-    "startPracticing": "Beginnen Sie mit dem Üben, um Statistiken zu sehen!"
+    "startPracticing": "Beginnen Sie mit dem Üben, um Statistiken zu sehen!",
+    "exportCode": "Als Code exportieren",
+    "importCode": "Von Code importieren",
+    "exportCodeSuccess": "Fortschrittscode in die Zwischenablage kopiert! Sie können ihn jetzt auf einem anderen Gerät einfügen.",
+    "exportCodeError": "Fehler beim Kopieren in die Zwischenablage. Bitte versuchen Sie es erneut.",
+    "importCodeTitle": "Fortschritt importieren",
+    "importCodeDescription": "Fügen Sie den Fortschrittscode ein, den Sie von einem anderen Gerät kopiert haben:",
+    "importCodePlaceholder": "Fügen Sie Ihren Fortschrittscode hier ein...",
+    "importCodeEmpty": "Bitte geben Sie einen Fortschrittscode ein.",
+    "importCodeSuccess": "Fortschritt erfolgreich importiert!",
+    "importCodeError": "Fehler beim Importieren des Fortschritts. Bitte überprüfen Sie den Code und versuchen Sie es erneut.",
+    "importButton": "Importieren",
+    "cancelButton": "Abbrechen"
   },
   "progress": {
     "notStarted": "Nicht begonnen",

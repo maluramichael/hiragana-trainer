@@ -159,3 +159,89 @@ export const exportStatistics = () => {
   };
   return JSON.stringify(exportData, null, 2);
 };
+
+// Export statistics as base64 string for cross-device transfer (compact format)
+export const exportStatisticsAsBase64 = () => {
+  const statistics = getStatistics();
+
+  // Create compact format - only export practiced kana with shortened property names
+  const compactStats = Object.values(statistics)
+    .filter(stat => stat.timesShown > 0) // Only export kana that have been practiced
+    .map(stat => ({
+      k: stat.kana,
+      r: stat.romaji,
+      s: stat.timesShown,
+      c: stat.timesCorrect,
+      i: stat.timesIncorrect,
+      ...(stat.lastSeen && { l: stat.lastSeen }), // Only include if not null
+      ...(stat.averageResponseTime > 0 && { a: Math.round(stat.averageResponseTime) }) // Round to integer
+    }));
+
+  const exportData = {
+    v: '2.0', // version
+    d: new Date().toISOString(), // exportDate
+    s: compactStats // stats
+  };
+
+  const jsonString = JSON.stringify(exportData);
+  // Convert to base64 using browser's btoa function
+  return btoa(unescape(encodeURIComponent(jsonString)));
+};
+
+// Import statistics from base64 string
+export const importStatisticsFromBase64 = (base64String) => {
+  try {
+    // Decode base64 string
+    const jsonString = decodeURIComponent(escape(atob(base64String)));
+    const importData = JSON.parse(jsonString);
+
+    let statistics = {};
+
+    // Handle different format versions
+    if (importData.v === '2.0' || importData.s) {
+      // New compact format (v2.0)
+      if (!importData.s || !Array.isArray(importData.s)) {
+        throw new Error('Invalid compact statistics data format');
+      }
+
+      // Convert compact format back to full format
+      importData.s.forEach(stat => {
+        const key = `${stat.k}-${stat.r}`;
+        statistics[key] = {
+          kana: stat.k,
+          romaji: stat.r,
+          script: /[\u3040-\u309F]/.test(stat.k) ? 'hiragana' : 'katakana', // Detect from Unicode range
+          timesShown: stat.s || 0,
+          timesCorrect: stat.c || 0,
+          timesIncorrect: stat.i || 0,
+          lastSeen: stat.l || null,
+          averageResponseTime: stat.a || 0,
+          responseTimes: [] // Initialize empty array
+        };
+      });
+    } else if (importData.statistics || importData.version === '1.0') {
+      // Old format (v1.0) - direct statistics object
+      if (!importData.statistics || typeof importData.statistics !== 'object') {
+        throw new Error('Invalid statistics data format');
+      }
+      statistics = importData.statistics;
+    } else {
+      throw new Error('Unknown statistics format version');
+    }
+
+    // Merge with existing statistics or replace
+    saveStatistics(statistics);
+    return {
+      success: true,
+      message: 'Statistics imported successfully',
+      importDate: importData.d || importData.exportDate || new Date().toISOString()
+    };
+  } catch (error) {
+    console.error('Error importing statistics:', error);
+    return {
+      success: false,
+      message: 'Failed to import statistics. Please check the provided code.',
+      error: error.message
+    };
+  }
+};

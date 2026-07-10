@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { 
-  getStatisticsByScript, 
-  getOverallStatistics, 
+import {
+  getStatisticsByScript,
+  getOverallStatistics,
   resetStatistics,
-  exportStatistics 
+  exportStatistics,
+  exportStatisticsAsBase64,
+  importStatisticsFromBase64
 } from '../utils/statisticsManager.js';
 
 const Statistics = ({ onBack }) => {
@@ -14,6 +16,9 @@ const Statistics = ({ onBack }) => {
   const [activeTab, setActiveTab] = useState('hiragana');
   const [sortBy, setSortBy] = useState('romaji');
   const [sortOrder, setSortOrder] = useState('asc');
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [importCode, setImportCode] = useState('');
+  const [importMessage, setImportMessage] = useState({ text: '', type: '' });
 
   useEffect(() => {
     loadStatistics();
@@ -77,6 +82,38 @@ const Statistics = ({ onBack }) => {
     URL.revokeObjectURL(url);
   };
 
+  const handleExportAsCode = async () => {
+    try {
+      const base64Code = exportStatisticsAsBase64();
+      await navigator.clipboard.writeText(base64Code);
+      alert(t('statistics.exportCodeSuccess'));
+    } catch (error) {
+      console.error('Failed to copy to clipboard:', error);
+      alert(t('statistics.exportCodeError'));
+    }
+  };
+
+  const handleImportFromCode = () => {
+    if (!importCode.trim()) {
+      setImportMessage({ text: t('statistics.importCodeEmpty'), type: 'error' });
+      return;
+    }
+
+    const result = importStatisticsFromBase64(importCode.trim());
+
+    if (result.success) {
+      setImportMessage({ text: t('statistics.importCodeSuccess'), type: 'success' });
+      loadStatistics();
+      setTimeout(() => {
+        setShowImportModal(false);
+        setImportCode('');
+        setImportMessage({ text: '', type: '' });
+      }, 2000);
+    } else {
+      setImportMessage({ text: t('statistics.importCodeError'), type: 'error' });
+    }
+  };
+
   const getAccuracy = (stat) => {
     return stat.timesShown > 0 ? Math.round((stat.timesCorrect / stat.timesShown) * 100) : 0;
   };
@@ -116,7 +153,19 @@ const Statistics = ({ onBack }) => {
             </h1>
           </div>
           
-          <div className="flex gap-3">
+          <div className="flex gap-3 flex-wrap">
+            <button
+              onClick={handleExportAsCode}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+            >
+              {t('statistics.exportCode')}
+            </button>
+            <button
+              onClick={() => setShowImportModal(true)}
+              className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg transition-colors"
+            >
+              {t('statistics.importCode')}
+            </button>
             <button
               onClick={handleExport}
               className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors"
@@ -284,6 +333,65 @@ const Statistics = ({ onBack }) => {
           )}
         </div>
       </div>
+
+      {/* Import Modal */}
+      {showImportModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-bold text-gray-800">{t('statistics.importCodeTitle')}</h2>
+              <button
+                onClick={() => {
+                  setShowImportModal(false);
+                  setImportCode('');
+                  setImportMessage({ text: '', type: '' });
+                }}
+                className="text-gray-500 hover:text-gray-700 text-2xl"
+              >
+                ×
+              </button>
+            </div>
+
+            <p className="text-gray-600 mb-4">{t('statistics.importCodeDescription')}</p>
+
+            <textarea
+              value={importCode}
+              onChange={(e) => setImportCode(e.target.value)}
+              placeholder={t('statistics.importCodePlaceholder')}
+              className="w-full h-32 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
+            />
+
+            {importMessage.text && (
+              <div className={`mt-4 p-3 rounded-lg ${
+                importMessage.type === 'success'
+                  ? 'bg-green-100 text-green-800'
+                  : 'bg-red-100 text-red-800'
+              }`}>
+                {importMessage.text}
+              </div>
+            )}
+
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={handleImportFromCode}
+                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors font-semibold"
+              >
+                {t('statistics.importButton')}
+              </button>
+              <button
+                onClick={() => {
+                  setShowImportModal(false);
+                  setImportCode('');
+                  setImportMessage({ text: '', type: '' });
+                }}
+                className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 px-6 py-3 rounded-lg transition-colors font-semibold"
+              >
+                {t('statistics.cancelButton')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

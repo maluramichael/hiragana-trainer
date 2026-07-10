@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "docker:dev": "docker build -f Dockerfile.dev -t hiragana-trainer:dev . && docker run --rm -it -p 5173:5173 -v $(pwd)/src:/app/src hiragana-trainer:dev"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.12",

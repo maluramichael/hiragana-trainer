@@ -91,7 +91,19 @@
     "reset": "Reset",
     "confirmReset": "Are you sure you want to reset all statistics? This action cannot be undone.",
     "noData": "No data available",
-    "startPracticing": "Start practicing to see statistics!"
+    "startPracticing": "Start practicing to see statistics!",
+    "exportCode": "Export as Code",
+    "importCode": "Import from Code",
+    "exportCodeSuccess": "Progress code copied to clipboard! You can now paste it on another device.",
+    "exportCodeError": "Failed to copy to clipboard. Please try again.",
+    "importCodeTitle": "Import Progress",
+    "importCodeDescription": "Paste the progress code you copied from another device:",
+    "importCodePlaceholder": "Paste your progress code here...",
+    "importCodeEmpty": "Please enter a progress code.",
+    "importCodeSuccess": "Progress imported successfully!",
+    "importCodeError": "Failed to import progress. Please check the code and try again.",
+    "importButton": "Import",
+    "cancelButton": "Cancel"
   },
   "progress": {
     "notStarted": "Not started",
