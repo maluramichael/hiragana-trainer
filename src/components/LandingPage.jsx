@@ -1,6 +1,10 @@
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import KanaBackground from './KanaBackground.jsx';
+import { hiragana, katakana } from '../data/kana.js';
 import { RocketIcon, SparkleIcon, RepeatIcon, HeartIcon } from './icons.jsx';
+
+const randomKana = (list) => list[Math.floor(Math.random() * list.length)].kana;
 
 // The three feature cards, each with a soft colored badge, a decorative kana and
 // a matching icon. Copy lives in i18n under landing.features.<key>.
@@ -15,6 +19,9 @@ const FEATURES = [
 // character picker.
 const LandingPage = ({ onStart, onChooseCharacters }) => {
   const { t } = useTranslation();
+  // Fresh hero characters each visit: a random hiragana + katakana pair.
+  const heroHiragana = useMemo(() => randomKana(hiragana), []);
+  const heroKatakana = useMemo(() => randomKana(katakana), []);
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-gradient-to-b from-rose-50 via-fuchsia-50 to-indigo-100 text-slate-800">
@@ -28,13 +35,13 @@ const LandingPage = ({ onStart, onChooseCharacters }) => {
             className="mb-10 flex justify-center gap-5"
           >
             <span className="font-kana animate-bob grid h-24 w-24 sm:h-28 sm:w-28 place-items-center rounded-[2rem] bg-gradient-to-br from-pink-400 to-fuchsia-500 text-6xl sm:text-7xl font-bold text-white shadow-cute-lg">
-              あ
+              {heroHiragana}
             </span>
             <span
               style={{ animationDelay: '0.4s' }}
               className="font-kana animate-bob grid h-24 w-24 sm:h-28 sm:w-28 place-items-center rounded-[2rem] bg-gradient-to-br from-violet-400 to-indigo-500 text-6xl sm:text-7xl font-bold text-white shadow-cute-lg"
             >
-              ア
+              {heroKatakana}
             </span>
           </div>
 

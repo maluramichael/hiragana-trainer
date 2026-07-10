@@ -4,9 +4,9 @@ import { exportStatisticsAsBase64 } from '../utils/statisticsManager';
 import { calculateGroupProgress, getProgressDescription } from '../utils/progressCalculator';
 import { trackEvent } from '../utils/analytics';
 import KanaBackground from './KanaBackground.jsx';
-import { SparkleIcon, ShareIcon, RepeatIcon, RocketIcon, StarIcon, HeartIcon } from './icons.jsx';
+import { SparkleIcon, ShareIcon, RepeatIcon, RocketIcon, StarIcon } from './icons.jsx';
 
-const APP_URL = 'https://hiragana-trainer.malura.de';
+const APP_URL = 'https://hiragana-trainer.de';
 const GITHUB_URL = 'https://github.com/maluramichael/hiragana-trainer';
 const SPONSORS_URL = 'https://github.com/sponsors/maluramichael';
 const AUTHOR_URL = 'https://malura.de';
@@ -16,19 +16,10 @@ const TOFUGU_KATAKANA_URL = 'https://www.tofugu.com/japanese/learn-katakana/';
 // #52: ab diesem Progress-Level (Experte) gilt eine Serie als gemeistert.
 const MASTERY_LEVEL = 9;
 
-// #22: geübte Auswahl als base64-Parameter kodieren (UTF-8-sicher, Kana sind
-// mehrbytig). Kodiert nur die Kana-Zeichen; App.jsx löst sie wieder zu Objekten auf.
-const buildChallengeUrl = (kanaList) => {
-  const chars = kanaList.map((k) => k.kana);
-  const base64 = btoa(String.fromCharCode(...new TextEncoder().encode(JSON.stringify(chars))));
-  return `${APP_URL}/?challenge=${encodeURIComponent(base64)}`;
-};
-
 const QuizResults = ({ results, onRestart, onNewSelection, kanaList = [] }) => {
   const { t } = useTranslation();
   const [shareStatus, setShareStatus] = useState(null);
   const [exportStatus, setExportStatus] = useState(null);
-  const [challengeStatus, setChallengeStatus] = useState(null);
 
   const accuracy = results.total > 0 ? Math.round((results.correct / results.total) * 100) : 0;
   const incorrect = results.total - results.correct;
@@ -73,17 +64,6 @@ const QuizResults = ({ results, onRestart, onNewSelection, kanaList = [] }) => {
       setShareStatus('copied');
     } catch {
       // User cancelled the native share sheet, or copy failed — no action needed.
-    }
-  };
-
-  // #22: Challenge-Link erzeugen und in die Zwischenablage kopieren.
-  const handleChallenge = async () => {
-    try {
-      await navigator.clipboard.writeText(buildChallengeUrl(kanaList));
-      trackEvent('challenge_created', String(kanaList.length));
-      setChallengeStatus('copied');
-    } catch {
-      setChallengeStatus('error');
     }
   };
 
@@ -185,22 +165,6 @@ const QuizResults = ({ results, onRestart, onNewSelection, kanaList = [] }) => {
             </button>
             {shareStatus === 'copied' && (
               <p className="text-sm font-medium text-emerald-600">{t('results.shareCopied')}</p>
-            )}
-
-            {/* Challenge a friend (#22): only when we know what was practiced */}
-            {kanaList.length > 0 && (
-              <button
-                onClick={handleChallenge}
-                className="inline-flex w-full items-center justify-center gap-2 rounded-[1.4rem] bg-white px-6 py-3 font-bold text-slate-700 ring-2 ring-fuchsia-100 transition-all hover:bg-fuchsia-50"
-              >
-                <HeartIcon className="w-5 h-5 text-pink-500" /> {t('results.challenge')}
-              </button>
-            )}
-            {challengeStatus === 'copied' && (
-              <p className="text-sm font-medium text-emerald-600">{t('results.challengeCopied')}</p>
-            )}
-            {challengeStatus === 'error' && (
-              <p className="text-sm font-medium text-rose-500">{t('results.challengeError')}</p>
             )}
           </div>
 

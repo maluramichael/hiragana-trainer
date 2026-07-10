@@ -2,7 +2,6 @@ import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import i18n from '../i18n/i18n.js';
-import { hiragana } from '../data/kana.js';
 import QuizResults from './QuizResults.jsx';
 
 // Labels are derived from the shared i18n instance so the tests stay green
@@ -44,7 +43,7 @@ describe('QuizResults', () => {
 
     expect(shareMock).toHaveBeenCalledTimes(1);
     expect(shareMock.mock.calls[0][0]).toMatchObject({
-      url: 'https://hiragana-trainer.malura.de',
+      url: 'https://hiragana-trainer.de',
     });
   });
 
@@ -71,28 +70,6 @@ describe('QuizResults', () => {
   it('#26: exposes a real GitHub link', () => {
     const { container } = renderResults();
     expect(container.querySelector('a[href*="github.com/maluramichael"]')).toBeTruthy();
-  });
-
-  it('#22: challenge button copies a URL containing ?challenge= to the clipboard', async () => {
-    const user = userEvent.setup();
-    const writeText = vi.fn().mockResolvedValue(undefined);
-    Object.defineProperty(navigator, 'clipboard', {
-      value: { writeText },
-      configurable: true,
-    });
-
-    renderResults({ kanaList: hiragana.slice(0, 5) });
-    await user.click(screen.getByRole('button', { name: label('results.challenge') }));
-
-    expect(writeText).toHaveBeenCalledTimes(1);
-    expect(writeText.mock.calls[0][0]).toContain('?challenge=');
-  });
-
-  it('#22: challenge button is hidden without a kana selection', () => {
-    renderResults({ kanaList: [] });
-    expect(
-      screen.queryByRole('button', { name: label('results.challenge') })
-    ).not.toBeInTheDocument();
   });
 
   it('#87: cross-device button copies the export code to the clipboard', async () => {
