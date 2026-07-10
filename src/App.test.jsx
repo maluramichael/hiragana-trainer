@@ -49,4 +49,20 @@ describe('App', () => {
     })
     expect(await screen.findByText(SELECTION_MARKER)).toBeInTheDocument()
   })
+
+  it('#4: study flow leads from selection into study and then the quiz', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+
+    await user.click(screen.getByRole('checkbox', { name: /Vokale/i }))
+    await user.click(screen.getByRole('button', { name: /Erst lernen/i }))
+
+    // The lazy study screen appears in place of the selection.
+    expect(await screen.findByText(/Zeichen lernen/)).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: /Quiz starten/i }))
+
+    // The quiz screen is up: its romaji input is the stable anchor.
+    expect(await screen.findByPlaceholderText(/Romaji/i)).toBeInTheDocument()
+  })
 })

@@ -9,6 +9,7 @@ import './i18n/i18n.js';
 const KanaQuiz = lazy(() => import('./components/KanaQuiz'));
 const QuizResults = lazy(() => import('./components/QuizResults'));
 const Statistics = lazy(() => import('./components/Statistics'));
+const StudyMode = lazy(() => import('./components/StudyMode'));
 
 // Dezenter Fallback, während ein Screen-Chunk nachgeladen wird.
 const ScreenFallback = () => (
@@ -80,6 +81,13 @@ function App() {
     navigateTo('quiz');
   };
 
+  // #4: study the picked kana as flashcards before quizzing.
+  const handleStartStudy = (kanaList, options = {}) => {
+    setSelectedKana(kanaList);
+    setScriptMode(options.scriptMode ?? 'both');
+    navigateTo('study');
+  };
+
   const handleQuizFinish = (results) => {
     if (results === null) {
       // In-quiz "back to selection": leave via history, without a redundant prompt.
@@ -91,6 +99,17 @@ function App() {
       window.history.replaceState({ view: 'results' }, '', window.location.pathname);
       setCurrentView('results');
     }
+  };
+
+  // From study straight into the quiz: swap the study entry for a quiz entry so
+  // browser-back returns to the selection screen, matching the direct-quiz flow.
+  const handleStudyStartQuiz = (kanaList, options = {}) => {
+    if (kanaList) {
+      setSelectedKana(kanaList);
+      setScriptMode(options.scriptMode ?? 'both');
+    }
+    window.history.replaceState({ view: 'quiz' }, '', window.location.pathname);
+    setCurrentView('quiz');
   };
 
   const handleRestart = () => {
@@ -118,11 +137,21 @@ function App() {
       {currentView === 'selection' && (
         <KanaSelection
           onStartQuiz={handleStartQuiz}
+          onStudy={handleStartStudy}
           onViewStatistics={handleViewStatistics}
         />
       )}
 
       <Suspense fallback={<ScreenFallback />}>
+        {currentView === 'study' && (
+          <StudyMode
+            kanaList={selectedKana}
+            scriptMode={scriptMode}
+            onStartQuiz={handleStudyStartQuiz}
+            onBack={handleBackToSelection}
+          />
+        )}
+
         {currentView === 'quiz' && (
           <KanaQuiz
             kanaList={selectedKana}

@@ -5,6 +5,25 @@ import '../i18n/i18n.js';
 import KanaSelection from './KanaSelection.jsx';
 
 const SELECTION_KEY = 'kana-quiz-selection';
+const STATS_KEY = 'kana-quiz-statistics';
+
+// Seed the statistics blob in the shape statisticsManager expects (schema v2).
+const seedStats = (stats) => {
+  localStorage.setItem(STATS_KEY, JSON.stringify({ schemaVersion: 2, stats }));
+};
+
+const statEntry = (overrides) => ({
+  kana: 'か',
+  romaji: 'ka',
+  script: 'hiragana',
+  timesShown: 0,
+  timesCorrect: 0,
+  timesIncorrect: 0,
+  lastSeen: null,
+  averageResponseTime: 0,
+  responseTimes: [],
+  ...overrides
+});
 
 describe('KanaSelection', () => {
   beforeEach(() => {
@@ -88,5 +107,89 @@ describe('KanaSelection', () => {
     await user.click(screen.getByTestId('quickstart-button'));
 
     expect(onStartQuiz.mock.calls[0][1]).toEqual({ scriptMode: 'katakana' });
+  });
+
+  it('#4: the "study first" button hands the current selection to onStudy', async () => {
+    const user = userEvent.setup();
+    const onStudy = vi.fn();
+    render(
+      <KanaSelection onStartQuiz={vi.fn()} onStudy={onStudy} onViewStatistics={vi.fn()} />
+    );
+
+    await user.click(screen.getByRole('checkbox', { name: /Vokale/i }));
+    await user.click(screen.getByRole('button', { name: /Erst lernen/i }));
+
+    expect(onStudy).toHaveBeenCalledTimes(1);
+    const [list, options] = onStudy.mock.calls[0];
+    expect(list.length).toBeGreaterThan(0);
+    // Default script mode on first visit is hiragana (#72).
+    expect(options).toEqual({ scriptMode: 'hiragana' });
+  });
+
+  it('#9: the weak-kana button is hidden without weak kana', () => {
+    render(<KanaSelection onStartQuiz={vi.fn()} onStudy={vi.fn()} onViewStatistics={vi.fn()} />);
+
+    expect(
+      screen.queryByRole('button', { name: /Schwache Zeichen üben/i })
+    ).not.toBeInTheDocument();
+  });
+
+  it('#9: the weak-kana button starts a quiz with exactly the weak kana', async () => {
+    const user = userEvent.setup();
+    const onStartQuiz = vi.fn();
+
+    // か answered mostly wrong (4 attempts, 25% accuracy) counts as weak.
+    seedStats({
+      'か-ka': statEntry({ timesShown: 4, timesCorrect: 1, timesIncorrect: 3 })
+    });
+
+    render(
+      <KanaSelection onStartQuiz={onStartQuiz} onStudy={vi.fn()} onViewStatistics={vi.fn()} />
+    );
+
+    const weakButton = await screen.findByRole('button', {
+      name: /Schwache Zeichen üben/i
+    });
+    await user.click(weakButton);
+
+    expect(onStartQuiz).toHaveBeenCalledTimes(1);
+    const [list, options] = onStartQuiz.mock.calls[0];
+    expect(list).toHaveLength(1);
+    expect(list[0].kana).toBe('か');
+    expect(list[0].romaji).toBe('ka');
+    expect(options).toEqual({ scriptMode: 'hiragana' });
+  });
+
+  it('#12: the due-kana button starts a quiz with the due kana', async () => {
+    const user = userEvent.setup();
+    const onStartQuiz = vi.fn();
+
+    // Practiced katakana カ whose review interval already elapsed (not weak).
+    const yesterday = new Date(Date.now() - 86400000).toISOString();
+    seedStats({
+      'カ-ka': statEntry({
+        kana: 'カ',
+        script: 'katakana',
+        timesShown: 5,
+        timesCorrect: 5,
+        box: 1,
+        dueAt: yesterday
+      })
+    });
+
+    render(
+      <KanaSelection onStartQuiz={onStartQuiz} onStudy={vi.fn()} onViewStatistics={vi.fn()} />
+    );
+
+    const dueButton = await screen.findByRole('button', {
+      name: /Fällige Zeichen wiederholen/i
+    });
+    await user.click(dueButton);
+
+    expect(onStartQuiz).toHaveBeenCalledTimes(1);
+    const [list, options] = onStartQuiz.mock.calls[0];
+    expect(list).toHaveLength(1);
+    expect(list[0].kana).toBe('カ');
+    expect(options).toEqual({ scriptMode: 'katakana' });
   });
 });

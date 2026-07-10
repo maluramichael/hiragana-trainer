@@ -1,9 +1,41 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { kanaGroups } from '../data/kana.js';
+import { kanaGroups, hiragana, katakana } from '../data/kana.js';
 import { getAllGroupProgress } from '../utils/progressCalculator.js';
-import { getOverallStatistics } from '../utils/statisticsManager.js';
+import {
+  getOverallStatistics,
+  getStatistics,
+  getWeakKana,
+  getDueKana
+} from '../utils/statisticsManager.js';
 import ProgressBar from './ProgressBar.jsx';
+
+// Hiragana Unicode block; anything else is treated as Katakana.
+const isHiragana = (char) => /[぀-ゟ]/.test(char);
+
+// Map every kana's stats key ("<kana>-<romaji>") to its full data object, so a
+// weak/due entry (a stat object or a bare key) can be turned back into the
+// kana object the quiz expects (#9/#12).
+const kanaByKey = new Map(
+  [...hiragana, ...katakana].map((k) => [`${k.kana}-${k.romaji}`, k])
+);
+
+// Resolve weak/due items to real kana objects. Weak items are stat objects,
+// due items are bare keys; both collapse to the same "<kana>-<romaji>" lookup.
+const resolveKana = (items) =>
+  items
+    .map((item) => (typeof item === 'string' ? item : `${item.kana}-${item.romaji}`))
+    .map((key) => kanaByKey.get(key))
+    .filter(Boolean);
+
+// Pick the narrowest script mode that still covers the given kana, so a review
+// round drills only the script(s) the learner actually needs.
+const deriveScriptMode = (list) => {
+  const hasHira = list.some((k) => isHiragana(k.kana));
+  const hasKata = list.some((k) => !isHiragana(k.kana));
+  if (hasHira && hasKata) return 'both';
+  return hasHira ? 'hiragana' : 'katakana';
+};
 
 const SELECTION_KEY = 'kana-quiz-selection';
 const SCRIPT_MODE_KEY = 'kana-quiz-script-mode';
@@ -104,17 +136,31 @@ const getKanaForSelection = (selection) => {
   return selected;
 };
 
-const KanaSelection = ({ onStartQuiz, onViewStatistics }) => {
+const KanaSelection = ({ onStartQuiz, onStudy, onViewStatistics }) => {
   const { t } = useTranslation();
   const [progress, setProgress] = useState(null);
   const [hasData, setHasData] = useState(false);
   const [selectedGroups, setSelectedGroups] = useState(loadSelection);
   const [scriptMode, setScriptMode] = useState(loadScriptMode);
+  // Kana surfaced by the two shortcut buttons (#9 weak, #12 due). Empty until
+  // there is real practice history, which keeps the buttons hidden on a fresh visit.
+  const [weakKana, setWeakKana] = useState([]);
+  const [dueKana, setDueKana] = useState([]);
 
   useEffect(() => {
     // Load progress data when component mounts
     setProgress(getAllGroupProgress());
     setHasData(getOverallStatistics().practicedKana > 0);
+
+    // #9: kana the learner keeps missing.
+    setWeakKana(resolveKana(getWeakKana()));
+
+    // #12: previously practiced kana whose spaced-repetition interval elapsed.
+    // Restrict candidates to practiced kana so untouched ones (which count as
+    // "due" by default) don't make this a "review everything" button.
+    const stats = getStatistics();
+    const practicedKeys = Object.keys(stats).filter((key) => stats[key].timesShown > 0);
+    setDueKana(resolveKana(getDueKana(practicedKeys)));
   }, []);
 
   // Persist the current selection so returning learners only press Start.
@@ -185,6 +231,28 @@ const KanaSelection = ({ onStartQuiz, onViewStatistics }) => {
     }
   };
 
+  // #4: study the current selection as flashcards before quizzing.
+  const handleStudy = () => {
+    const kanaToStudy = getKanaForSelection(selectedGroups);
+    if (kanaToStudy.length > 0) {
+      onStudy(kanaToStudy, { scriptMode });
+    }
+  };
+
+  // #9/#12: start a focused quiz on only the weak / due kana, drilling the
+  // narrowest script mode that still covers them.
+  const handlePracticeWeak = () => {
+    if (weakKana.length > 0) {
+      onStartQuiz(weakKana, { scriptMode: deriveScriptMode(weakKana) });
+    }
+  };
+
+  const handleReviewDue = () => {
+    if (dueKana.length > 0) {
+      onStartQuiz(dueKana, { scriptMode: deriveScriptMode(dueKana) });
+    }
+  };
+
   const selectedCount = getKanaForSelection(selectedGroups).length;
 
   const RecommendedBadge = () => (
@@ -252,6 +320,29 @@ const KanaSelection = ({ onStartQuiz, onViewStatistics }) => {
             {t('selection.quickstartHint')}
           </p>
         </div>
+
+        {/* Review shortcuts: only shown once there is practice history to act on
+            (#9 weak kana, #12 due kana). */}
+        {(weakKana.length > 0 || dueKana.length > 0) && (
+          <div className="flex flex-col sm:flex-row justify-center gap-3 mb-6">
+            {weakKana.length > 0 && (
+              <button
+                onClick={handlePracticeWeak}
+                className="bg-rose-600 hover:bg-rose-700 text-white px-6 py-3 rounded-lg font-medium transition-colors shadow-md"
+              >
+                🔁 {t('selection.practiceWeak')}
+              </button>
+            )}
+            {dueKana.length > 0 && (
+              <button
+                onClick={handleReviewDue}
+                className="bg-amber-600 hover:bg-amber-700 text-white px-6 py-3 rounded-lg font-medium transition-colors shadow-md"
+              >
+                ⏰ {t('selection.reviewDue')}
+              </button>
+            )}
+          </div>
+        )}
 
         <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
           <h2 className="text-2xl font-semibold text-gray-800 mb-4 text-center">
@@ -490,23 +581,37 @@ const KanaSelection = ({ onStartQuiz, onViewStatistics }) => {
           {/* Start Quiz Button */}
           <div className="mt-8 pt-6 border-t border-gray-200">
             <div className="text-center">
-              <button
-                onClick={handleStartQuiz}
-                disabled={selectedCount === 0}
-                className={`px-8 py-4 rounded-xl text-xl font-semibold transition-all transform ${
-                  selectedCount > 0
-                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white hover:scale-105 shadow-lg hover:shadow-xl'
-                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                }`}
-              >
-                {selectedCount > 0 ? (
-                  <>
-                    🚀 {t('selection.startQuiz')}
-                  </>
-                ) : (
-                  t('selection.startQuiz')
-                )}
-              </button>
+              <div className="flex flex-col sm:flex-row justify-center items-center gap-3">
+                <button
+                  onClick={handleStudy}
+                  disabled={selectedCount === 0}
+                  className={`px-6 py-4 rounded-xl text-lg font-semibold transition-all transform ${
+                    selectedCount > 0
+                      ? 'bg-white border-2 border-indigo-600 text-indigo-700 hover:bg-indigo-50 hover:scale-105 shadow'
+                      : 'bg-gray-100 border-2 border-gray-200 text-gray-400 cursor-not-allowed'
+                  }`}
+                >
+                  📖 {t('selection.studyFirst')}
+                </button>
+
+                <button
+                  onClick={handleStartQuiz}
+                  disabled={selectedCount === 0}
+                  className={`px-8 py-4 rounded-xl text-xl font-semibold transition-all transform ${
+                    selectedCount > 0
+                      ? 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white hover:scale-105 shadow-lg hover:shadow-xl'
+                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  }`}
+                >
+                  {selectedCount > 0 ? (
+                    <>
+                      🚀 {t('selection.startQuiz')}
+                    </>
+                  ) : (
+                    t('selection.startQuiz')
+                  )}
+                </button>
+              </div>
 
               {selectedCount > 0 && (
                 <p className="mt-3 text-sm text-gray-600">

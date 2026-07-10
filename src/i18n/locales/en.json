@@ -44,7 +44,18 @@
     "scriptMode": "Which script?",
     "scriptHiragana": "Hiragana only",
     "scriptKatakana": "Katakana only",
-    "scriptBoth": "Both"
+    "scriptBoth": "Both",
+    "studyFirst": "Study first",
+    "practiceWeak": "Practice weak characters",
+    "reviewDue": "Review due characters"
+  },
+  "study": {
+    "title": "Study characters",
+    "back": "← Back to selection",
+    "cardPosition": "Card {{current}} of {{total}}",
+    "previous": "Previous",
+    "next": "Next",
+    "startQuiz": "Start quiz now"
   },
   "quiz": {
     "typeRomaji": "Type the romaji...",

@@ -44,7 +44,18 @@
     "scriptMode": "Welche Schrift?",
     "scriptHiragana": "Nur Hiragana",
     "scriptKatakana": "Nur Katakana",
-    "scriptBoth": "Beide"
+    "scriptBoth": "Beide",
+    "studyFirst": "Erst lernen",
+    "practiceWeak": "Schwache Zeichen üben",
+    "reviewDue": "Fällige Zeichen wiederholen"
+  },
+  "study": {
+    "title": "Zeichen lernen",
+    "back": "← Zurück zur Auswahl",
+    "cardPosition": "Karte {{current}} von {{total}}",
+    "previous": "Zurück",
+    "next": "Weiter",
+    "startQuiz": "Jetzt Quiz starten"
   },
   "quiz": {
     "typeRomaji": "Geben Sie das Romaji ein...",
