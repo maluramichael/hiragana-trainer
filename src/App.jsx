@@ -3,7 +3,26 @@ import { useTranslation } from 'react-i18next';
 import KanaSelection from './components/KanaSelection';
 import LanguageSwitcher from './components/LanguageSwitcher';
 import { initializeStatistics } from './utils/statisticsManager.js';
+import { trackEvent } from './utils/analytics.js';
+import { hiragana, katakana } from './data/kana.js';
 import './i18n/i18n.js';
+
+// #22: base64-Challenge-Parameter zu einer gültigen kanaList auflösen.
+// Kaputte/fremde Parameter ergeben eine leere Liste (Aufrufer startet dann normal).
+// eslint-disable-next-line react-refresh/only-export-components -- exportiert nur für den isolierten Decode-Test
+export const decodeChallenge = (raw) => {
+  try {
+    const json = new TextDecoder().decode(
+      Uint8Array.from(atob(decodeURIComponent(raw)), (c) => c.charCodeAt(0))
+    );
+    const chars = JSON.parse(json);
+    if (!Array.isArray(chars)) return [];
+    const byChar = new Map([...hiragana, ...katakana].map((k) => [k.kana, k]));
+    return chars.map((c) => byChar.get(c)).filter(Boolean);
+  } catch {
+    return [];
+  }
+};
 
 // #62: only the initial screen ships in the main bundle; the rest are split out.
 const KanaQuiz = lazy(() => import('./components/KanaQuiz'));
@@ -31,6 +50,28 @@ function App() {
   useEffect(() => {
     // Initialize statistics on app load
     initializeStatistics();
+  }, []);
+
+  // #22: Wurde die App über einen Challenge-Link geöffnet, direkt mit dieser
+  // Auswahl ins Quiz. Param danach aus der URL entfernen, damit ein Reload nicht
+  // erneut triggert. Läuft genau einmal beim Mount.
+  useEffect(() => {
+    const raw = new URLSearchParams(window.location.search).get('challenge');
+    if (!raw) return;
+
+    const kanaList = decodeChallenge(raw);
+    if (kanaList.length > 0) {
+      // Saubere Selection-Basis + Quiz-Eintrag, damit Browser-Zurück zur Auswahl führt.
+      window.history.replaceState({ view: 'selection' }, '', window.location.pathname);
+      window.history.pushState({ view: 'quiz' }, '', window.location.pathname);
+      setSelectedKana(kanaList);
+      setScriptMode('both');
+      setCurrentView('quiz');
+      trackEvent('challenge_opened', String(kanaList.length));
+    } else {
+      // Kaputter Parameter: nur die URL bereinigen, normal auf der Auswahl bleiben.
+      window.history.replaceState(null, '', window.location.pathname);
+    }
   }, []);
 
   // #14: keep <html lang> in sync so screen readers announce the right language.
@@ -163,6 +204,7 @@ function App() {
         {currentView === 'results' && (
           <QuizResults
             results={quizResults}
+            kanaList={selectedKana}
             onRestart={handleRestart}
             onNewSelection={handleNewSelection}
           />

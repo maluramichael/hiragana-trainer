@@ -1,6 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { exportStatisticsAsBase64 } from '../utils/statisticsManager';
+import { calculateGroupProgress, getProgressDescription } from '../utils/progressCalculator';
+import { trackEvent } from '../utils/analytics';
 
 const APP_URL = 'https://hiragana-trainer.malura.de';
 const GITHUB_URL = 'https://github.com/maluramichael/hiragana-trainer';
@@ -9,13 +11,43 @@ const AUTHOR_URL = 'https://malura.de';
 const TOFUGU_HIRAGANA_URL = 'https://www.tofugu.com/japanese/learn-hiragana/';
 const TOFUGU_KATAKANA_URL = 'https://www.tofugu.com/japanese/learn-katakana/';
 
-const QuizResults = ({ results, onRestart, onNewSelection }) => {
+// #52: ab diesem Progress-Level (Experte) gilt eine Serie als gemeistert.
+const MASTERY_LEVEL = 9;
+
+// #22: geübte Auswahl als base64-Parameter kodieren (UTF-8-sicher, Kana sind
+// mehrbytig). Kodiert nur die Kana-Zeichen; App.jsx löst sie wieder zu Objekten auf.
+const buildChallengeUrl = (kanaList) => {
+  const chars = kanaList.map((k) => k.kana);
+  const base64 = btoa(String.fromCharCode(...new TextEncoder().encode(JSON.stringify(chars))));
+  return `${APP_URL}/?challenge=${encodeURIComponent(base64)}`;
+};
+
+const QuizResults = ({ results, onRestart, onNewSelection, kanaList = [] }) => {
   const { t } = useTranslation();
   const [shareStatus, setShareStatus] = useState(null);
   const [exportStatus, setExportStatus] = useState(null);
+  const [challengeStatus, setChallengeStatus] = useState(null);
 
   const accuracy = results.total > 0 ? Math.round((results.correct / results.total) * 100) : 0;
   const incorrect = results.total - results.correct;
+
+  // #90: Runde abgeschlossen — einmalig beim Anzeigen der Ergebnisse melden.
+  useEffect(() => {
+    trackEvent('quiz_finished', `${accuracy}%`);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // #52: Serien der geübten Auswahl auf echtes Mastery prüfen (Daten aus localStorage,
+  // bereits während des Quiz aktualisiert). Nur wirklich erreichte Meilensteine feiern.
+  const masteredSeries = useMemo(() => {
+    const uniqueSeries = new Map();
+    kanaList.forEach((k) => {
+      if (k.type && k.series) uniqueSeries.set(`${k.type}:${k.series}`, { type: k.type, series: k.series });
+    });
+    return [...uniqueSeries.values()]
+      .map(({ type, series }) => ({ series, level: calculateGroupProgress(type, series).level }))
+      .filter((s) => s.level >= MASTERY_LEVEL);
+  }, [kanaList]);
 
   const getPerformanceMessage = () => {
     if (accuracy >= 95) return { message: t('results.perfect'), color: "text-green-600" };
@@ -27,6 +59,7 @@ const QuizResults = ({ results, onRestart, onNewSelection }) => {
   const performance = getPerformanceMessage();
 
   const handleShare = async () => {
+    trackEvent('share_clicked', `${accuracy}%`);
     const text = t('results.shareText', { accuracy, url: APP_URL });
     const shareData = { title: t('results.shareTitle'), text, url: APP_URL };
     try {
@@ -38,6 +71,17 @@ const QuizResults = ({ results, onRestart, onNewSelection }) => {
       setShareStatus('copied');
     } catch {
       // User cancelled the native share sheet, or copy failed — no action needed.
+    }
+  };
+
+  // #22: Challenge-Link erzeugen und in die Zwischenablage kopieren.
+  const handleChallenge = async () => {
+    try {
+      await navigator.clipboard.writeText(buildChallengeUrl(kanaList));
+      trackEvent('challenge_created', String(kanaList.length));
+      setChallengeStatus('copied');
+    } catch {
+      setChallengeStatus('error');
     }
   };
 
@@ -59,6 +103,23 @@ const QuizResults = ({ results, onRestart, onNewSelection }) => {
           <div className={`text-2xl font-semibold mb-8 ${performance.color}`}>
             {performance.message}
           </div>
+
+          {/* Mastery-Feier (#52): nur echte, aus den Daten ableitbare Meilensteine */}
+          {masteredSeries.length > 0 && (
+            <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-8 text-left">
+              <div className="font-semibold text-amber-800 mb-1">{t('mastery.title')}</div>
+              <ul className="space-y-1 text-sm text-amber-700">
+                {masteredSeries.map((s) => (
+                  <li key={s.series}>
+                    {t('mastery.reached', {
+                      series: t(`mastery.series.${s.series}`),
+                      level: getProgressDescription(s.level, t),
+                    })}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
 
           {/* Results Grid */}
           <div className="grid grid-cols-2 gap-6 mb-8">
@@ -116,6 +177,22 @@ const QuizResults = ({ results, onRestart, onNewSelection }) => {
             </button>
             {shareStatus === 'copied' && (
               <p className="text-sm text-green-600">{t('results.shareCopied')}</p>
+            )}
+
+            {/* Challenge a friend (#22): only when we know what was practiced */}
+            {kanaList.length > 0 && (
+              <button
+                onClick={handleChallenge}
+                className="w-full bg-white border border-gray-300 hover:bg-gray-50 text-gray-800 font-semibold py-3 px-6 rounded-xl transition-all"
+              >
+                {t('results.challenge')}
+              </button>
+            )}
+            {challengeStatus === 'copied' && (
+              <p className="text-sm text-green-600">{t('results.challengeCopied')}</p>
+            )}
+            {challengeStatus === 'error' && (
+              <p className="text-sm text-red-600">{t('results.challengeError')}</p>
             )}
           </div>
 

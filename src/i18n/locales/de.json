@@ -96,6 +96,9 @@
     "shareTitle": "Mein Kana-Ergebnis",
     "shareText": "Ich habe {{accuracy}}% bei Kana geschafft. Kostenlos üben: {{url}}",
     "shareCopied": "In die Zwischenablage kopiert.",
+    "challenge": "Freund herausfordern",
+    "challengeCopied": "Challenge-Link kopiert. Schick ihn deinem Freund.",
+    "challengeError": "Link konnte nicht kopiert werden.",
     "nextStepTitle": "Nächster Schritt",
     "nextStepReview": "Übe die Zeichen, die du noch verwechselst, gleich noch einmal.",
     "nextStepKeepGoing": "Starke Runde. Nimm dir als Nächstes eine neue Gruppe vor.",
@@ -109,6 +112,27 @@
     "starGithub": "Auf GitHub sternen",
     "sponsor": "GitHub Sponsors",
     "aboutBy": "Gebaut von"
+  },
+  "mastery": {
+    "title": "Meilenstein erreicht 🎉",
+    "reached": "{{series}}: {{level}} erreicht",
+    "series": {
+      "vowels": "Vokale",
+      "k": "K-Reihe",
+      "s": "S-Reihe",
+      "t": "T-Reihe",
+      "n": "N-Reihe",
+      "h": "H-Reihe",
+      "m": "M-Reihe",
+      "y": "Y-Reihe",
+      "r": "R-Reihe",
+      "w": "W-Reihe",
+      "g": "G-Reihe",
+      "z": "Z-Reihe",
+      "d": "D-Reihe",
+      "b": "B-Reihe",
+      "p": "P-Reihe"
+    }
   },
   "scripts": {
     "hiragana": "Hiragana",

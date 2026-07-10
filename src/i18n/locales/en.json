@@ -96,6 +96,9 @@
     "shareTitle": "My kana result",
     "shareText": "I scored {{accuracy}}% on kana. Practice for free: {{url}}",
     "shareCopied": "Copied to clipboard.",
+    "challenge": "Challenge a friend",
+    "challengeCopied": "Challenge link copied. Send it to your friend.",
+    "challengeError": "Could not copy the link.",
     "nextStepTitle": "Next step",
     "nextStepReview": "Practice the characters you still mix up one more time.",
     "nextStepKeepGoing": "Strong round. Try a new group next.",
@@ -109,6 +112,27 @@
     "starGithub": "Star on GitHub",
     "sponsor": "GitHub Sponsors",
     "aboutBy": "Built by"
+  },
+  "mastery": {
+    "title": "Milestone reached 🎉",
+    "reached": "{{series}}: {{level}} reached",
+    "series": {
+      "vowels": "Vowels",
+      "k": "K-series",
+      "s": "S-series",
+      "t": "T-series",
+      "n": "N-series",
+      "h": "H-series",
+      "m": "M-series",
+      "y": "Y-series",
+      "r": "R-series",
+      "w": "W-series",
+      "g": "G-series",
+      "z": "Z-series",
+      "d": "D-series",
+      "b": "B-series",
+      "p": "P-series"
+    }
   },
   "scripts": {
     "hiragana": "Hiragana",
