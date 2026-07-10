@@ -36,7 +36,7 @@ describe('KanaQuiz', () => {
 
   it('#29: an alternative romanization (si for し) is accepted', async () => {
     const user = userEvent.setup();
-    render(<KanaQuiz kanaList={pair('shi')} onFinish={vi.fn()} />);
+    render(<KanaQuiz kanaList={pair('shi')} scriptMode="hiragana" onFinish={vi.fn()} />);
 
     await user.type(screen.getByRole('textbox'), 'si{Enter}');
 

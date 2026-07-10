@@ -23,6 +23,10 @@ const QuizResults = ({ results, onRestart, onNewSelection, kanaList = [] }) => {
 
   const accuracy = results.total > 0 ? Math.round((results.correct / results.total) * 100) : 0;
   const incorrect = results.total - results.correct;
+  // Nudge the learner in the right direction: a strong round makes "choose
+  // different characters" the primary CTA (move on), a shaky round makes
+  // "practice the same kana again" primary (repeat). The other stays secondary.
+  const recommendNew = accuracy >= 80;
 
   // #90: Runde abgeschlossen — einmalig beim Anzeigen der Ergebnisse melden.
   useEffect(() => {
@@ -141,21 +145,25 @@ const QuizResults = ({ results, onRestart, onNewSelection, kanaList = [] }) => {
             </p>
           </div>
 
-          {/* Action Buttons */}
+          {/* Action Buttons — the recommended next step is the prominent one. */}
           <div className="space-y-3">
-            <button
-              onClick={onRestart}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-[1.4rem] bg-gradient-to-r from-pink-500 to-fuchsia-600 px-6 py-4 font-bold text-white shadow-cute transition-all hover:-translate-y-0.5 active:translate-y-0.5"
-            >
-              <RepeatIcon className="w-5 h-5" /> {t('results.practiceSame')}
-            </button>
-
-            <button
-              onClick={onNewSelection}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-[1.4rem] bg-gradient-to-r from-violet-500 to-indigo-500 px-6 py-4 font-bold text-white shadow-cute transition-all hover:-translate-y-0.5 active:translate-y-0.5"
-            >
-              <RocketIcon className="w-5 h-5" /> {t('results.chooseDifferent')}
-            </button>
+            {(() => {
+              const primaryClass = 'inline-flex w-full items-center justify-center gap-2 rounded-[1.4rem] bg-gradient-to-r from-pink-500 to-fuchsia-600 px-6 py-4 font-bold text-white shadow-cute transition-all hover:-translate-y-0.5 active:translate-y-0.5';
+              const secondaryClass = 'inline-flex w-full items-center justify-center gap-2 rounded-[1.4rem] bg-white px-6 py-3.5 font-bold text-slate-600 ring-2 ring-fuchsia-100 transition-all hover:bg-fuchsia-50';
+              const repeatButton = (className) => (
+                <button onClick={onRestart} className={className}>
+                  <RepeatIcon className="w-5 h-5" /> {t('results.practiceSame')}
+                </button>
+              );
+              const newButton = (className) => (
+                <button onClick={onNewSelection} className={className}>
+                  <RocketIcon className="w-5 h-5" /> {t('results.chooseDifferent')}
+                </button>
+              );
+              return recommendNew
+                ? <>{newButton(primaryClass)}{repeatButton(secondaryClass)}</>
+                : <>{repeatButton(primaryClass)}{newButton(secondaryClass)}</>;
+            })()}
 
             <button
               onClick={handleShare}
