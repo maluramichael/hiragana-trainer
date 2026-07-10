@@ -11,7 +11,7 @@ const SELECTION_MARKER = /Hiragana & Katakana/
 // The app now opens on the landing page; its CTA is the stable anchor for
 // "are we on the landing screen?". Helper to leave it for the picker.
 const goToSelection = async (user) =>
-  user.click(screen.getByRole('button', { name: /Zeichen selbst auswählen/i }))
+  user.click(screen.getByRole('button', { name: /Wähle andere Zeichen/i }))
 
 afterEach(async () => {
   // Clear any challenge param a test set on the URL.
@@ -26,7 +26,7 @@ describe('App', () => {
   it('renders the landing page as the initial screen', () => {
     render(<App />)
     expect(screen.getByRole('heading', { level: 1 })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /Kostenlos starten/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Lerne die Vokale/i })).toBeInTheDocument()
     // The picker only appears after choosing to select characters.
     expect(screen.queryByText(SELECTION_MARKER)).not.toBeInTheDocument()
   })
@@ -35,7 +35,7 @@ describe('App', () => {
     const user = userEvent.setup()
     render(<App />)
 
-    await user.click(screen.getByRole('button', { name: /Kostenlos starten/i }))
+    await user.click(screen.getByRole('button', { name: /Lerne die Vokale/i }))
     expect(await screen.findByPlaceholderText(/Romaji/i)).toBeInTheDocument()
   })
 

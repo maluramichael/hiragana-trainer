@@ -155,19 +155,19 @@ const Statistics = ({ onBack }) => {
           <div className="flex flex-wrap gap-2.5">
             <button
               onClick={handleExportAsCode}
-              className="rounded-xl bg-gradient-to-r from-fuchsia-500 to-violet-500 px-4 py-2 font-semibold text-white shadow-cute transition-all hover:-translate-y-0.5"
+              className="rounded-xl bg-fuchsia-500 px-4 py-2 font-semibold text-white shadow-cute transition-all hover:-translate-y-0.5 hover:bg-fuchsia-600"
             >
               {t('statistics.exportCode')}
             </button>
             <button
               onClick={() => setShowImportModal(true)}
-              className="rounded-xl bg-gradient-to-r from-violet-500 to-indigo-500 px-4 py-2 font-semibold text-white shadow-cute transition-all hover:-translate-y-0.5"
+              className="rounded-xl bg-violet-500 px-4 py-2 font-semibold text-white shadow-cute transition-all hover:-translate-y-0.5 hover:bg-violet-600"
             >
               {t('statistics.importCode')}
             </button>
             <button
               onClick={handleExport}
-              className="rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 px-4 py-2 font-semibold text-white shadow-cute transition-all hover:-translate-y-0.5"
+              className="rounded-xl bg-emerald-500 px-4 py-2 font-semibold text-white shadow-cute transition-all hover:-translate-y-0.5 hover:bg-emerald-600"
             >
               {t('statistics.export')}
             </button>
@@ -213,7 +213,7 @@ const Statistics = ({ onBack }) => {
               onClick={() => setActiveTab('hiragana')}
               className={`flex-1 px-6 py-4 text-lg font-bold transition-colors ${
                 activeTab === 'hiragana'
-                  ? 'bg-gradient-to-r from-fuchsia-500 to-violet-500 text-white'
+                  ? 'bg-fuchsia-500 text-white'
                   : 'bg-white/50 text-slate-600 hover:bg-fuchsia-50'
               }`}
             >
@@ -223,7 +223,7 @@ const Statistics = ({ onBack }) => {
               onClick={() => setActiveTab('katakana')}
               className={`flex-1 px-6 py-4 text-lg font-bold transition-colors ${
                 activeTab === 'katakana'
-                  ? 'bg-gradient-to-r from-fuchsia-500 to-violet-500 text-white'
+                  ? 'bg-fuchsia-500 text-white'
                   : 'bg-white/50 text-slate-600 hover:bg-fuchsia-50'
               }`}
             >

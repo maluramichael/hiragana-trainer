@@ -84,4 +84,4 @@ Contributions are welcome. Feel free to open an issue or a pull request.
 
 ## License
 
-Open source under the MIT License.
+Open source under the Apache License 2.0.

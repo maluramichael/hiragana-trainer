@@ -341,7 +341,7 @@ const KanaSelection = ({ onStartQuiz, onStudy, onViewStatistics }) => {
           {hasData ? (
             <button
               onClick={onViewStatistics}
-              className="inline-flex items-center gap-2 whitespace-nowrap rounded-2xl bg-gradient-to-r from-violet-500 to-purple-600 px-4 py-2.5 font-semibold text-white shadow-cute transition-all hover:-translate-y-0.5"
+              className="inline-flex items-center gap-2 whitespace-nowrap rounded-2xl bg-violet-500 hover:bg-violet-600 px-4 py-2.5 font-semibold text-white shadow-cute transition-all hover:-translate-y-0.5"
             >
               <ChartIcon className="w-5 h-5" /> {t('statistics.title')}
             </button>
@@ -362,7 +362,7 @@ const KanaSelection = ({ onStartQuiz, onStudy, onViewStatistics }) => {
             <button
               data-testid="quickstart-button"
               onClick={handleQuickstart}
-              className="group inline-flex items-center gap-2.5 rounded-[1.4rem] bg-gradient-to-r from-emerald-500 to-teal-500 px-8 py-4 text-xl font-bold text-white shadow-cute-lg transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0.5"
+              className="group inline-flex items-center gap-2.5 rounded-[1.4rem] bg-emerald-500 hover:bg-emerald-600 px-8 py-4 text-xl font-bold text-white shadow-cute-lg transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0.5"
             >
               <RocketIcon className="w-6 h-6 transition-transform duration-200 group-hover:-rotate-12" />
               {t('selection.quickstart')}
@@ -380,7 +380,7 @@ const KanaSelection = ({ onStartQuiz, onStudy, onViewStatistics }) => {
             {weakKana.length > 0 && (
               <button
                 onClick={handlePracticeWeak}
-                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-rose-500 to-pink-500 px-6 py-3 font-semibold text-white shadow-cute transition-all hover:-translate-y-0.5"
+                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-rose-500 hover:bg-rose-600 px-6 py-3 font-semibold text-white shadow-cute transition-all hover:-translate-y-0.5"
               >
                 <RepeatIcon className="w-5 h-5" /> {t('selection.practiceWeak')}
               </button>
@@ -388,7 +388,7 @@ const KanaSelection = ({ onStartQuiz, onStudy, onViewStatistics }) => {
             {dueKana.length > 0 && (
               <button
                 onClick={handleReviewDue}
-                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 px-6 py-3 font-semibold text-white shadow-cute transition-all hover:-translate-y-0.5"
+                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-amber-500 hover:bg-amber-600 px-6 py-3 font-semibold text-white shadow-cute transition-all hover:-translate-y-0.5"
               >
                 <ClockIcon className="w-5 h-5" /> {t('selection.reviewDue')}
               </button>
@@ -416,7 +416,7 @@ const KanaSelection = ({ onStartQuiz, onStudy, onViewStatistics }) => {
                   key={value}
                   className={`cursor-pointer rounded-full px-5 py-2 text-sm font-semibold transition-all ${
                     scriptMode === value
-                      ? 'bg-gradient-to-r from-fuchsia-500 to-violet-500 text-white shadow-cute'
+                      ? 'bg-fuchsia-500 text-white shadow-cute'
                       : 'bg-fuchsia-50 text-slate-600 ring-1 ring-fuchsia-100 hover:bg-fuchsia-100'
                   }`}
                 >
@@ -479,7 +479,7 @@ const KanaSelection = ({ onStartQuiz, onStudy, onViewStatistics }) => {
                   disabled={selectedCount === 0}
                   className={`inline-flex items-center gap-2.5 rounded-[1.4rem] px-8 py-4 text-xl font-bold transition-all ${
                     selectedCount > 0
-                      ? 'bg-gradient-to-r from-pink-500 to-fuchsia-600 text-white shadow-cute-lg hover:-translate-y-0.5 active:translate-y-0.5'
+                      ? 'bg-fuchsia-500 text-white shadow-cute-lg hover:-translate-y-0.5 hover:bg-fuchsia-600 active:translate-y-0.5'
                       : 'cursor-not-allowed bg-slate-200 text-slate-400'
                   }`}
                 >

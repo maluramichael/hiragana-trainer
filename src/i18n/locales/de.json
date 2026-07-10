@@ -196,9 +196,10 @@
     "hero": {
       "title": "Hiragana und Katakana sicher lesen lernen",
       "subtitle": "Du siehst ein japanisches Zeichen und tippst seine Aussprache. Kurze Runden, klares Feedback, sichtbarer Fortschritt.",
-      "cta": "Kostenlos starten",
+      "cta": "Lerne die Vokale",
       "ctaHint": "Startet sofort mit den fünf Vokalen.",
-      "secondary": "Zeichen selbst auswählen",
+      "or": "oder",
+      "secondary": "Wähle andere Zeichen",
       "trust": "Kostenlos. Keine Anmeldung. Läuft offline im Browser."
     },
     "features": {
@@ -215,6 +216,11 @@
         "title": "Offline und ohne Konto",
         "body": "Dein Fortschritt bleibt lokal auf deinem Gerät. Keine Anmeldung nötig."
       }
+    },
+    "about": {
+      "title": "Hi, ich bin Michael",
+      "role": "Software-Entwickler & Japan-Enthusiast",
+      "body": "Japan fasziniert mich schon lange, die Sprache, die Kultur, das Land. Statt ewig nach der perfekten Lern-App zu suchen, habe ich sie aus Neugier und Lerndrang einfach selbst gebaut, kostenlos, ohne Konto, ohne Schnickschnack. Viel Spaß beim Üben."
     }
   }
 }

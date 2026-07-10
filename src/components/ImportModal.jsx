@@ -109,7 +109,7 @@ const ImportModal = ({ onClose, onImported }) => {
         <div className="mt-6 flex gap-3">
           <button
             onClick={handleImportFromCode}
-            className="flex-1 rounded-[1.4rem] bg-gradient-to-r from-fuchsia-500 to-violet-500 px-6 py-3 font-bold text-white shadow-cute transition-all hover:-translate-y-0.5"
+            className="flex-1 rounded-[1.4rem] bg-fuchsia-500 px-6 py-3 font-bold text-white shadow-cute transition-all hover:-translate-y-0.5 hover:bg-fuchsia-600"
           >
             {t('statistics.importButton')}
           </button>

@@ -148,7 +148,7 @@ const QuizResults = ({ results, onRestart, onNewSelection, kanaList = [] }) => {
           {/* Action Buttons — the recommended next step is the prominent one. */}
           <div className="space-y-3">
             {(() => {
-              const primaryClass = 'inline-flex w-full items-center justify-center gap-2 rounded-[1.4rem] bg-gradient-to-r from-pink-500 to-fuchsia-600 px-6 py-4 font-bold text-white shadow-cute transition-all hover:-translate-y-0.5 active:translate-y-0.5';
+              const primaryClass = 'inline-flex w-full items-center justify-center gap-2 rounded-[1.4rem] bg-fuchsia-500 px-6 py-4 font-bold text-white shadow-cute transition-all hover:-translate-y-0.5 hover:bg-fuchsia-600 active:translate-y-0.5';
               const secondaryClass = 'inline-flex w-full items-center justify-center gap-2 rounded-[1.4rem] bg-white px-6 py-3.5 font-bold text-slate-600 ring-2 ring-fuchsia-100 transition-all hover:bg-fuchsia-50';
               const repeatButton = (className) => (
                 <button onClick={onRestart} className={className}>

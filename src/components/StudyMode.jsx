@@ -108,7 +108,7 @@ const StudyMode = ({ kanaList, scriptMode = 'both', onStartQuiz, onBack }) => {
         <div className="text-center">
           <button
             onClick={startQuiz}
-            className="group inline-flex items-center gap-2.5 rounded-[1.4rem] bg-gradient-to-r from-pink-500 to-fuchsia-600 px-8 py-4 text-xl font-bold text-white shadow-cute-lg transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0.5"
+            className="group inline-flex items-center gap-2.5 rounded-[1.4rem] bg-fuchsia-500 px-8 py-4 text-xl font-bold text-white shadow-cute-lg transition-all duration-200 hover:-translate-y-0.5 hover:bg-fuchsia-600 active:translate-y-0.5"
           >
             <RocketIcon className="w-6 h-6 transition-transform duration-200 group-hover:-rotate-12" />
             {t('study.startQuiz')}

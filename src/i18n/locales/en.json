@@ -196,9 +196,10 @@
     "hero": {
       "title": "Learn to read Hiragana and Katakana for real",
       "subtitle": "You see a Japanese character and type how it sounds. Short rounds, clear feedback, visible progress.",
-      "cta": "Start for free",
+      "cta": "Learn the vowels",
       "ctaHint": "Starts right away with the five vowels.",
-      "secondary": "Pick characters yourself",
+      "or": "or",
+      "secondary": "Choose other characters",
       "trust": "Free. No signup. Runs offline in your browser."
     },
     "features": {
@@ -215,6 +216,11 @@
         "title": "Offline and no account",
         "body": "Your progress stays local on your device. No signup required."
       }
+    },
+    "about": {
+      "title": "Hi, I'm Michael",
+      "role": "Software developer & Japan enthusiast",
+      "body": "Japan has fascinated me for a long time, the language, the culture, the country. Instead of hunting forever for the perfect learning app, I built the one I wanted myself, out of curiosity and the urge to learn. Free, no account, no clutter. Have fun practicing."
     }
   }
 }

@@ -261,7 +261,7 @@ const KanaQuiz = ({ kanaList, onFinish, scriptMode = 'both' }) => {
                   disabled={!userInput.trim()}
                   className={`rounded-[1.4rem] px-8 py-3 text-lg font-bold transition-all ${
                     userInput.trim()
-                      ? 'bg-gradient-to-r from-fuchsia-500 to-violet-500 text-white shadow-cute hover:-translate-y-0.5 active:translate-y-0.5'
+                      ? 'bg-fuchsia-500 text-white shadow-cute hover:-translate-y-0.5 hover:bg-fuchsia-600 active:translate-y-0.5'
                       : 'cursor-not-allowed bg-slate-200 text-slate-400'
                   }`}
                 >
@@ -295,7 +295,7 @@ const KanaQuiz = ({ kanaList, onFinish, scriptMode = 'both' }) => {
                   ref={advanceButtonRef}
                   type="button"
                   onClick={handleAdvance}
-                  className="rounded-[1.4rem] bg-gradient-to-r from-fuchsia-500 to-violet-500 px-8 py-3 text-lg font-bold text-white shadow-cute transition-all hover:-translate-y-0.5 active:translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-400"
+                  className="rounded-[1.4rem] bg-fuchsia-500 px-8 py-3 text-lg font-bold text-white shadow-cute transition-all hover:-translate-y-0.5 hover:bg-fuchsia-600 active:translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-400"
                 >
                   {currentIndex < totalQuestions - 1 ? t('quiz.next') : t('quiz.finish')}
                 </button>
