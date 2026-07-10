@@ -90,22 +90,19 @@ export const calculateGroupProgress = (groupType, subGroupKey = null) => {
 };
 
 // Get color based on progress level (0-10)
+// Hue interpolates linearly from red (0°, low) to green (120°, high) so that a
+// higher level always looks "better" — perceptually monotonic, no red mid-scale.
 export const getLevelColor = (level) => {
-  const colors = [
-    '#e5e7eb', // 0 - Gray (not started)
-    '#fef3c7', // 1 - Very light yellow
-    '#fde68a', // 2 - Light yellow
-    '#fcd34d', // 3 - Yellow
-    '#f59e0b', // 4 - Amber
-    '#f97316', // 5 - Orange
-    '#ea580c', // 6 - Dark orange
-    '#dc2626', // 7 - Red
-    '#b91c1c', // 8 - Dark red
-    '#16a34a', // 9 - Green
-    '#15803d'  // 10 - Dark green
-  ];
-  
-  return colors[Math.min(level, 10)];
+  const clamped = Math.max(0, Math.min(level, 10));
+
+  // Level 0 - not started (neutral gray, matches inactive segments)
+  if (clamped === 0) {
+    return '#e5e7eb';
+  }
+
+  // Levels 1-10 - map onto a red -> yellow -> green ramp
+  const hue = Math.round(((clamped - 1) / 9) * 120);
+  return `hsl(${hue}, 75%, 45%)`;
 };
 
 // Get progress for all groups (for displaying on selection screen)

@@ -1,4 +1,30 @@
 const STORAGE_KEY = 'kana-quiz-statistics';
+const STREAK_KEY = 'kana-quiz-best-streak';
+const SCHEMA_VERSION = 2;
+
+// Single source of truth for script detection (Hiragana Unicode range, else Katakana)
+const scriptOf = (kana) => (/[぀-ゟ]/.test(kana) ? 'hiragana' : 'katakana');
+
+const isNonEmptyString = (value) => typeof value === 'string' && value.length > 0;
+
+// Normalize any numeric field to a finite, non-negative number (default 0)
+const toNumber = (value) => {
+  const n = Number(value);
+  return Number.isFinite(n) && n >= 0 ? n : 0;
+};
+
+// Read the raw localStorage blob and return the flat stats map, migrating legacy blobs.
+// Legacy blobs are the raw stats map itself (no schemaVersion wrapper).
+const migrate = (raw) => {
+  if (!raw || typeof raw !== 'object') {
+    return {};
+  }
+  if ('schemaVersion' in raw) {
+    return raw.stats && typeof raw.stats === 'object' ? raw.stats : {};
+  }
+  // Legacy format: the object is the flat stats map itself
+  return raw;
+};
 
 // Initialize statistics for all kana
 export const initializeStatistics = async () => {
@@ -9,17 +35,17 @@ export const initializeStatistics = async () => {
 
   // Create initial structure for all kana
   const initialStats = {};
-  
+
   try {
     // Import all kana from data
     const { hiragana, katakana } = await import('../data/kana.js');
-    
+
     [...hiragana, ...katakana].forEach(kana => {
       const key = `${kana.kana}-${kana.romaji}`;
       initialStats[key] = {
         kana: kana.kana,
         romaji: kana.romaji,
-        script: hiragana.includes(kana) ? 'hiragana' : 'katakana',
+        script: scriptOf(kana.kana),
         timesShown: 0,
         timesCorrect: 0,
         timesIncorrect: 0,
@@ -28,7 +54,7 @@ export const initializeStatistics = async () => {
         responseTimes: []
       };
     });
-    
+
     saveStatistics(initialStats);
     return initialStats;
   } catch (error) {
@@ -37,69 +63,87 @@ export const initializeStatistics = async () => {
   }
 };
 
-// Get statistics from localStorage
+// Get statistics from localStorage (returns the flat stats map, migrating legacy blobs)
 export const getStatistics = () => {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
-    return stored ? JSON.parse(stored) : {};
+    return stored ? migrate(JSON.parse(stored)) : {};
   } catch (error) {
     console.error('Error reading statistics from localStorage:', error);
     return {};
   }
 };
 
-// Save statistics to localStorage
+// Save statistics to localStorage. Returns true on success, false on failure
+// (e.g. QuotaExceededError) so callers can surface the error.
 export const saveStatistics = (statistics) => {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(statistics));
+    const blob = { schemaVersion: SCHEMA_VERSION, stats: statistics };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(blob));
+    return true;
   } catch (error) {
     console.error('Error saving statistics to localStorage:', error);
+    return false;
   }
 };
 
-// Update statistics for a specific kana
-export const updateKanaStatistic = (kana, romaji, isCorrect, responseTime = null) => {
+// Apply several {kana, romaji, isCorrect, responseTime} updates in a single
+// get -> mutate -> save cycle. Returns the updated stat objects.
+export const updateKanaStatistics = (entries) => {
+  const list = Array.isArray(entries) ? entries : [entries];
   const statistics = getStatistics();
-  const key = `${kana}-${romaji}`;
-  
-  if (!statistics[key]) {
-    // Initialize if doesn't exist
-    statistics[key] = {
-      kana,
-      romaji,
-      script: /[\u3040-\u309F]/.test(kana) ? 'hiragana' : 'katakana', // Unicode range check
-      timesShown: 0,
-      timesCorrect: 0,
-      timesIncorrect: 0,
-      lastSeen: null,
-      averageResponseTime: 0,
-      responseTimes: []
-    };
-  }
+  const updated = [];
 
-  const stat = statistics[key];
-  stat.timesShown += 1;
-  stat.lastSeen = new Date().toISOString();
+  list.forEach(({ kana, romaji, isCorrect, responseTime = null }) => {
+    const key = `${kana}-${romaji}`;
 
-  if (isCorrect) {
-    stat.timesCorrect += 1;
-  } else {
-    stat.timesIncorrect += 1;
-  }
-
-  // Track response time if provided
-  if (responseTime !== null) {
-    stat.responseTimes.push(responseTime);
-    // Keep only last 10 response times to avoid storage bloat
-    if (stat.responseTimes.length > 10) {
-      stat.responseTimes = stat.responseTimes.slice(-10);
+    if (!statistics[key]) {
+      // Initialize if doesn't exist
+      statistics[key] = {
+        kana,
+        romaji,
+        script: scriptOf(kana),
+        timesShown: 0,
+        timesCorrect: 0,
+        timesIncorrect: 0,
+        lastSeen: null,
+        averageResponseTime: 0,
+        responseTimes: []
+      };
     }
-    // Calculate average response time
-    stat.averageResponseTime = stat.responseTimes.reduce((sum, time) => sum + time, 0) / stat.responseTimes.length;
-  }
+
+    const stat = statistics[key];
+    stat.timesShown += 1;
+    stat.lastSeen = new Date().toISOString();
+
+    if (isCorrect) {
+      stat.timesCorrect += 1;
+    } else {
+      stat.timesIncorrect += 1;
+    }
+
+    // Track response time if provided
+    if (responseTime !== null && responseTime !== undefined) {
+      stat.responseTimes.push(responseTime);
+      // Keep only last 10 response times to avoid storage bloat
+      if (stat.responseTimes.length > 10) {
+        stat.responseTimes = stat.responseTimes.slice(-10);
+      }
+      // Calculate average response time
+      stat.averageResponseTime = stat.responseTimes.reduce((sum, time) => sum + time, 0) / stat.responseTimes.length;
+    }
+
+    updated.push(stat);
+  });
 
   saveStatistics(statistics);
-  return statistics[key];
+  return updated;
+};
+
+// Update statistics for a specific kana (single-entry convenience wrapper)
+export const updateKanaStatistic = (kana, romaji, isCorrect, responseTime = null) => {
+  const [stat] = updateKanaStatistics([{ kana, romaji, isCorrect, responseTime }]);
+  return stat;
 };
 
 // Get statistics for all kana, grouped by script
@@ -111,9 +155,11 @@ export const getStatisticsByScript = () => {
   };
 
   Object.values(statistics).forEach(stat => {
+    // Classify only by an explicit, known script value; entries with a
+    // missing/unknown script are not silently dumped into katakana.
     if (stat.script === 'hiragana') {
       result.hiragana.push(stat);
-    } else {
+    } else if (stat.script === 'katakana') {
       result.katakana.push(stat);
     }
   });
@@ -129,11 +175,11 @@ export const getStatisticsByScript = () => {
 export const getOverallStatistics = () => {
   const statistics = getStatistics();
   const stats = Object.values(statistics);
-  
+
   const totalShown = stats.reduce((sum, stat) => sum + stat.timesShown, 0);
   const totalCorrect = stats.reduce((sum, stat) => sum + stat.timesCorrect, 0);
   const totalIncorrect = stats.reduce((sum, stat) => sum + stat.timesIncorrect, 0);
-  
+
   return {
     totalKana: stats.length,
     totalShown,
@@ -188,53 +234,123 @@ export const exportStatisticsAsBase64 = () => {
   return btoa(unescape(encodeURIComponent(jsonString)));
 };
 
-// Import statistics from base64 string
-export const importStatisticsFromBase64 = (base64String) => {
+// Validate & normalize a single imported entry (compact or full shape).
+// Returns a complete stat object, or null if the entry is unusable.
+const normalizeImportedStat = (raw) => {
+  if (!raw || typeof raw !== 'object') {
+    return null;
+  }
+  const kana = raw.kana ?? raw.k;
+  const romaji = raw.romaji ?? raw.r;
+  if (!isNonEmptyString(kana) || !isNonEmptyString(romaji)) {
+    return null;
+  }
+  const rawScript = raw.script;
+  const script = rawScript === 'hiragana' || rawScript === 'katakana' ? rawScript : scriptOf(kana);
+  const lastSeen = raw.lastSeen ?? raw.l;
+  const responseTimes = Array.isArray(raw.responseTimes)
+    ? raw.responseTimes.map(Number).filter(Number.isFinite)
+    : [];
+
+  return {
+    kana,
+    romaji,
+    script,
+    timesShown: toNumber(raw.timesShown ?? raw.s),
+    timesCorrect: toNumber(raw.timesCorrect ?? raw.c),
+    timesIncorrect: toNumber(raw.timesIncorrect ?? raw.i),
+    lastSeen: isNonEmptyString(lastSeen) ? lastSeen : null,
+    averageResponseTime: toNumber(raw.averageResponseTime ?? raw.a),
+    responseTimes
+  };
+};
+
+// Merge an incoming stat into an existing one. Counters are additive; lastSeen
+// is the newer date; averageResponseTime is weighted by sample size (timesShown).
+const mergeStat = (existing, incoming) => {
+  if (!existing) {
+    return incoming;
+  }
+  const timesShown = existing.timesShown + incoming.timesShown;
+  const averageResponseTime = timesShown > 0
+    ? (existing.averageResponseTime * existing.timesShown + incoming.averageResponseTime * incoming.timesShown) / timesShown
+    : 0;
+  const lastSeen = [existing.lastSeen, incoming.lastSeen].filter(Boolean).sort().pop() || null;
+
+  return {
+    kana: existing.kana,
+    romaji: existing.romaji,
+    script: existing.script === 'hiragana' || existing.script === 'katakana' ? existing.script : incoming.script,
+    timesShown,
+    timesCorrect: existing.timesCorrect + incoming.timesCorrect,
+    timesIncorrect: existing.timesIncorrect + incoming.timesIncorrect,
+    lastSeen,
+    averageResponseTime,
+    // ISO strings sort chronologically; keep the last 10 combined samples
+    responseTimes: [...(existing.responseTimes || []), ...(incoming.responseTimes || [])].slice(-10)
+  };
+};
+
+// Import statistics from base64 string.
+// options.mode: 'merge' (default, additive) or 'replace' (overwrite local state).
+export const importStatisticsFromBase64 = (base64String, options = {}) => {
+  const mode = options.mode === 'replace' ? 'replace' : 'merge';
   try {
     // Decode base64 string
     const jsonString = decodeURIComponent(escape(atob(base64String)));
     const importData = JSON.parse(jsonString);
 
-    let statistics = {};
-
-    // Handle different format versions
+    // Collect the raw entries depending on the format version
+    let rawEntries;
     if (importData.v === '2.0' || importData.s) {
       // New compact format (v2.0)
-      if (!importData.s || !Array.isArray(importData.s)) {
+      if (!Array.isArray(importData.s)) {
         throw new Error('Invalid compact statistics data format');
       }
-
-      // Convert compact format back to full format
-      importData.s.forEach(stat => {
-        const key = `${stat.k}-${stat.r}`;
-        statistics[key] = {
-          kana: stat.k,
-          romaji: stat.r,
-          script: /[\u3040-\u309F]/.test(stat.k) ? 'hiragana' : 'katakana', // Detect from Unicode range
-          timesShown: stat.s || 0,
-          timesCorrect: stat.c || 0,
-          timesIncorrect: stat.i || 0,
-          lastSeen: stat.l || null,
-          averageResponseTime: stat.a || 0,
-          responseTimes: [] // Initialize empty array
-        };
-      });
+      rawEntries = importData.s;
     } else if (importData.statistics || importData.version === '1.0') {
       // Old format (v1.0) - direct statistics object
       if (!importData.statistics || typeof importData.statistics !== 'object') {
         throw new Error('Invalid statistics data format');
       }
-      statistics = importData.statistics;
+      rawEntries = Object.values(importData.statistics);
     } else {
       throw new Error('Unknown statistics format version');
     }
 
-    // Merge with existing statistics or replace
-    saveStatistics(statistics);
+    // Validate & normalize; invalid entries are discarded, not imported.
+    const imported = {};
+    rawEntries.forEach(raw => {
+      const stat = normalizeImportedStat(raw);
+      if (stat) {
+        imported[`${stat.kana}-${stat.romaji}`] = stat;
+      }
+    });
+
+    if (Object.keys(imported).length === 0) {
+      throw new Error('No valid statistics entries found');
+    }
+
+    // Merge into (or replace) the existing local state
+    const existing = mode === 'replace' ? {} : getStatistics();
+    const result = { ...existing };
+    Object.entries(imported).forEach(([key, stat]) => {
+      result[key] = mergeStat(mode === 'replace' ? null : existing[key], stat);
+    });
+
+    if (!saveStatistics(result)) {
+      return {
+        success: false,
+        message: 'Failed to save imported statistics. Storage may be full.'
+      };
+    }
+
     return {
       success: true,
       message: 'Statistics imported successfully',
-      importDate: importData.d || importData.exportDate || new Date().toISOString()
+      importDate: importData.d || importData.exportDate || new Date().toISOString(),
+      imported: Object.keys(imported).length,
+      mode
     };
   } catch (error) {
     console.error('Error importing statistics:', error);
@@ -244,4 +360,35 @@ export const importStatisticsFromBase64 = (base64String) => {
       error: error.message
     };
   }
+};
+
+// Get the persisted best streak (default 0)
+export const getBestStreak = () => {
+  try {
+    const n = Number(localStorage.getItem(STREAK_KEY));
+    return Number.isFinite(n) && n > 0 ? Math.floor(n) : 0;
+  } catch (error) {
+    console.error('Error reading best streak from localStorage:', error);
+    return 0;
+  }
+};
+
+// Persist a new streak only if it beats the stored best.
+// Returns { bestStreak, isRecord }.
+export const updateBestStreak = (streak) => {
+  const current = getBestStreak();
+  const value = Number(streak);
+  const candidate = Number.isFinite(value) && value > 0 ? Math.floor(value) : 0;
+
+  if (candidate > current) {
+    try {
+      localStorage.setItem(STREAK_KEY, String(candidate));
+    } catch (error) {
+      console.error('Error saving best streak to localStorage:', error);
+      return { bestStreak: current, isRecord: false };
+    }
+    return { bestStreak: candidate, isRecord: true };
+  }
+
+  return { bestStreak: current, isRecord: false };
 };
