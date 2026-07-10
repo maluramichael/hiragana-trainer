@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import KanaBackground from './KanaBackground.jsx';
-import { RocketIcon, SparkleIcon, RepeatIcon, HeartIcon } from './icons.jsx';
+import { RocketIcon, SparkleIcon, RepeatIcon, HeartIcon, GlobeIcon } from './icons.jsx';
 
 // The hero spells out the two syllabaries as bobbing badges: "hiragana" and
 // "katakana", both written in hiragana.
@@ -115,8 +115,14 @@ const LandingPage = ({ onStart, onChooseCharacters }) => {
           </ul>
 
           {/* Author card: same style, spanning the full width under the three
-              feature cards. Photo (self-hosted, round) on the left, short bio right. */}
-          <div className="mt-6 flex flex-col items-center gap-5 rounded-[1.75rem] bg-white/80 p-6 text-center shadow-cute ring-1 ring-white/70 backdrop-blur-sm sm:flex-row sm:text-left">
+              feature cards. Whole card links to my site. Photo (self-hosted,
+              round) on the left, short bio right. */}
+          <a
+            href="https://malura.de"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group mt-6 flex flex-col items-center gap-5 rounded-[1.75rem] bg-white/80 p-6 text-center shadow-cute ring-1 ring-white/70 backdrop-blur-sm transition hover:-translate-y-0.5 hover:shadow-cute-lg hover:ring-fuchsia-200 sm:flex-row sm:text-left"
+          >
             <img
               src="/michael.jpg"
               alt="Michael Malura"
@@ -135,8 +141,13 @@ const LandingPage = ({ onStart, onChooseCharacters }) => {
               <p className="mt-2 text-sm leading-relaxed text-slate-600">
                 {t('landing.about.body')}
               </p>
+              <span className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-fuchsia-600 transition group-hover:text-fuchsia-700">
+                <GlobeIcon className="h-4 w-4" />
+                {t('landing.about.link')}
+                <span aria-hidden className="transition-transform group-hover:translate-x-0.5">→</span>
+              </span>
             </div>
-          </div>
+          </a>
         </section>
       </div>
     </main>
