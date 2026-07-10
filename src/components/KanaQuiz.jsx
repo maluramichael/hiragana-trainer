@@ -300,7 +300,7 @@ const KanaQuiz = ({ kanaList, onFinish }) => {
               )}
 
               <div className="text-lg text-gray-700">
-                {t('quiz.correctAnswer')}: <span className="font-mono bg-green-100 px-2 py-1 rounded font-semibold">{feedback.correctAnswer}</span>
+                {t('quiz.correctAnswer')} <span className="font-mono bg-green-100 px-2 py-1 rounded font-semibold">{feedback.correctAnswer}</span>
               </div>
 
               <div className="mt-4">

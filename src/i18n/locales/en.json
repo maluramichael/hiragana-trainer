@@ -111,6 +111,7 @@
     "cancelButton": "Cancel"
   },
   "progress": {
+    "level": "Level",
     "notStarted": "Not started",
     "beginner": "Beginner",
     "intermediate": "Intermediate",
