@@ -25,17 +25,13 @@ const isHiragana = (char) => /[぀-ゟ]/.test(char);
 
 const KanaQuiz = ({ kanaList, onFinish, scriptMode = 'both' }) => {
   const { t } = useTranslation();
-  // Which script(s) are drilled this round. 'both' keeps hiragana and katakana
-  // side by side; the single-script modes show and track only that one (#72).
-  const showHiragana = scriptMode !== 'katakana';
-  const showKatakana = scriptMode !== 'hiragana';
   const [currentIndex, setCurrentIndex] = useState(0);
   const [userInput, setUserInput] = useState('');
   const [feedback, setFeedback] = useState(null);
   const [correctCount, setCorrectCount] = useState(0);
   const [streak, setStreak] = useState(0);
   const [bestStreak, setBestStreak] = useState(() => getBestStreak());
-  const [shuffledPairs, setShuffledPairs] = useState([]);
+  const [shuffledQuestions, setShuffledQuestions] = useState([]);
   const [questionStartTime, setQuestionStartTime] = useState(null);
   const [incorrectQueue, setIncorrectQueue] = useState([]);
   const inputRef = useRef(null);
@@ -44,28 +40,35 @@ const KanaQuiz = ({ kanaList, onFinish, scriptMode = 'both' }) => {
   const persistedBestRef = useRef(getBestStreak());
 
   useEffect(() => {
-    // Pair each selected kana with its positional counterpart in the other script.
-    // Dedupe on the actual character pair (not romaji) so ぢ/づ stay distinct from
-    // じ/ず despite sharing romaji (#11).
+    // Build a flat list of single-character questions. In "both" mode each pair
+    // contributes TWO separate questions (the hiragana and the katakana), so the
+    // scripts are drilled one at a time, shuffled together and alternating, not
+    // shown side by side. Single-script modes contribute one question per pair.
+    // Dedupe on the character pair so ぢ/づ stay distinct from じ/ず despite
+    // sharing romaji (#11).
     const seen = new Set();
-    const kanaPairs = [];
+    const questions = [];
 
-    kanaList.forEach(kana => {
+    kanaList.forEach((kana) => {
       const counterpart = getScriptCounterpart(kana);
       if (!counterpart) return;
 
       const hiraganaChar = isHiragana(kana.kana) ? kana.kana : counterpart.kana;
       const katakanaChar = isHiragana(kana.kana) ? counterpart.kana : kana.kana;
-      const key = `${hiraganaChar}-${katakanaChar}`;
-      if (seen.has(key)) return;
-      seen.add(key);
+      const pairKey = `${hiraganaChar}-${katakanaChar}`;
+      if (seen.has(pairKey)) return;
+      seen.add(pairKey);
 
-      kanaPairs.push({ romaji: kana.romaji, hiragana: hiraganaChar, katakana: katakanaChar });
+      if (scriptMode !== 'katakana') {
+        questions.push({ kana: hiraganaChar, romaji: kana.romaji, script: 'hiragana' });
+      }
+      if (scriptMode !== 'hiragana') {
+        questions.push({ kana: katakanaChar, romaji: kana.romaji, script: 'katakana' });
+      }
     });
 
-    const shuffled = [...kanaPairs].sort(() => Math.random() - 0.5);
-    setShuffledPairs(shuffled);
-  }, [kanaList]);
+    setShuffledQuestions([...questions].sort(() => Math.random() - 0.5));
+  }, [kanaList, scriptMode]);
 
   useEffect(() => {
     if (inputRef.current) {
@@ -82,51 +85,36 @@ const KanaQuiz = ({ kanaList, onFinish, scriptMode = 'both' }) => {
     }
   }, [feedback]);
 
-  // Get current question from main queue or retry queue
+  // Get current question from the main queue or, once we walk past it, the retry queue.
   const getCurrentQuestion = () => {
-    if (incorrectQueue.length > 0 && currentIndex >= shuffledPairs.length) {
-      // We're in the retry phase
-      const retryIndex = currentIndex - shuffledPairs.length;
-      return incorrectQueue[retryIndex];
-    } else {
-      // Normal question from main queue
-      return shuffledPairs[currentIndex];
+    if (incorrectQueue.length > 0 && currentIndex >= shuffledQuestions.length) {
+      return incorrectQueue[currentIndex - shuffledQuestions.length];
     }
+    return shuffledQuestions[currentIndex];
   };
 
-  const currentPair = getCurrentQuestion();
-  const totalQuestions = shuffledPairs.length + incorrectQueue.length;
+  const current = getCurrentQuestion();
+  const totalQuestions = shuffledQuestions.length + incorrectQueue.length;
   const progress = ((currentIndex + 1) / totalQuestions) * 100;
   // Retry phase begins once we've walked past the main queue (#95, derived inline).
-  const isRetryAttempt = currentIndex >= shuffledPairs.length;
+  const isRetryAttempt = currentIndex >= shuffledQuestions.length;
   const isNewRecord = bestStreak > persistedBestRef.current;
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!userInput.trim() || feedback) return;
 
-    const isCorrect = isRomajiCorrect(userInput, currentPair.romaji);
+    const isCorrect = isRomajiCorrect(userInput, current.romaji);
     const responseTime = questionStartTime ? Date.now() - questionStartTime : null;
 
-    // Only the active script(s) are tracked. In a single-script round the other
-    // side is never shown, so it must not gain statistics either (#72).
-    const answered = [];
-    if (showHiragana) {
-      answered.push({ kana: currentPair.hiragana, romaji: currentPair.romaji, isCorrect, responseTime });
-    }
-    if (showKatakana) {
-      answered.push({ kana: currentPair.katakana, romaji: currentPair.romaji, isCorrect, responseTime });
-    }
-
-    // Update statistics for the active kana in a single get/save (#83).
-    updateKanaStatistics(answered);
-
-    // Keep the spaced-repetition schedule current for each answered kana (#12).
-    answered.forEach(({ kana, romaji }) => scheduleReview(`${kana}-${romaji}`, isCorrect));
+    // Each question is a single kana; record exactly that one (#83).
+    updateKanaStatistics([{ kana: current.kana, romaji: current.romaji, isCorrect, responseTime }]);
+    // Keep the spaced-repetition schedule current for the answered kana (#12).
+    scheduleReview(`${current.kana}-${current.romaji}`, isCorrect);
 
     setFeedback({
       isCorrect,
-      correctAnswer: currentPair.romaji,
+      correctAnswer: current.romaji,
       userAnswer: userInput.trim()
     });
 
@@ -147,11 +135,9 @@ const KanaQuiz = ({ kanaList, onFinish, scriptMode = 'both' }) => {
       // Add to incorrect queue if not already there and not a retry
       if (!isRetryAttempt) {
         setIncorrectQueue(prev => {
-          const alreadyQueued = prev.some(pair =>
-            pair.hiragana === currentPair.hiragana &&
-            pair.katakana === currentPair.katakana
-          );
-          return alreadyQueued ? prev : [...prev, currentPair];
+          const key = `${current.kana}-${current.romaji}`;
+          const alreadyQueued = prev.some(q => `${q.kana}-${q.romaji}` === key);
+          return alreadyQueued ? prev : [...prev, current];
         });
       }
     }
@@ -160,7 +146,7 @@ const KanaQuiz = ({ kanaList, onFinish, scriptMode = 'both' }) => {
   // Advance runs on a click (a later render), so incorrectQueue/streak/counts are
   // already up to date — no stale-closure end/progress decision from a timeout (#79).
   const handleAdvance = () => {
-    const total = shuffledPairs.length + incorrectQueue.length;
+    const total = shuffledQuestions.length + incorrectQueue.length;
 
     if (currentIndex < total - 1) {
       setCurrentIndex(prev => prev + 1);
@@ -170,7 +156,7 @@ const KanaQuiz = ({ kanaList, onFinish, scriptMode = 'both' }) => {
       // Quiz complete — persist the best streak reached this session (#53).
       updateBestStreak(bestStreak);
       onFinish({
-        total: shuffledPairs.length,
+        total: shuffledQuestions.length,
         correct: correctCount,
         bestStreak
       });
@@ -183,13 +169,15 @@ const KanaQuiz = ({ kanaList, onFinish, scriptMode = 'both' }) => {
     onFinish(null);
   };
 
-  if (!currentPair) return <div>Loading...</div>;
+  if (!current) return <div>Loading...</div>;
 
   const kanaStateClass = feedback?.isCorrect
     ? 'text-emerald-500 scale-110'
     : feedback?.isCorrect === false
       ? 'text-rose-500 scale-90'
       : 'text-slate-800';
+  const scriptLabel = current.script === 'hiragana' ? t('scripts.hiragana') : t('scripts.katakana');
+  const scriptLabelClass = current.script === 'hiragana' ? 'text-fuchsia-400' : 'text-violet-400';
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-violet-100 via-fuchsia-50 to-rose-100 p-6 pb-24">
@@ -240,36 +228,16 @@ const KanaQuiz = ({ kanaList, onFinish, scriptMode = 'both' }) => {
 
         {/* Main Quiz Card */}
         <div className="mb-6 rounded-[1.75rem] bg-white/90 p-8 shadow-cute-lg ring-1 ring-white/70">
-          {/* Kana Display */}
+          {/* Single kana display; the script (hiragana or katakana) is labelled. */}
           <div className="mb-8 text-center">
-            <div className="flex items-center justify-center gap-8">
-              {showHiragana && (
-                <div className="text-center">
-                  <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-fuchsia-400">{t('scripts.hiragana')}</div>
-                  <div
-                    lang="ja"
-                    className={`font-kana text-7xl font-bold transition-all duration-300 ${kanaStateClass}`}
-                  >
-                    {currentPair.hiragana}
-                  </div>
-                </div>
-              )}
-
-              {showHiragana && showKatakana && (
-                <div className="h-16 w-px bg-fuchsia-200" />
-              )}
-
-              {showKatakana && (
-                <div className="text-center">
-                  <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-violet-400">{t('scripts.katakana')}</div>
-                  <div
-                    lang="ja"
-                    className={`font-kana text-7xl font-bold transition-all duration-300 ${kanaStateClass}`}
-                  >
-                    {currentPair.katakana}
-                  </div>
-                </div>
-              )}
+            <div className={`mb-2 text-xs font-semibold uppercase tracking-wide ${scriptLabelClass}`}>
+              {scriptLabel}
+            </div>
+            <div
+              lang="ja"
+              className={`font-kana text-8xl font-bold transition-all duration-300 ${kanaStateClass}`}
+            >
+              {current.kana}
             </div>
           </div>
 

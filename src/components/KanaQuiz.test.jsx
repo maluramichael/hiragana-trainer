@@ -18,11 +18,14 @@ describe('KanaQuiz', () => {
     localStorage.clear();
   });
 
-  it('#1 + #83: a single correct answer counts each kana exactly once', async () => {
+  it('#1 + #83: each kana counts exactly once (both scripts asked separately)', async () => {
     const user = userEvent.setup();
     render(<KanaQuiz kanaList={pair('a')} onFinish={vi.fn()} />);
 
-    // Enter must submit once (no double count), stats written once per kana.
+    // Both mode asks the two scripts as separate, alternating questions.
+    // Each Enter submits once (no double count), stats written once per kana.
+    await user.type(screen.getByRole('textbox'), 'a{Enter}');
+    await user.click(screen.getByRole('button', { name: /weiter|next/i }));
     await user.type(screen.getByRole('textbox'), 'a{Enter}');
 
     const stats = getStatistics();
@@ -54,11 +57,11 @@ describe('KanaQuiz', () => {
   it('#65: feedback shows a control button instead of auto-advancing', async () => {
     const user = userEvent.setup();
     const onFinish = vi.fn();
-    render(<KanaQuiz kanaList={pair('a')} onFinish={onFinish} />);
+    render(<KanaQuiz kanaList={pair('a')} scriptMode="hiragana" onFinish={onFinish} />);
 
     await user.type(screen.getByRole('textbox'), 'a{Enter}');
 
-    // Single pair -> the advance control finishes the quiz on click.
+    // Single hiragana question -> the advance control finishes the quiz on click.
     const advance = screen.getByRole('button', { name: /beenden|finish/i });
     await user.click(advance);
 
@@ -102,6 +105,9 @@ describe('KanaQuiz', () => {
     const user = userEvent.setup();
     render(<KanaQuiz kanaList={pair('a')} onFinish={vi.fn()} />);
 
+    // Both scripts are asked as separate questions; answer both.
+    await user.type(screen.getByRole('textbox'), 'a{Enter}');
+    await user.click(screen.getByRole('button', { name: /weiter|next/i }));
     await user.type(screen.getByRole('textbox'), 'a{Enter}');
 
     const stats = getStatistics();

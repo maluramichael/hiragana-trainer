@@ -87,8 +87,11 @@ function App() {
   };
 
   // Landing CTA: one click jumps straight into a quiz on the five hiragana
-  // vowels, the natural first thing a learner drills.
+  // vowels, the natural first thing a learner drills. Seed a selection entry
+  // behind the quiz first, so "back to selection" and "choose different
+  // characters" land on the picker instead of bouncing to the landing page.
   const handleStartFromLanding = () => {
+    window.history.pushState({ view: 'selection' }, '', window.location.pathname);
     handleStartQuiz(kanaGroups.basic.vowels.hiragana, { scriptMode: 'hiragana' });
   };
 
