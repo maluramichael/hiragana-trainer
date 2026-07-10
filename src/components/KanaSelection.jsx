@@ -6,7 +6,23 @@ import { getOverallStatistics } from '../utils/statisticsManager.js';
 import ProgressBar from './ProgressBar.jsx';
 
 const SELECTION_KEY = 'kana-quiz-selection';
+const SCRIPT_MODE_KEY = 'kana-quiz-script-mode';
 const GITHUB_URL = 'https://github.com/maluramichael/hiragana-trainer';
+
+// Which script(s) the quiz drills. Default on first visit is Hiragana only —
+// the natural order in which learners pick up Japanese.
+const SCRIPT_MODES = ['hiragana', 'katakana', 'both'];
+const DEFAULT_SCRIPT_MODE = 'hiragana';
+
+// Restore the persisted script mode, robust against a missing/corrupt value.
+const loadScriptMode = () => {
+  try {
+    const raw = localStorage.getItem(SCRIPT_MODE_KEY);
+    return SCRIPT_MODES.includes(raw) ? raw : DEFAULT_SCRIPT_MODE;
+  } catch {
+    return DEFAULT_SCRIPT_MODE;
+  }
+};
 
 const defaultSelection = {
   basic: false,
@@ -93,6 +109,7 @@ const KanaSelection = ({ onStartQuiz, onViewStatistics }) => {
   const [progress, setProgress] = useState(null);
   const [hasData, setHasData] = useState(false);
   const [selectedGroups, setSelectedGroups] = useState(loadSelection);
+  const [scriptMode, setScriptMode] = useState(loadScriptMode);
 
   useEffect(() => {
     // Load progress data when component mounts
@@ -108,6 +125,15 @@ const KanaSelection = ({ onStartQuiz, onViewStatistics }) => {
       // Persistence is a convenience; ignore quota/availability errors.
     }
   }, [selectedGroups]);
+
+  // Persist the chosen script mode alongside the group selection.
+  useEffect(() => {
+    try {
+      localStorage.setItem(SCRIPT_MODE_KEY, scriptMode);
+    } catch {
+      // Persistence is a convenience; ignore quota/availability errors.
+    }
+  }, [scriptMode]);
 
   const handleMainGroupToggle = (group) => {
     const newValue = !selectedGroups[group];
@@ -141,7 +167,7 @@ const KanaSelection = ({ onStartQuiz, onViewStatistics }) => {
   const handleStartQuiz = () => {
     const kanaToStudy = getKanaForSelection(selectedGroups);
     if (kanaToStudy.length > 0) {
-      onStartQuiz(kanaToStudy);
+      onStartQuiz(kanaToStudy, { scriptMode });
     }
   };
 
@@ -155,7 +181,7 @@ const KanaSelection = ({ onStartQuiz, onViewStatistics }) => {
     setSelectedGroups(quickSelection);
     const kanaToStudy = getKanaForSelection(quickSelection);
     if (kanaToStudy.length > 0) {
-      onStartQuiz(kanaToStudy);
+      onStartQuiz(kanaToStudy, { scriptMode });
     }
   };
 
@@ -231,6 +257,39 @@ const KanaSelection = ({ onStartQuiz, onViewStatistics }) => {
           <h2 className="text-2xl font-semibold text-gray-800 mb-4 text-center">
             ひらがな & カタカナ (Hiragana & Katakana)
           </h2>
+
+          {/* Script mode: drill only Hiragana, only Katakana, or both (#72). */}
+          <fieldset className="mb-6">
+            <legend className="text-sm font-medium text-gray-700 mb-2 text-center w-full">
+              {t('selection.scriptMode')}
+            </legend>
+            <div className="flex justify-center gap-2">
+              {[
+                { value: 'hiragana', label: 'selection.scriptHiragana' },
+                { value: 'katakana', label: 'selection.scriptKatakana' },
+                { value: 'both', label: 'selection.scriptBoth' }
+              ].map(({ value, label }) => (
+                <label
+                  key={value}
+                  className={`cursor-pointer px-4 py-2 rounded-lg border text-sm transition-colors ${
+                    scriptMode === value
+                      ? 'bg-blue-600 border-blue-600 text-white'
+                      : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="scriptMode"
+                    value={value}
+                    checked={scriptMode === value}
+                    onChange={() => setScriptMode(value)}
+                    className="sr-only"
+                  />
+                  {t(label)}
+                </label>
+              ))}
+            </div>
+          </fieldset>
 
           <div className="space-y-4">
             {/* Basic Section */}

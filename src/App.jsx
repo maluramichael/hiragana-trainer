@@ -21,6 +21,8 @@ function App() {
   const { t, i18n } = useTranslation();
   const [currentView, setCurrentView] = useState('selection');
   const [selectedKana, setSelectedKana] = useState([]);
+  // Which script(s) the quiz drills; 'both' keeps the legacy behaviour (#72).
+  const [scriptMode, setScriptMode] = useState('both');
   const [quizResults, setQuizResults] = useState(null);
   // Marks a back navigation we triggered ourselves, so popstate skips the quiz-leave prompt.
   const intentionalLeaveRef = useRef(false);
@@ -72,8 +74,9 @@ function App() {
     setCurrentView(view);
   };
 
-  const handleStartQuiz = (kanaList) => {
+  const handleStartQuiz = (kanaList, options = {}) => {
     setSelectedKana(kanaList);
+    setScriptMode(options.scriptMode ?? 'both');
     navigateTo('quiz');
   };
 
@@ -123,6 +126,7 @@ function App() {
         {currentView === 'quiz' && (
           <KanaQuiz
             kanaList={selectedKana}
+            scriptMode={scriptMode}
             onFinish={handleQuizFinish}
           />
         )}

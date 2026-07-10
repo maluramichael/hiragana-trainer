@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { getScriptCounterpart } from '../data/kana.js';
-import { updateKanaStatistics, getBestStreak, updateBestStreak } from '../utils/statisticsManager.js';
+import { updateKanaStatistics, getBestStreak, updateBestStreak, scheduleReview } from '../utils/statisticsManager.js';
 
 // Accept common Kunrei/Hepburn spelling variants, not only the canonical romaji (#29).
 // Keyed on the canonical romaji stored in kana.js (always the Hepburn form).
@@ -22,8 +22,12 @@ const isRomajiCorrect = (input, romaji) => {
 // Hiragana Unicode block; anything else in a pair is the Katakana side.
 const isHiragana = (char) => /[぀-ゟ]/.test(char);
 
-const KanaQuiz = ({ kanaList, onFinish }) => {
+const KanaQuiz = ({ kanaList, onFinish, scriptMode = 'both' }) => {
   const { t } = useTranslation();
+  // Which script(s) are drilled this round. 'both' keeps hiragana and katakana
+  // side by side; the single-script modes show and track only that one (#72).
+  const showHiragana = scriptMode !== 'katakana';
+  const showKatakana = scriptMode !== 'hiragana';
   const [currentIndex, setCurrentIndex] = useState(0);
   const [userInput, setUserInput] = useState('');
   const [feedback, setFeedback] = useState(null);
@@ -103,11 +107,21 @@ const KanaQuiz = ({ kanaList, onFinish }) => {
     const isCorrect = isRomajiCorrect(userInput, currentPair.romaji);
     const responseTime = questionStartTime ? Date.now() - questionStartTime : null;
 
-    // Update statistics for both hiragana and katakana in a single get/save (#83).
-    updateKanaStatistics([
-      { kana: currentPair.hiragana, romaji: currentPair.romaji, isCorrect, responseTime },
-      { kana: currentPair.katakana, romaji: currentPair.romaji, isCorrect, responseTime }
-    ]);
+    // Only the active script(s) are tracked. In a single-script round the other
+    // side is never shown, so it must not gain statistics either (#72).
+    const answered = [];
+    if (showHiragana) {
+      answered.push({ kana: currentPair.hiragana, romaji: currentPair.romaji, isCorrect, responseTime });
+    }
+    if (showKatakana) {
+      answered.push({ kana: currentPair.katakana, romaji: currentPair.romaji, isCorrect, responseTime });
+    }
+
+    // Update statistics for the active kana in a single get/save (#83).
+    updateKanaStatistics(answered);
+
+    // Keep the spaced-repetition schedule current for each answered kana (#12).
+    answered.forEach(({ kana, romaji }) => scheduleReview(`${kana}-${romaji}`, isCorrect));
 
     setFeedback({
       isCorrect,
@@ -222,35 +236,41 @@ const KanaQuiz = ({ kanaList, onFinish }) => {
           {/* Kana Display */}
           <div className="text-center mb-8">
             <div className="flex justify-center items-center gap-8 mb-4">
-              <div className="text-center">
-                <div className="text-sm text-gray-500 mb-2">{t('scripts.hiragana')}</div>
-                <div
-                  lang="ja"
-                  className={`text-6xl font-bold transition-all duration-300 ${
-                    feedback?.isCorrect ? 'text-green-500 scale-110' :
-                    feedback?.isCorrect === false ? 'text-red-500 scale-90' :
-                    'text-gray-800'
-                  }`}
-                >
-                  {currentPair.hiragana}
+              {showHiragana && (
+                <div className="text-center">
+                  <div className="text-sm text-gray-500 mb-2">{t('scripts.hiragana')}</div>
+                  <div
+                    lang="ja"
+                    className={`text-6xl font-bold transition-all duration-300 ${
+                      feedback?.isCorrect ? 'text-green-500 scale-110' :
+                      feedback?.isCorrect === false ? 'text-red-500 scale-90' :
+                      'text-gray-800'
+                    }`}
+                  >
+                    {currentPair.hiragana}
+                  </div>
                 </div>
-              </div>
+              )}
 
-              <div className="text-4xl text-gray-400 font-light">|</div>
+              {showHiragana && showKatakana && (
+                <div className="text-4xl text-gray-400 font-light">|</div>
+              )}
 
-              <div className="text-center">
-                <div className="text-sm text-gray-500 mb-2">{t('scripts.katakana')}</div>
-                <div
-                  lang="ja"
-                  className={`text-6xl font-bold transition-all duration-300 ${
-                    feedback?.isCorrect ? 'text-green-500 scale-110' :
-                    feedback?.isCorrect === false ? 'text-red-500 scale-90' :
-                    'text-gray-800'
-                  }`}
-                >
-                  {currentPair.katakana}
+              {showKatakana && (
+                <div className="text-center">
+                  <div className="text-sm text-gray-500 mb-2">{t('scripts.katakana')}</div>
+                  <div
+                    lang="ja"
+                    className={`text-6xl font-bold transition-all duration-300 ${
+                      feedback?.isCorrect ? 'text-green-500 scale-110' :
+                      feedback?.isCorrect === false ? 'text-red-500 scale-90' :
+                      'text-gray-800'
+                    }`}
+                  >
+                    {currentPair.katakana}
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
 

@@ -40,7 +40,11 @@
     "basicHint": "Grundzeichen, hier anfangen.",
     "dakutenHint": "Zeichen mit zwei Strichen, für später.",
     "handakutenHint": "Zeichen mit kleinem Kreis.",
-    "viewStats": "Statistik ansehen"
+    "viewStats": "Statistik ansehen",
+    "scriptMode": "Welche Schrift?",
+    "scriptHiragana": "Nur Hiragana",
+    "scriptKatakana": "Nur Katakana",
+    "scriptBoth": "Beide"
   },
   "quiz": {
     "typeRomaji": "Geben Sie das Romaji ein...",

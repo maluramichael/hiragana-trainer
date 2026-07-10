@@ -40,7 +40,11 @@
     "basicHint": "Basic characters, start here.",
     "dakutenHint": "Characters with two strokes, for later.",
     "handakutenHint": "Characters with a small circle.",
-    "viewStats": "View statistics"
+    "viewStats": "View statistics",
+    "scriptMode": "Which script?",
+    "scriptHiragana": "Hiragana only",
+    "scriptKatakana": "Katakana only",
+    "scriptBoth": "Both"
   },
   "quiz": {
     "typeRomaji": "Type the romaji...",

@@ -54,4 +54,39 @@ describe('KanaSelection', () => {
     // Vowels: 5 hiragana + 5 katakana = 10 characters.
     expect(screen.getByText(/10 Zeichen ausgewählt/)).toBeInTheDocument();
   });
+
+  it('#72: the script mode defaults to hiragana on first visit', () => {
+    render(<KanaSelection onStartQuiz={vi.fn()} onViewStatistics={vi.fn()} />);
+
+    expect(screen.getByRole('radio', { name: /Nur Hiragana/i })).toBeChecked();
+    expect(screen.getByRole('radio', { name: /Nur Katakana/i })).not.toBeChecked();
+    expect(screen.getByRole('radio', { name: /^Beide$/i })).not.toBeChecked();
+  });
+
+  it('#72: the script mode is persisted and restored on remount', async () => {
+    const user = userEvent.setup();
+
+    const { unmount } = render(
+      <KanaSelection onStartQuiz={vi.fn()} onViewStatistics={vi.fn()} />
+    );
+
+    await user.click(screen.getByRole('radio', { name: /Nur Katakana/i }));
+    expect(localStorage.getItem('kana-quiz-script-mode')).toBe('katakana');
+
+    unmount();
+    render(<KanaSelection onStartQuiz={vi.fn()} onViewStatistics={vi.fn()} />);
+
+    expect(screen.getByRole('radio', { name: /Nur Katakana/i })).toBeChecked();
+  });
+
+  it('#72: the chosen script mode is handed to onStartQuiz', async () => {
+    const user = userEvent.setup();
+    const onStartQuiz = vi.fn();
+    render(<KanaSelection onStartQuiz={onStartQuiz} onViewStatistics={vi.fn()} />);
+
+    await user.click(screen.getByRole('radio', { name: /Nur Katakana/i }));
+    await user.click(screen.getByTestId('quickstart-button'));
+
+    expect(onStartQuiz.mock.calls[0][1]).toEqual({ scriptMode: 'katakana' });
+  });
 });

@@ -75,4 +75,49 @@ describe('KanaQuiz', () => {
 
     expect(onFinish).toHaveBeenCalledWith(null);
   });
+
+  it('#72: hiragana mode tracks only the hiragana kana', async () => {
+    const user = userEvent.setup();
+    render(<KanaQuiz kanaList={pair('a')} scriptMode="hiragana" onFinish={vi.fn()} />);
+
+    await user.type(screen.getByRole('textbox'), 'a{Enter}');
+
+    const stats = getStatistics();
+    expect(stats['あ-a']).toBeDefined();
+    expect(stats['ア-a']).toBeUndefined();
+  });
+
+  it('#72: katakana mode tracks only the katakana kana', async () => {
+    const user = userEvent.setup();
+    render(<KanaQuiz kanaList={pair('a')} scriptMode="katakana" onFinish={vi.fn()} />);
+
+    await user.type(screen.getByRole('textbox'), 'a{Enter}');
+
+    const stats = getStatistics();
+    expect(stats['ア-a']).toBeDefined();
+    expect(stats['あ-a']).toBeUndefined();
+  });
+
+  it('#72: both mode (the default) tracks both scripts', async () => {
+    const user = userEvent.setup();
+    render(<KanaQuiz kanaList={pair('a')} onFinish={vi.fn()} />);
+
+    await user.type(screen.getByRole('textbox'), 'a{Enter}');
+
+    const stats = getStatistics();
+    expect(stats['あ-a']).toBeDefined();
+    expect(stats['ア-a']).toBeDefined();
+  });
+
+  it('#12: answering schedules a spaced-repetition review for the kana', async () => {
+    const user = userEvent.setup();
+    render(<KanaQuiz kanaList={pair('a')} scriptMode="hiragana" onFinish={vi.fn()} />);
+
+    await user.type(screen.getByRole('textbox'), 'a{Enter}');
+
+    const stats = getStatistics();
+    // A correct answer moves the kana from box 0 to box 1 and sets a due date.
+    expect(stats['あ-a'].box).toBe(1);
+    expect(stats['あ-a'].dueAt).toBeTruthy();
+  });
 });
