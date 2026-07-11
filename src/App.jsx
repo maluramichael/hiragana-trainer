@@ -72,6 +72,17 @@ function App() {
     return () => window.removeEventListener('popstate', handlePopState);
   }, [currentView, t]);
 
+  // Forward-navigating back onto the results entry (browser-forward after leaving
+  // results) lands here without result data — it was cleared on the way out.
+  // There is nothing to show, so fall back to the selection screen instead of
+  // rendering QuizResults with a null `results` (which would crash on results.total).
+  useEffect(() => {
+    if (currentView === 'results' && !quizResults) {
+      window.history.replaceState({ view: 'selection' }, '', window.location.pathname);
+      setCurrentView('selection');
+    }
+  }, [currentView, quizResults]);
+
   // Forward navigation: add a history entry so browser-back has somewhere to go.
   const navigateTo = (view) => {
     window.history.pushState({ view }, '', window.location.pathname);
@@ -177,7 +188,7 @@ function App() {
           />
         )}
 
-        {currentView === 'results' && (
+        {currentView === 'results' && quizResults && (
           <QuizResults
             results={quizResults}
             kanaList={selectedKana}
