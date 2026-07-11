@@ -2,17 +2,11 @@ import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { getScriptCounterpart } from '../data/kana.js';
 import { updateKanaStatistics, getBestStreak, updateBestStreak, scheduleReview } from '../utils/statisticsManager.js';
-import { ArrowLeftIcon } from './icons.jsx';
+import { Card, KanaCard, TextInput, Button, FeedbackBanner, StatTile, ProgressMeter, Badge } from '../ui/index.js';
 
-// Accept common Kunrei/Hepburn spelling variants, not only the canonical romaji (#29).
-// Keyed on the canonical romaji stored in kana.js (always the Hepburn form).
+// Accept common Kunrei/Hepburn spelling variants (#29).
 const romajiAliases = {
-  shi: ['si'],
-  chi: ['ti'],
-  tsu: ['tu'],
-  fu: ['hu'],
-  ji: ['zi', 'di'],
-  zu: ['du']
+  shi: ['si'], chi: ['ti'], tsu: ['tu'], fu: ['hu'], ji: ['zi', 'di'], zu: ['du']
 };
 
 const isRomajiCorrect = (input, romaji) => {
@@ -20,7 +14,6 @@ const isRomajiCorrect = (input, romaji) => {
   return normalized === romaji || (romajiAliases[romaji] || []).includes(normalized);
 };
 
-// Hiragana Unicode block; anything else in a pair is the Katakana side.
 const isHiragana = (char) => /[぀-ゟ]/.test(char);
 
 const KanaQuiz = ({ kanaList, onFinish, scriptMode = 'both' }) => {
@@ -36,56 +29,34 @@ const KanaQuiz = ({ kanaList, onFinish, scriptMode = 'both' }) => {
   const [incorrectQueue, setIncorrectQueue] = useState([]);
   const inputRef = useRef(null);
   const advanceButtonRef = useRef(null);
-  // Best streak persisted before this session started — used to flag a new record.
   const persistedBestRef = useRef(getBestStreak());
 
   useEffect(() => {
-    // Build a flat list of single-character questions. In "both" mode each pair
-    // contributes TWO separate questions (the hiragana and the katakana), so the
-    // scripts are drilled one at a time, shuffled together and alternating, not
-    // shown side by side. Single-script modes contribute one question per pair.
-    // Dedupe on the character pair so ぢ/づ stay distinct from じ/ず despite
-    // sharing romaji (#11).
     const seen = new Set();
     const questions = [];
-
     kanaList.forEach((kana) => {
       const counterpart = getScriptCounterpart(kana);
       if (!counterpart) return;
-
       const hiraganaChar = isHiragana(kana.kana) ? kana.kana : counterpart.kana;
       const katakanaChar = isHiragana(kana.kana) ? counterpart.kana : kana.kana;
       const pairKey = `${hiraganaChar}-${katakanaChar}`;
       if (seen.has(pairKey)) return;
       seen.add(pairKey);
-
-      if (scriptMode !== 'katakana') {
-        questions.push({ kana: hiraganaChar, romaji: kana.romaji, script: 'hiragana' });
-      }
-      if (scriptMode !== 'hiragana') {
-        questions.push({ kana: katakanaChar, romaji: kana.romaji, script: 'katakana' });
-      }
+      if (scriptMode !== 'katakana') questions.push({ kana: hiraganaChar, romaji: kana.romaji, script: 'hiragana' });
+      if (scriptMode !== 'hiragana') questions.push({ kana: katakanaChar, romaji: kana.romaji, script: 'katakana' });
     });
-
     setShuffledQuestions([...questions].sort(() => Math.random() - 0.5));
   }, [kanaList, scriptMode]);
 
   useEffect(() => {
-    if (inputRef.current) {
-      inputRef.current.focus();
-    }
-    // Start timing for new question
+    if (inputRef.current) inputRef.current.focus();
     setQuestionStartTime(Date.now());
   }, [currentIndex]);
 
-  // Move focus to the "next" button once feedback appears so Enter/Space advances.
   useEffect(() => {
-    if (feedback && advanceButtonRef.current) {
-      advanceButtonRef.current.focus();
-    }
+    if (feedback && advanceButtonRef.current) advanceButtonRef.current.focus();
   }, [feedback]);
 
-  // Get current question from the main queue or, once we walk past it, the retry queue.
   const getCurrentQuestion = () => {
     if (incorrectQueue.length > 0 && currentIndex >= shuffledQuestions.length) {
       return incorrectQueue[currentIndex - shuffledQuestions.length];
@@ -96,43 +67,26 @@ const KanaQuiz = ({ kanaList, onFinish, scriptMode = 'both' }) => {
   const current = getCurrentQuestion();
   const totalQuestions = shuffledQuestions.length + incorrectQueue.length;
   const progress = ((currentIndex + 1) / totalQuestions) * 100;
-  // Retry phase begins once we've walked past the main queue (#95, derived inline).
   const isRetryAttempt = currentIndex >= shuffledQuestions.length;
   const isNewRecord = bestStreak > persistedBestRef.current;
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!userInput.trim() || feedback) return;
-
     const isCorrect = isRomajiCorrect(userInput, current.romaji);
     const responseTime = questionStartTime ? Date.now() - questionStartTime : null;
-
-    // Each question is a single kana; record exactly that one (#83).
     updateKanaStatistics([{ kana: current.kana, romaji: current.romaji, isCorrect, responseTime }]);
-    // Keep the spaced-repetition schedule current for the answered kana (#12).
     scheduleReview(`${current.kana}-${current.romaji}`, isCorrect);
-
-    setFeedback({
-      isCorrect,
-      correctAnswer: current.romaji,
-      userAnswer: userInput.trim()
-    });
-
+    setFeedback({ isCorrect, correctAnswer: current.romaji, userAnswer: userInput.trim() });
     if (isCorrect) {
-      // Only count toward quiz score if not a retry attempt
-      if (!isRetryAttempt) {
-        setCorrectCount(prev => prev + 1);
-      }
-
+      if (!isRetryAttempt) setCorrectCount(prev => prev + 1);
       setStreak(prev => {
         const newStreak = prev + 1;
-        setBestStreak(current => Math.max(current, newStreak));
+        setBestStreak(cur => Math.max(cur, newStreak));
         return newStreak;
       });
     } else {
       setStreak(0);
-
-      // Add to incorrect queue if not already there and not a retry
       if (!isRetryAttempt) {
         setIncorrectQueue(prev => {
           const key = `${current.kana}-${current.romaji}`;
@@ -143,186 +97,83 @@ const KanaQuiz = ({ kanaList, onFinish, scriptMode = 'both' }) => {
     }
   };
 
-  // Advance runs on a click (a later render), so incorrectQueue/streak/counts are
-  // already up to date — no stale-closure end/progress decision from a timeout (#79).
   const handleAdvance = () => {
     const total = shuffledQuestions.length + incorrectQueue.length;
-
     if (currentIndex < total - 1) {
       setCurrentIndex(prev => prev + 1);
       setUserInput('');
       setFeedback(null);
     } else {
-      // Quiz complete — persist the best streak reached this session (#53).
       updateBestStreak(bestStreak);
-      onFinish({
-        total: shuffledQuestions.length,
-        correct: correctCount,
-        bestStreak
-      });
+      onFinish({ total: shuffledQuestions.length, correct: correctCount, bestStreak });
     }
   };
 
   const handleBack = () => {
-    // Guard against losing in-progress answers (#64).
     if (currentIndex > 0 && !window.confirm(t('quiz.confirmLeave'))) return;
     onFinish(null);
   };
 
-  if (!current) return <div>Loading...</div>;
+  if (!current) return null;
 
-  const kanaStateClass = feedback?.isCorrect
-    ? 'text-emerald-500 scale-110'
-    : feedback?.isCorrect === false
-      ? 'text-rose-500 scale-90'
-      : 'text-slate-800';
+  const state = feedback ? (feedback.isCorrect ? 'correct' : 'wrong') : 'idle';
   const scriptLabel = current.script === 'hiragana' ? t('scripts.hiragana') : t('scripts.katakana');
-  const scriptLabelClass = current.script === 'hiragana' ? 'text-fuchsia-400' : 'text-violet-400';
+  const acc = Math.round((correctCount / Math.max(currentIndex, 1)) * 100);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-violet-100 via-fuchsia-50 to-rose-100 p-6 pb-24">
-      <div className="max-w-2xl mx-auto">
-        {/* Header with progress */}
-        <div className="mb-8">
-          <div className="mb-4 flex items-center justify-between">
-            <button
-              onClick={handleBack}
-              className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-semibold text-slate-500 transition-colors hover:bg-white/70 hover:text-slate-700"
-            >
-              <ArrowLeftIcon className="w-4 h-4" /> {t('navigation.backToSelection')}
-            </button>
-            <div className="text-right">
-              <div className="text-sm font-semibold text-slate-600">
-                {currentIndex + 1} / {totalQuestions}
-                {isRetryAttempt && (
-                  <span className="ml-2 rounded-full bg-orange-100 px-2.5 py-1 text-xs font-semibold text-orange-700">
-                    {t('quiz.retryMode')}
-                  </span>
-                )}
-              </div>
-              <div className="text-sm text-slate-500">
-                {t('quiz.streak')}: {streak} | {t('quiz.best')}: {bestStreak}
-                {isNewRecord && (
-                  <span className="ml-2 rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-700">
-                    {t('quiz.newRecord')}
-                  </span>
-                )}
-              </div>
-            </div>
-          </div>
-
-          <div
-            className="h-3 w-full rounded-full bg-white/70 ring-1 ring-white/60"
-            role="progressbar"
-            aria-valuenow={currentIndex + 1}
-            aria-valuemin={0}
-            aria-valuemax={totalQuestions}
-            aria-label={t('quiz.progressLabel')}
-          >
-            <div
-              className="h-3 rounded-full bg-gradient-to-r from-fuchsia-500 to-violet-500 transition-all duration-500"
-              style={{ width: `${progress}%` }}
-            />
+    <main style={{ position: 'relative', minHeight: '100vh' }}>
+      <div style={{ maxWidth: 'var(--width-prose)', margin: '0 auto', padding: 'var(--space-8) var(--space-6) var(--space-16)' }}>
+        {/* Header */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, marginBottom: 'var(--space-4)', flexWrap: 'wrap' }}>
+          <Button variant="ghost" size="sm" iconLeft="arrow-left" onClick={handleBack}>{t('navigation.backToSelection')}</Button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontFamily: 'var(--font-body)', fontWeight: 600, color: 'var(--text-muted)', fontSize: 'var(--text-sm)', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+            <span>{Math.min(currentIndex + 1, totalQuestions)} / {totalQuestions}</span>
+            {isRetryAttempt && <Badge tone="warning" icon="rotate-ccw">{t('quiz.retryMode')}</Badge>}
+            <Badge tone="warning" icon="flame">{t('quiz.streak')} {streak}</Badge>
+            {isNewRecord && <Badge tone="success" icon="trophy">{t('quiz.newRecord')}</Badge>}
           </div>
         </div>
+        <ProgressMeter variant="bar" value={progress} style={{ marginBottom: 'var(--space-6)' }} />
 
-        {/* Main Quiz Card */}
-        <div className="mb-6 rounded-[1.75rem] bg-white/90 p-8 shadow-cute-lg ring-1 ring-white/70">
-          {/* Single kana display; the script (hiragana or katakana) is labelled. */}
-          <div className="mb-8 text-center">
-            <div className={`mb-2 text-xs font-semibold uppercase tracking-wide ${scriptLabelClass}`}>
-              {scriptLabel}
-            </div>
-            <div
-              lang="ja"
-              className={`font-kana text-8xl font-bold transition-all duration-300 ${kanaStateClass}`}
-            >
-              {current.kana}
-            </div>
+        {/* Main card */}
+        <Card padding="lg" style={{ marginBottom: 'var(--space-5)' }}>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 'var(--space-8)' }}>
+            <KanaCard kana={current.kana} caption={scriptLabel} state={state} />
           </div>
 
-          {/* Input Area */}
-          {!feedback && (
-            <form onSubmit={handleSubmit} className="text-center">
-              <input
-                ref={inputRef}
-                type="text"
-                value={userInput}
-                onChange={(e) => setUserInput(e.target.value)}
-                placeholder={t('quiz.typeRomaji')}
-                className="w-full max-w-xs rounded-2xl border-2 border-fuchsia-200 px-4 py-3 text-center text-xl transition-colors focus:border-fuchsia-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-400"
-                autoComplete="off"
-                autoCapitalize="off"
-                autoCorrect="off"
-              />
-              <div className="mt-5">
-                <button
-                  type="submit"
-                  disabled={!userInput.trim()}
-                  className={`rounded-[1.4rem] px-8 py-3 text-lg font-bold transition-all ${
-                    userInput.trim()
-                      ? 'bg-fuchsia-500 text-white shadow-cute hover:-translate-y-0.5 hover:bg-fuchsia-600 active:translate-y-0.5'
-                      : 'cursor-not-allowed bg-slate-200 text-slate-400'
-                  }`}
-                >
-                  {t('quiz.submit')}
-                </button>
+          {!feedback ? (
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--space-4)' }}>
+              <div style={{ width: 260, maxWidth: '100%' }}>
+                <TextInput inputRef={inputRef} value={userInput} onChange={(e) => setUserInput(e.target.value)} placeholder={t('quiz.typeRomaji')} />
               </div>
+              <Button type="submit" variant="primary" size="md" iconRight="arrow-right" disabled={!userInput.trim()}>{t('quiz.submit')}</Button>
             </form>
-          )}
-
-          {/* Feedback */}
-          {feedback && (
-            <div className="animate-pop-in text-center" role="status" aria-live="assertive">
-              <div className={`mb-2 text-3xl font-extrabold ${
-                feedback.isCorrect ? 'text-emerald-500' : 'text-rose-500'
-              }`}>
-                {feedback.isCorrect ? t('quiz.correct') : t('quiz.incorrect')}
-              </div>
-
-              {!feedback.isCorrect && (
-                <div className="mb-2 text-lg text-slate-500">
-                  {t('quiz.youTyped')}: <span className="rounded-lg bg-rose-100 px-2 py-1 font-mono text-rose-700">{feedback.userAnswer}</span>
-                </div>
-              )}
-
-              <div className="text-lg text-slate-600">
-                {t('quiz.correctAnswer')} <span className="rounded-lg bg-emerald-100 px-2 py-1 font-mono font-bold text-emerald-700">{feedback.correctAnswer}</span>
-              </div>
-
-              <div className="mt-5">
-                <button
-                  ref={advanceButtonRef}
-                  type="button"
-                  onClick={handleAdvance}
-                  className="rounded-[1.4rem] bg-fuchsia-500 px-8 py-3 text-lg font-bold text-white shadow-cute transition-all hover:-translate-y-0.5 hover:bg-fuchsia-600 active:translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-400"
-                >
-                  {currentIndex < totalQuestions - 1 ? t('quiz.next') : t('quiz.finish')}
-                </button>
-              </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--space-5)' }}>
+              <FeedbackBanner
+                correct={feedback.isCorrect}
+                title={feedback.isCorrect ? t('quiz.correct') : t('quiz.incorrect')}
+                yourAnswer={feedback.isCorrect ? undefined : feedback.userAnswer}
+                yourAnswerLabel={t('quiz.youTyped')}
+                correctAnswer={feedback.correctAnswer}
+                answerLabel={t('quiz.correctAnswer')}
+                hint={feedback.isCorrect ? t('quiz.correctHint') : t('quiz.wrongHint')}
+              />
+              <Button ref={advanceButtonRef} variant="primary" size="md" iconRight="arrow-right" onClick={handleAdvance}>
+                {currentIndex < totalQuestions - 1 ? t('quiz.next') : t('quiz.finish')}
+              </Button>
             </div>
           )}
-        </div>
+        </Card>
 
         {/* Stats */}
-        <div className="grid grid-cols-3 gap-4">
-          <div className="rounded-2xl bg-white/85 p-4 text-center shadow-cute ring-1 ring-white/60">
-            <div className="text-2xl font-extrabold text-fuchsia-600">{correctCount}</div>
-            <div className="text-sm text-slate-500">{t('quiz.correct_stat')}</div>
-          </div>
-          <div className="rounded-2xl bg-white/85 p-4 text-center shadow-cute ring-1 ring-white/60">
-            <div className="text-2xl font-extrabold text-violet-600">{streak}</div>
-            <div className="text-sm text-slate-500">{t('quiz.currentStreak')}</div>
-          </div>
-          <div className="rounded-2xl bg-white/85 p-4 text-center shadow-cute ring-1 ring-white/60">
-            <div className="text-2xl font-extrabold text-emerald-600">
-              {Math.round((correctCount / Math.max(currentIndex, 1)) * 100)}%
-            </div>
-            <div className="text-sm text-slate-500">{t('quiz.accuracy')}</div>
-          </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 'var(--space-4)' }}>
+          <StatTile value={correctCount} label={t('quiz.correct_stat')} tone="emerald" icon="check-circle" />
+          <StatTile value={streak} label={t('quiz.currentStreak')} tone="amber" icon="flame" />
+          <StatTile value={`${acc}%`} label={t('quiz.accuracy')} tone="fuchsia" icon="target" />
         </div>
       </div>
-    </div>
+    </main>
   );
 };
 

@@ -4,9 +4,10 @@ import userEvent from '@testing-library/user-event'
 import App from './App.jsx'
 import i18n from './i18n/i18n.js'
 
-// Statically-rendered KanaSelection carries this literal heading — a stable anchor
-// for "are we on the selection screen?" that doesn't depend on translations.
-const SELECTION_MARKER = /Hiragana & Katakana/
+// The redesigned selection screen shows the two scripts as toggle tiles; the
+// hiragana tile's kana label ("ひらがな") is a stable, translation-independent
+// anchor for "are we on the selection screen?".
+const SELECTION_MARKER = /ひらがな/
 
 // The app now opens on the landing page; its CTA is the stable anchor for
 // "are we on the landing screen?". Helper to leave it for the picker.

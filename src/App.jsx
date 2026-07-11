@@ -2,7 +2,6 @@ import { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 import KanaSelection from './components/KanaSelection';
 import LandingPage from './components/LandingPage';
-import LanguageSwitcher from './components/LanguageSwitcher';
 import { initializeStatistics } from './utils/statisticsManager.js';
 import { kanaGroups } from './data/kana.js';
 import './i18n/i18n.js';
@@ -15,7 +14,7 @@ const StudyMode = lazy(() => import('./components/StudyMode'));
 
 // Dezenter Fallback, während ein Screen-Chunk nachgeladen wird.
 const ScreenFallback = () => (
-  <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-rose-50 to-indigo-100" aria-hidden="true">
+  <div className="min-h-screen flex items-center justify-center" aria-hidden="true">
     <div className="h-9 w-9 rounded-full border-[3px] border-pink-200 border-t-fuchsia-500 animate-spin" />
   </div>
 );
@@ -145,8 +144,6 @@ function App() {
 
   return (
     <div className="App">
-      <LanguageSwitcher />
-
       {currentView === 'landing' && (
         <LandingPage
           onStart={handleStartFromLanding}

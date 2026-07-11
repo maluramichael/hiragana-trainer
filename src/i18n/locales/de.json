@@ -29,7 +29,8 @@
   "selection": {
     "charactersSelected": "Zeichen ausgewählt",
     "startQuiz": "Quiz starten",
-    "headline": "Lerne alle Hiragana und Katakana",
+    "headline": "Was üben wir heute?",
+    "subhead": "Wähl die Schriften und Kana-Gruppen aus, die du üben willst.",
     "payoff": "Sieh pro Zeichen deine Trefferquote und Reaktionszeit. Zeichen, die du falsch hast, kommen automatisch zurück.",
     "intro": "So läuft es: Du siehst ein Zeichen und tippst ein, wie es ausgesprochen wird.",
     "trust": "Kostenlos. Keine Anmeldung. Open Source.",
@@ -60,8 +61,10 @@
   "quiz": {
     "typeRomaji": "Gib das Romaji ein...",
     "submit": "Absenden",
-    "correct": "✓ Richtig!",
-    "incorrect": "✗ Falsch",
+    "correct": "Richtig!",
+    "incorrect": "Nicht ganz",
+    "correctHint": "Nächstes Kana.",
+    "wrongHint": "Merk es dir, kommt gleich nochmal.",
     "youTyped": "Du hast eingegeben:",
     "correctAnswer": "Richtige Antwort:",
     "nextKanaQuick": "Nächstes Kana in 0.6s...",
@@ -82,10 +85,10 @@
   },
   "results": {
     "title": "Quiz beendet!",
-    "perfect": "Perfekt! 🎉",
-    "excellent": "Ausgezeichnet! 😊",
-    "good": "Gut gemacht! 👍",
-    "keepPracticing": "Weiter üben! 💪",
+    "perfect": "Perfekt!",
+    "excellent": "Ausgezeichnet!",
+    "good": "Gut gemacht!",
+    "keepPracticing": "Weiter üben!",
     "correctAnswers": "Richtige Antworten",
     "outOf": "von",
     "bestStreak": "Beste Serie",
@@ -111,7 +114,7 @@
     "aboutBy": "Gebaut von"
   },
   "mastery": {
-    "title": "Meilenstein erreicht 🎉",
+    "title": "Meilenstein erreicht",
     "reached": "{{series}}: {{level}} erreicht",
     "series": {
       "vowels": "Vokale",
@@ -193,6 +196,9 @@
     "by": "von"
   },
   "landing": {
+    "nav": {
+      "start": "Loslegen"
+    },
     "hero": {
       "title": "Hiragana und Katakana sicher lesen lernen",
       "subtitle": "Du siehst ein japanisches Zeichen und tippst seine Aussprache. Kurze Runden, klares Feedback, sichtbarer Fortschritt.",

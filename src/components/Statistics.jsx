@@ -8,7 +8,7 @@ import {
   exportStatisticsAsBase64
 } from '../utils/statisticsManager.js';
 import ImportModal from './ImportModal.jsx';
-import { ArrowLeftIcon } from './icons.jsx';
+import { Card, StatTile, Button, Icon, AppFooter } from '../ui/index.js';
 
 const Statistics = ({ onBack }) => {
   const { t, i18n } = useTranslation();
@@ -19,9 +19,7 @@ const Statistics = ({ onBack }) => {
   const [sortOrder, setSortOrder] = useState('asc');
   const [showImportModal, setShowImportModal] = useState(false);
 
-  useEffect(() => {
-    loadStatistics();
-  }, []);
+  useEffect(() => { loadStatistics(); }, []);
 
   const loadStatistics = () => {
     setStatisticsData(getStatisticsByScript());
@@ -29,19 +27,12 @@ const Statistics = ({ onBack }) => {
   };
 
   const handleSort = (column) => {
-    if (sortBy === column) {
-      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortBy(column);
-      setSortOrder('asc');
-    }
+    if (sortBy === column) setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    else { setSortBy(column); setSortOrder('asc'); }
   };
 
   const handleReset = () => {
-    if (window.confirm(t('statistics.confirmReset'))) {
-      resetStatistics();
-      loadStatistics();
-    }
+    if (window.confirm(t('statistics.confirmReset'))) { resetStatistics(); loadStatistics(); }
   };
 
   const handleExport = () => {
@@ -59,8 +50,7 @@ const Statistics = ({ onBack }) => {
 
   const handleExportAsCode = async () => {
     try {
-      const base64Code = exportStatisticsAsBase64();
-      await navigator.clipboard.writeText(base64Code);
+      await navigator.clipboard.writeText(exportStatisticsAsBase64());
       alert(t('statistics.exportCodeSuccess'));
     } catch (error) {
       console.error('Failed to copy to clipboard:', error);
@@ -68,9 +58,7 @@ const Statistics = ({ onBack }) => {
     }
   };
 
-  const getAccuracy = (stat) => {
-    return stat.timesShown > 0 ? Math.round((stat.timesCorrect / stat.timesShown) * 100) : 0;
-  };
+  const getAccuracy = (stat) => stat.timesShown > 0 ? Math.round((stat.timesCorrect / stat.timesShown) * 100) : 0;
 
   const formatLastSeen = (lastSeen) => {
     if (!lastSeen) return t('statistics.never');
@@ -79,32 +67,18 @@ const Statistics = ({ onBack }) => {
     return date.toLocaleDateString(locale) + ' ' + date.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
   };
 
-  const formatResponseTime = (averageResponseTime) => {
-    return averageResponseTime > 0 ? `${(averageResponseTime / 1000).toFixed(1)}s` : '-';
-  };
+  const formatResponseTime = (avg) => avg > 0 ? `${(avg / 1000).toFixed(1)}s` : '-';
 
-  const getSortIcon = (column) => {
-    if (sortBy !== column) return '↕️';
-    return sortOrder === 'asc' ? '↑' : '↓';
-  };
+  const getSortIcon = (column) => (sortBy !== column ? '↕' : sortOrder === 'asc' ? '↑' : '↓');
+  const accuracySymbol = (a) => (a >= 80 ? '✓' : a >= 60 ? '•' : '✗');
+  const accTone = (a) => (a >= 80 ? 'var(--emerald-600)' : a >= 60 ? 'var(--amber-500)' : 'var(--rose-600)');
 
-  // A color-independent accuracy indicator (issue #68): the symbol conveys the
-  // same threshold as the color, so it works without color perception.
-  const accuracySymbol = (accuracy) => (accuracy >= 80 ? '✓' : accuracy >= 60 ? '•' : '✗');
+  const th = { padding: '0.7rem var(--space-4)', fontSize: 'var(--text-xs)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 'var(--tracking-caps)', color: 'var(--text-faint)', textAlign: 'left', whiteSpace: 'nowrap' };
+  const td = { padding: '0.6rem var(--space-4)', whiteSpace: 'nowrap' };
 
-  // Accessible sortable column header (issues #48): the click target is a real
-  // <button> (keyboard-focusable, Enter/Space activate it) and the <th> carries
-  // aria-sort so assistive tech announces the current sort state.
   const renderSortHeader = (column, labelKey) => (
-    <th
-      aria-sort={sortBy === column ? (sortOrder === 'asc' ? 'ascending' : 'descending') : 'none'}
-      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-    >
-      <button
-        type="button"
-        onClick={() => handleSort(column)}
-        className="flex items-center gap-1 uppercase tracking-wider hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded"
-      >
+    <th aria-sort={sortBy === column ? (sortOrder === 'asc' ? 'ascending' : 'descending') : 'none'} style={th}>
+      <button type="button" onClick={() => handleSort(column)} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: 'none', border: 'none', cursor: 'pointer', font: 'inherit', color: 'inherit', textTransform: 'uppercase', letterSpacing: 'var(--tracking-caps)' }}>
         {t(labelKey)} <span aria-hidden="true">{getSortIcon(column)}</span>
       </button>
     </th>
@@ -115,8 +89,6 @@ const Statistics = ({ onBack }) => {
     return [...data].sort((a, b) => {
       let aValue = a[sortBy];
       let bValue = b[sortBy];
-
-      // Handle special cases
       if (sortBy === 'accuracy') {
         aValue = a.timesShown > 0 ? (a.timesCorrect / a.timesShown) * 100 : 0;
         bValue = b.timesShown > 0 ? (b.timesCorrect / b.timesShown) * 100 : 0;
@@ -124,117 +96,54 @@ const Statistics = ({ onBack }) => {
         aValue = a.lastSeen ? new Date(a.lastSeen) : new Date(0);
         bValue = b.lastSeen ? new Date(b.lastSeen) : new Date(0);
       }
-
-      if (typeof aValue === 'string') {
-        return sortOrder === 'asc'
-          ? aValue.localeCompare(bValue)
-          : bValue.localeCompare(aValue);
-      }
-
+      if (typeof aValue === 'string') return sortOrder === 'asc' ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
       return sortOrder === 'asc' ? aValue - bValue : bValue - aValue;
     });
   }, [statisticsData, activeTab, sortBy, sortOrder]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-violet-50 via-fuchsia-50 to-indigo-100 p-6 pb-24">
-      <div className="max-w-7xl mx-auto">
+    <main style={{ position: 'relative', minHeight: '100vh' }}>
+      <div style={{ maxWidth: 'var(--width-wide)', margin: '0 auto', padding: 'var(--space-8) var(--space-6) var(--space-16)' }}>
         {/* Header */}
-        <div className="mb-8 flex items-center justify-between">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 'var(--space-4)', marginBottom: 'var(--space-6)', flexWrap: 'wrap' }}>
           <div>
-            <button
-              onClick={onBack}
-              className="mb-4 inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-semibold text-slate-500 transition-colors hover:bg-white/70 hover:text-slate-700"
-            >
-              <ArrowLeftIcon className="w-4 h-4" /> {t('navigation.backToSelection')}
-            </button>
-            <h1 className="text-4xl font-extrabold text-slate-900">
-              {t('statistics.title')}
-            </h1>
+            <Button variant="ghost" size="sm" iconLeft="arrow-left" onClick={onBack} style={{ marginBottom: 8, marginLeft: -8 }}>{t('navigation.backToSelection')}</Button>
+            <h1 style={{ fontSize: 'clamp(2rem, 6vw, var(--text-4xl))' }}>{t('statistics.title')}</h1>
           </div>
-
-          <div className="flex flex-wrap gap-2.5">
-            <button
-              onClick={handleExportAsCode}
-              className="rounded-xl bg-fuchsia-500 px-4 py-2 font-semibold text-white shadow-cute transition-all hover:-translate-y-0.5 hover:bg-fuchsia-600"
-            >
-              {t('statistics.exportCode')}
-            </button>
-            <button
-              onClick={() => setShowImportModal(true)}
-              className="rounded-xl bg-violet-500 px-4 py-2 font-semibold text-white shadow-cute transition-all hover:-translate-y-0.5 hover:bg-violet-600"
-            >
-              {t('statistics.importCode')}
-            </button>
-            <button
-              onClick={handleExport}
-              className="rounded-xl bg-emerald-500 px-4 py-2 font-semibold text-white shadow-cute transition-all hover:-translate-y-0.5 hover:bg-emerald-600"
-            >
-              {t('statistics.export')}
-            </button>
-            <button
-              onClick={handleReset}
-              className="rounded-xl bg-white px-4 py-2 font-semibold text-rose-500 ring-2 ring-rose-200 transition-all hover:bg-rose-50"
-            >
-              {t('statistics.reset')}
-            </button>
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+            <Button variant="secondary" size="sm" iconLeft="upload" onClick={handleExportAsCode}>{t('statistics.exportCode')}</Button>
+            <Button variant="secondary" size="sm" iconLeft="download" onClick={() => setShowImportModal(true)}>{t('statistics.importCode')}</Button>
+            <Button variant="secondary" size="sm" iconLeft="download" onClick={handleExport}>{t('statistics.export')}</Button>
+            <Button variant="danger" size="sm" iconLeft="rotate-ccw" onClick={handleReset}>{t('statistics.reset')}</Button>
           </div>
         </div>
 
-        {/* Overall Statistics */}
-        <div className="mb-8 rounded-[1.75rem] bg-white/85 p-6 shadow-cute ring-1 ring-white/60">
-          <h2 className="mb-4 text-2xl font-bold text-slate-800">
-            {t('statistics.overall')}
-          </h2>
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-            <div className="rounded-2xl bg-fuchsia-50 p-4 text-center ring-1 ring-fuchsia-100">
-              <div className="text-3xl font-extrabold text-fuchsia-600">{overallStats.practicedKana || 0}</div>
-              <div className="text-sm text-slate-600">{t('statistics.practicedKana')}</div>
-              <div className="text-xs text-slate-400">{t('statistics.outOf')} {overallStats.totalKana || 0}</div>
-            </div>
-            <div className="rounded-2xl bg-emerald-50 p-4 text-center ring-1 ring-emerald-100">
-              <div className="text-3xl font-extrabold text-emerald-600">{overallStats.totalCorrect || 0}</div>
-              <div className="text-sm text-slate-600">{t('statistics.totalCorrect')}</div>
-            </div>
-            <div className="rounded-2xl bg-rose-50 p-4 text-center ring-1 ring-rose-100">
-              <div className="text-3xl font-extrabold text-rose-500">{overallStats.totalIncorrect || 0}</div>
-              <div className="text-sm text-slate-600">{t('statistics.totalIncorrect')}</div>
-            </div>
-            <div className="rounded-2xl bg-violet-50 p-4 text-center ring-1 ring-violet-100">
-              <div className="text-3xl font-extrabold text-violet-600">{overallStats.overallAccuracy || 0}%</div>
-              <div className="text-sm text-slate-600">{t('statistics.overallAccuracy')}</div>
-            </div>
-          </div>
+        {/* Overall */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 'var(--space-4)', marginBottom: 'var(--space-6)' }}>
+          <StatTile value={overallStats.practicedKana || 0} label={t('statistics.practicedKana')} sub={`${t('statistics.outOf')} ${overallStats.totalKana || 0}`} tone="violet" icon="book-open" />
+          <StatTile value={overallStats.totalCorrect || 0} label={t('statistics.totalCorrect')} tone="emerald" icon="check-circle" />
+          <StatTile value={overallStats.totalIncorrect || 0} label={t('statistics.totalIncorrect')} tone="rose" icon="x-circle" />
+          <StatTile value={`${overallStats.overallAccuracy || 0}%`} label={t('statistics.overallAccuracy')} tone="fuchsia" icon="target" />
         </div>
 
-        {/* Script Tabs */}
-        <div className="overflow-hidden rounded-[1.75rem] bg-white/90 shadow-cute ring-1 ring-white/60">
-          <div className="flex border-b border-fuchsia-100">
-            <button
-              onClick={() => setActiveTab('hiragana')}
-              className={`flex-1 px-6 py-4 text-lg font-bold transition-colors ${
-                activeTab === 'hiragana'
-                  ? 'bg-fuchsia-500 text-white'
-                  : 'bg-white/50 text-slate-600 hover:bg-fuchsia-50'
-              }`}
-            >
-              {t('scripts.hiragana')} ({statisticsData.hiragana?.length || 0})
-            </button>
-            <button
-              onClick={() => setActiveTab('katakana')}
-              className={`flex-1 px-6 py-4 text-lg font-bold transition-colors ${
-                activeTab === 'katakana'
-                  ? 'bg-fuchsia-500 text-white'
-                  : 'bg-white/50 text-slate-600 hover:bg-fuchsia-50'
-              }`}
-            >
-              {t('scripts.katakana')} ({statisticsData.katakana?.length || 0})
-            </button>
+        <Card padding="sm" style={{ overflow: 'hidden' }}>
+          {/* Tabs */}
+          <div style={{ display: 'flex', gap: 8, padding: 'var(--space-2)' }}>
+            {[['hiragana', t('scripts.hiragana')], ['katakana', t('scripts.katakana')]].map(([k, lbl]) => (
+              <button key={k} onClick={() => setActiveTab(k)} style={{
+                flex: 1, padding: '0.7rem', borderRadius: 'var(--radius-xl)', border: 'none', cursor: 'pointer',
+                fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 'var(--text-base)',
+                background: activeTab === k ? 'var(--color-primary)' : 'transparent',
+                color: activeTab === k ? '#fff' : 'var(--text-muted)',
+                transition: 'all var(--dur-fast) var(--ease-soft)',
+              }}>{lbl} ({statisticsData[k]?.length || 0})</button>
+            ))}
           </div>
 
-          {/* Statistics Table */}
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-fuchsia-50/60">
+          {/* Table */}
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: 'var(--font-body)' }}>
+              <thead>
                 <tr>
                   {renderSortHeader('kana', 'statistics.kana')}
                   {renderSortHeader('romaji', 'statistics.romaji')}
@@ -246,66 +155,43 @@ const Statistics = ({ onBack }) => {
                   {renderSortHeader('lastSeen', 'statistics.lastSeen')}
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {currentData.map((stat, index) => (
-                  <tr key={`${stat.kana}-${stat.romaji}`} className={index % 2 === 0 ? 'bg-white' : 'bg-fuchsia-50/40'}>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div lang="ja" className="font-kana text-2xl font-bold text-slate-800">{stat.kana}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-mono text-gray-900">{stat.romaji}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{stat.timesShown}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-green-600 font-semibold">{stat.timesCorrect}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-red-600 font-semibold">{stat.timesIncorrect}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className={`flex items-center gap-1 text-sm font-semibold ${
-                        getAccuracy(stat) >= 80 ? 'text-green-600' :
-                        getAccuracy(stat) >= 60 ? 'text-yellow-600' : 'text-red-600'
-                      }`}>
-                        {stat.timesShown > 0 ? (
-                          <>
-                            <span aria-hidden="true">{accuracySymbol(getAccuracy(stat))}</span>
-                            <span>{getAccuracy(stat)}%</span>
-                          </>
-                        ) : '-'}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{formatResponseTime(stat.averageResponseTime)}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-500">{formatLastSeen(stat.lastSeen)}</div>
-                    </td>
-                  </tr>
-                ))}
+              <tbody>
+                {currentData.map((stat, index) => {
+                  const a = getAccuracy(stat);
+                  return (
+                    <tr key={`${stat.kana}-${stat.romaji}`} style={{ background: index % 2 ? 'var(--surface-sunken)' : 'transparent' }}>
+                      <td style={{ ...td, fontFamily: 'var(--font-kana)', fontWeight: 500, fontSize: 'var(--text-2xl)', color: 'var(--text-strong)' }}><span lang="ja">{stat.kana}</span></td>
+                      <td style={{ ...td, fontFamily: 'var(--font-mono)', color: 'var(--text-body)' }}>{stat.romaji}</td>
+                      <td style={{ ...td, color: 'var(--text-body)' }}>{stat.timesShown}</td>
+                      <td style={{ ...td, color: 'var(--emerald-600)', fontWeight: 700 }}>{stat.timesCorrect}</td>
+                      <td style={{ ...td, color: 'var(--rose-600)', fontWeight: 700 }}>{stat.timesIncorrect}</td>
+                      <td style={{ ...td, fontWeight: 700, color: accTone(a) }}>
+                        {stat.timesShown > 0 ? (<><span aria-hidden="true">{accuracySymbol(a)}</span> {a}%</>) : '-'}
+                      </td>
+                      <td style={{ ...td, color: 'var(--text-body)' }}>{formatResponseTime(stat.averageResponseTime)}</td>
+                      <td style={{ ...td, color: 'var(--text-muted)', fontSize: 'var(--text-sm)' }}>{formatLastSeen(stat.lastSeen)}</td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
 
           {currentData.length === 0 && (
-            <div className="text-center py-12">
-              <div className="text-gray-500 text-lg">{t('statistics.noData')}</div>
-              <div className="text-gray-400 text-sm mt-2">{t('statistics.startPracticing')}</div>
+            <div style={{ textAlign: 'center', padding: 'var(--space-12) 0' }}>
+              <div style={{ color: 'var(--text-muted)', fontSize: 'var(--text-lg)' }}>{t('statistics.noData')}</div>
+              <div style={{ color: 'var(--text-faint)', fontSize: 'var(--text-sm)', marginTop: 'var(--space-2)' }}>{t('statistics.startPracticing')}</div>
             </div>
           )}
-        </div>
+        </Card>
+
+        <AppFooter />
       </div>
 
-      {/* Import Modal */}
       {showImportModal && (
-        <ImportModal
-          onClose={() => setShowImportModal(false)}
-          onImported={loadStatistics}
-        />
+        <ImportModal onClose={() => setShowImportModal(false)} onImported={loadStatistics} />
       )}
-    </div>
+    </main>
   );
 };
 

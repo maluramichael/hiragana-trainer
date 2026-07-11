@@ -1,10 +1,12 @@
 @import "tailwindcss";
+@import "./ui/fonts.css";
+@import "./ui/tokens.css";
 
-/* Cute, rounded, friendly type. All self-hosted / system fonts so the app stays
-   fully offline (no Google Fonts request, no CSP change). Overriding --font-sans
-   makes every component pick up the rounded look without touching each file. */
+/* Cute, rounded, friendly type. Fonts are self-hosted (see ui/fonts.css) so the
+   app stays fully offline (no Google Fonts request, no CSP change). Overriding
+   --font-sans makes Tailwind components pick up the rounded look too. */
 @theme {
-  --font-sans: "SF Pro Rounded", ui-rounded, "Baloo 2", "Quicksand",
+  --font-sans: "Quicksand", "SF Pro Rounded", ui-rounded, "Baloo 2",
     "Segoe UI", "Hiragino Maru Gothic ProN", system-ui, sans-serif;
 }
 
@@ -12,6 +14,24 @@
   html {
     /* Rounded, warm base color and a touch of tracking for the playful feel. */
     color: #3a2f4a;
+  }
+
+  /* The signature soft page gradient lives on the body, fixed so it never
+     scrolls; individual screens sit on top of it. */
+  body {
+    font: var(--role-body);
+    color: var(--text-body);
+    background: var(--gradient-page);
+    background-attachment: fixed;
+    min-height: 100vh;
+  }
+
+  /* Headings use the rounded display face (Baloo 2), extrabold. */
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    font-weight: var(--weight-extrabold);
+    line-height: var(--leading-tight);
+    color: var(--text-strong);
   }
 
   /* Sichtbarer Fokus-Ring für Tastaturnutzer (Tailwind-Preflight resettet das Outline). */
@@ -30,8 +50,8 @@
 /* Kana glyphs get a rounded "maru gothic" face where available — the characters
    look soft and cute instead of sharp. Falls back cleanly on other systems. */
 @utility font-kana {
-  font-family: "Hiragino Maru Gothic ProN", "YuGothic", "Yu Gothic",
-    "M PLUS Rounded 1c", "Meiryo", var(--font-sans);
+  font-family: "Zen Maru Gothic", "Hiragino Maru Gothic ProN", "YuGothic",
+    "Yu Gothic", "M PLUS Rounded 1c", "Meiryo", var(--font-sans);
 }
 
 /* Soft, tinted card shadow used across screens for the pillowy, playful depth. */
@@ -85,6 +105,16 @@
 }
 @utility animate-bob {
   animation: bob 3.5s ease-in-out infinite;
+}
+
+/* Landing "About Michael" card: photo + bio side by side on desktop, stacked
+   and centered on narrow screens. Overrides the inline two-column grid. */
+@media (max-width: 640px) {
+  .ht-about-grid {
+    grid-template-columns: 1fr !important;
+    justify-items: center;
+    text-align: center;
+  }
 }
 
 /* Nutzerpräferenz "reduzierte Bewegung" respektieren (Feedback-Scale, Hover, Transitions). */

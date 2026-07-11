@@ -29,7 +29,8 @@
   "selection": {
     "charactersSelected": "characters selected",
     "startQuiz": "Start Quiz",
-    "headline": "Learn every Hiragana and Katakana",
+    "headline": "What are we practicing today?",
+    "subhead": "Pick the scripts and kana groups you want to practice.",
     "payoff": "See your accuracy and response time for each character. The ones you miss come back automatically.",
     "intro": "How it works: you see a character and type how it is pronounced.",
     "trust": "Free. No signup. Open source.",
@@ -60,8 +61,10 @@
   "quiz": {
     "typeRomaji": "Type the romaji...",
     "submit": "Submit",
-    "correct": "✓ Correct!",
-    "incorrect": "✗ Incorrect",
+    "correct": "Correct!",
+    "incorrect": "Not quite",
+    "correctHint": "Next kana.",
+    "wrongHint": "Remember it, it'll come back soon.",
     "youTyped": "You typed:",
     "correctAnswer": "Correct answer:",
     "nextKanaQuick": "Next kana in 0.6s...",
@@ -82,10 +85,10 @@
   },
   "results": {
     "title": "Quiz Complete!",
-    "perfect": "Perfect! 🎉",
-    "excellent": "Excellent! 😊",
-    "good": "Good job! 👍",
-    "keepPracticing": "Keep practicing! 💪",
+    "perfect": "Perfect!",
+    "excellent": "Excellent!",
+    "good": "Good job!",
+    "keepPracticing": "Keep practicing!",
     "correctAnswers": "Correct Answers",
     "outOf": "out of",
     "bestStreak": "Best Streak",
@@ -111,7 +114,7 @@
     "aboutBy": "Built by"
   },
   "mastery": {
-    "title": "Milestone reached 🎉",
+    "title": "Milestone reached",
     "reached": "{{series}}: {{level}} reached",
     "series": {
       "vowels": "Vowels",
@@ -193,6 +196,9 @@
     "by": "by"
   },
   "landing": {
+    "nav": {
+      "start": "Get started"
+    },
     "hero": {
       "title": "Learn to read Hiragana and Katakana for real",
       "subtitle": "You see a Japanese character and type how it sounds. Short rounds, clear feedback, visible progress.",

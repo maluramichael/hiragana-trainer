@@ -1,154 +1,112 @@
 import { useTranslation } from 'react-i18next';
-import KanaBackground from './KanaBackground.jsx';
-import { RocketIcon, SparkleIcon, RepeatIcon, HeartIcon, GlobeIcon } from './icons.jsx';
+import { Card, Button, Icon, Wordmark, LanguagePill, BackdropKana, AppFooter } from '../ui/index.js';
 
-// The hero spells out the two syllabaries as bobbing badges: "hiragana" and
-// "katakana", both written in hiragana.
+// Hero motif: the words hiragana / katakana spelled in kana as bobbing chips.
 const HIRAGANA_WORD = ['ひ', 'ら', 'が', 'な'];
 const KATAKANA_WORD = ['か', 'た', 'か', 'な'];
 
-// The three feature cards. Each card is tinted in its own colour and carries a
-// large, lighter watermark of its icon behind the text. Copy lives in i18n
-// under landing.features.<key>.
+// The three feature tiles. Copy lives in i18n under landing.features.<key>.
 const FEATURES = [
-  { key: 'accuracy', Icon: SparkleIcon, tint: 'from-pink-500 to-fuchsia-600' },
-  { key: 'repeat', Icon: RepeatIcon, tint: 'from-violet-500 to-indigo-600' },
-  { key: 'offline', Icon: HeartIcon, tint: 'from-sky-500 to-cyan-600' },
+  { key: 'accuracy', tone: 'fuchsia', watermark: 'bar-chart' },
+  { key: 'repeat',   tone: 'violet',  watermark: 'rotate-ccw' },
+  { key: 'offline',  tone: 'sky',     watermark: 'heart' },
 ];
 
-// First screen of the app. The primary CTA jumps straight into a quiz (the
-// caller wires it to the hiragana vowels); the secondary link opens the full
-// character picker.
+function KanaChip({ char, gradient, delay = 0 }) {
+  return (
+    <span lang="ja" style={{
+      width: 76, height: 76, borderRadius: 'var(--radius-3xl)', background: gradient,
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      fontFamily: 'var(--font-kana)', fontWeight: 700, fontSize: 42, color: '#fff',
+      boxShadow: 'var(--shadow-md)',
+      animation: `ht-bob 3.2s var(--ease-soft) ${delay}s infinite`,
+    }}>{char}</span>
+  );
+}
+
 const LandingPage = ({ onStart, onChooseCharacters }) => {
   const { t } = useTranslation();
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-gradient-to-b from-rose-50 via-fuchsia-50 to-indigo-100 text-slate-800">
-      <KanaBackground />
+    <main style={{ position: 'relative', minHeight: '100vh', overflow: 'hidden' }}>
+      <BackdropKana />
+      <div style={{ position: 'relative', zIndex: 1, maxWidth: 1040, margin: '0 auto', padding: '0 var(--space-6) var(--space-16)' }}>
+        {/* Nav */}
+        <nav style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, padding: 'var(--space-5) 0', flexWrap: 'wrap' }}>
+          <Wordmark />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <LanguagePill />
+            <Button variant="primary" size="sm" iconRight="arrow-right" onClick={onStart}>{t('landing.nav.start')}</Button>
+          </div>
+        </nav>
 
-      <div className="relative max-w-3xl mx-auto px-6 py-16 sm:py-24">
-        <section className="text-center">
-          {/* Decorative motif: the words hiragana / katakana as bobbing badges. */}
-          <div aria-hidden="true" className="mb-10 flex flex-col items-center gap-3">
-            <div className="flex gap-2 sm:gap-3">
-              {HIRAGANA_WORD.map((ch, i) => (
-                <span
-                  key={i}
-                  style={{ animationDelay: `${i * 0.12}s` }}
-                  className="font-kana animate-bob grid h-14 w-14 sm:h-16 sm:w-16 place-items-center rounded-2xl bg-gradient-to-br from-pink-400 to-fuchsia-500 text-3xl sm:text-4xl font-bold text-white shadow-cute"
-                >
-                  {ch}
-                </span>
-              ))}
+        {/* Hero */}
+        <header style={{ textAlign: 'center', padding: 'var(--space-8) 0 var(--space-12)' }}>
+          <div aria-hidden="true" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, marginBottom: 'var(--space-8)' }}>
+            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center' }}>
+              {HIRAGANA_WORD.map((c, i) => <KanaChip key={`h${i}`} char={c} gradient="var(--tile-fuchsia)" delay={i * 0.15} />)}
             </div>
-            <div className="flex gap-2 sm:gap-3">
-              {KATAKANA_WORD.map((ch, i) => (
-                <span
-                  key={i}
-                  style={{ animationDelay: `${(i + 4) * 0.12}s` }}
-                  className="font-kana animate-bob grid h-14 w-14 sm:h-16 sm:w-16 place-items-center rounded-2xl bg-gradient-to-br from-violet-400 to-indigo-500 text-3xl sm:text-4xl font-bold text-white shadow-cute"
-                >
-                  {ch}
-                </span>
-              ))}
+            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center' }}>
+              {KATAKANA_WORD.map((c, i) => <KanaChip key={`k${i}`} char={c} gradient="var(--tile-violet)" delay={0.6 + i * 0.15} />)}
             </div>
           </div>
 
-          <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-slate-900">
+          <h1 style={{ fontSize: 'clamp(2.25rem, 7vw, var(--text-6xl))', lineHeight: 1.05, letterSpacing: 'var(--tracking-tight)', maxWidth: 820, margin: '0 auto var(--space-5)' }}>
             {t('landing.hero.title')}
           </h1>
-
-          <p className="mt-5 text-lg text-slate-600 max-w-xl mx-auto">
+          <p style={{ fontFamily: 'var(--font-body)', fontSize: 'clamp(1.05rem, 2.6vw, var(--text-xl))', color: 'var(--text-body)', lineHeight: 1.55, maxWidth: 620, margin: '0 auto var(--space-8)' }}>
             {t('landing.hero.subtitle')}
           </p>
 
-          <div className="mt-10 flex flex-col items-center gap-3">
-            <button
-              type="button"
-              onClick={onStart}
-              className="group inline-flex items-center gap-2.5 rounded-[1.4rem] bg-fuchsia-500 px-9 py-4 text-lg font-bold text-white shadow-cute-lg transition-all duration-200 hover:-translate-y-0.5 hover:bg-fuchsia-600 active:translate-y-0.5"
-            >
-              <RocketIcon className="w-6 h-6 transition-transform duration-200 group-hover:-rotate-12" />
-              {t('landing.hero.cta')}
-            </button>
-            <span className="text-sm font-medium text-slate-400">{t('landing.hero.or')}</span>
-            <button
-              type="button"
-              onClick={onChooseCharacters}
-              className="rounded-[1.4rem] px-7 py-3 font-bold text-fuchsia-600 ring-2 ring-fuchsia-300 transition-colors hover:bg-fuchsia-50"
-            >
-              {t('landing.hero.secondary')}
-            </button>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--space-3)' }}>
+            <Button variant="primary" size="lg" iconLeft="rocket" onClick={onStart}>{t('landing.hero.cta')}</Button>
+            <span style={{ fontFamily: 'var(--font-body)', fontSize: 'var(--text-sm)', color: 'var(--text-muted)' }}>{t('landing.hero.or')}</span>
+            <Button variant="secondary" size="lg" iconLeft="book-open" onClick={onChooseCharacters}>{t('landing.hero.secondary')}</Button>
           </div>
 
-          <p className="mt-8 inline-flex items-center gap-2 rounded-full bg-white/70 px-4 py-2 text-sm font-medium text-slate-500 shadow-sm ring-1 ring-white/60">
+          <p style={{ marginTop: 'var(--space-8)', display: 'inline-flex', alignItems: 'center', gap: 8, borderRadius: 'var(--radius-pill)', background: 'var(--surface-card-soft)', padding: '0.5rem 1rem', fontFamily: 'var(--font-body)', fontSize: 'var(--text-sm)', fontWeight: 500, color: 'var(--text-muted)', boxShadow: 'var(--ring-white), var(--shadow-sm)' }}>
             {t('landing.hero.trust')}
           </p>
+        </header>
+
+        {/* Feature tiles */}
+        <section aria-label={t('landing.features.heading')} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 'var(--space-4)', marginBottom: 'var(--space-8)' }}>
+          {FEATURES.map((f) => (
+            <Card key={f.key} variant="tile" tone={f.tone} watermark={f.watermark} padding="lg">
+              <div style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 'var(--text-2xl)', lineHeight: 1.15, marginBottom: 10 }}>
+                {t(`landing.features.${f.key}.title`)}
+              </div>
+              <div style={{ fontWeight: 500, lineHeight: 1.55, opacity: 0.95 }}>
+                {t(`landing.features.${f.key}.body`)}
+              </div>
+            </Card>
+          ))}
         </section>
 
-        <section aria-labelledby="landing-features" className="mt-20 sm:mt-24">
-          <h2 id="landing-features" className="sr-only">
-            {t('landing.features.heading')}
-          </h2>
-          <ul className="grid gap-6 sm:grid-cols-3">
-            {FEATURES.map((feature) => (
-              <li
-                key={feature.key}
-                className={`relative overflow-hidden rounded-[1.75rem] bg-gradient-to-br ${feature.tint} p-6 text-white shadow-cute transition-transform duration-200 hover:-translate-y-1`}
-              >
-                {/* The icon as a large, lighter watermark: offset so it straddles
-                    the corner, strong alpha, sitting behind the text. */}
-                <feature.Icon
-                  aria-hidden="true"
-                  className="pointer-events-none absolute -bottom-10 -right-8 h-44 w-44 text-white/25"
-                />
-                <div className="relative">
-                  <h3 className="text-lg font-bold">
-                    {t(`landing.features.${feature.key}.title`)}
-                  </h3>
-                  <p className="mt-2 text-sm leading-relaxed text-white/90">
-                    {t(`landing.features.${feature.key}.body`)}
-                  </p>
+        {/* About Michael — whole card links to malura.de */}
+        <a href="https://malura.de" target="_blank" rel="noopener noreferrer" style={{ display: 'block', textDecoration: 'none' }}>
+          <Card padding="lg">
+            <div style={{ display: 'grid', gridTemplateColumns: '150px 1fr', gap: 'var(--space-6)', alignItems: 'center' }} className="ht-about-grid">
+              <img src="/michael.jpg" alt="Michael Malura" width="150" height="150" loading="lazy"
+                style={{ width: 150, height: 150, borderRadius: '50%', objectFit: 'cover', boxShadow: 'var(--ring-white), var(--shadow-md)', background: 'var(--fuchsia-100)' }} />
+              <div>
+                <h3 style={{ fontSize: 'var(--text-2xl)', marginBottom: 4 }}>{t('landing.about.title')}</h3>
+                <div style={{ fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 'var(--text-lg)', color: 'var(--fuchsia-600)', marginBottom: 'var(--space-4)' }}>
+                  {t('landing.about.role')}
                 </div>
-              </li>
-            ))}
-          </ul>
-
-          {/* Author card: same style, spanning the full width under the three
-              feature cards. Whole card links to my site. Photo (self-hosted,
-              round) on the left, short bio right. */}
-          <a
-            href="https://malura.de"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="group mt-6 flex flex-col items-center gap-5 rounded-[1.75rem] bg-white/80 p-6 text-center shadow-cute ring-1 ring-white/70 backdrop-blur-sm transition hover:-translate-y-0.5 hover:shadow-cute-lg hover:ring-fuchsia-200 sm:flex-row sm:text-left"
-          >
-            <img
-              src="/michael.jpg"
-              alt="Michael Malura"
-              width="96"
-              height="96"
-              loading="lazy"
-              className="h-24 w-24 flex-shrink-0 rounded-full object-cover shadow-cute ring-4 ring-white"
-            />
-            <div>
-              <h3 className="text-lg font-bold text-slate-900">
-                {t('landing.about.title')}
-              </h3>
-              <p className="text-sm font-semibold text-fuchsia-600">
-                {t('landing.about.role')}
-              </p>
-              <p className="mt-2 text-sm leading-relaxed text-slate-600">
-                {t('landing.about.body')}
-              </p>
-              <span className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-fuchsia-600 transition group-hover:text-fuchsia-700">
-                <GlobeIcon className="h-4 w-4" />
-                {t('landing.about.link')}
-                <span aria-hidden className="transition-transform group-hover:translate-x-0.5">→</span>
-              </span>
+                <p style={{ margin: '0 0 var(--space-5)', color: 'var(--text-body)', fontSize: 'var(--text-lg)', lineHeight: 1.6 }}>
+                  {t('landing.about.body')}
+                </p>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontWeight: 700, fontSize: 'var(--text-lg)', color: 'var(--fuchsia-600)' }}>
+                  <Icon name="globe" size={18} /> {t('landing.about.link')}
+                  <Icon name="arrow-right" size={16} />
+                </span>
+              </div>
             </div>
-          </a>
-        </section>
+          </Card>
+        </a>
+
+        <AppFooter />
       </div>
     </main>
   );

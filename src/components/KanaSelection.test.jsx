@@ -74,12 +74,13 @@ describe('KanaSelection', () => {
     expect(screen.getByText(/10 Zeichen ausgewählt/)).toBeInTheDocument();
   });
 
+  // The two scripts are toggle tiles now: both on = "both", one on = that script.
+  // Switching to katakana-only means turning Katakana on (→ both) then Hiragana off.
   it('#72: the script mode defaults to hiragana on first visit', () => {
     render(<KanaSelection onStartQuiz={vi.fn()} onViewStatistics={vi.fn()} />);
 
-    expect(screen.getByRole('radio', { name: /Nur Hiragana/i })).toBeChecked();
-    expect(screen.getByRole('radio', { name: /Nur Katakana/i })).not.toBeChecked();
-    expect(screen.getByRole('radio', { name: /^Beide$/i })).not.toBeChecked();
+    expect(screen.getByRole('button', { name: 'Hiragana' })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByRole('button', { name: 'Katakana' })).toHaveAttribute('aria-pressed', 'false');
   });
 
   it('#72: the script mode is persisted and restored on remount', async () => {
@@ -89,13 +90,15 @@ describe('KanaSelection', () => {
       <KanaSelection onStartQuiz={vi.fn()} onViewStatistics={vi.fn()} />
     );
 
-    await user.click(screen.getByRole('radio', { name: /Nur Katakana/i }));
+    await user.click(screen.getByRole('button', { name: 'Katakana' }));
+    await user.click(screen.getByRole('button', { name: 'Hiragana' }));
     expect(localStorage.getItem('kana-quiz-script-mode')).toBe('katakana');
 
     unmount();
     render(<KanaSelection onStartQuiz={vi.fn()} onViewStatistics={vi.fn()} />);
 
-    expect(screen.getByRole('radio', { name: /Nur Katakana/i })).toBeChecked();
+    expect(screen.getByRole('button', { name: 'Katakana' })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByRole('button', { name: 'Hiragana' })).toHaveAttribute('aria-pressed', 'false');
   });
 
   it('#72: the chosen script mode is handed to onStartQuiz', async () => {
@@ -103,7 +106,8 @@ describe('KanaSelection', () => {
     const onStartQuiz = vi.fn();
     render(<KanaSelection onStartQuiz={onStartQuiz} onViewStatistics={vi.fn()} />);
 
-    await user.click(screen.getByRole('radio', { name: /Nur Katakana/i }));
+    await user.click(screen.getByRole('button', { name: 'Katakana' }));
+    await user.click(screen.getByRole('button', { name: 'Hiragana' }));
     await user.click(screen.getByTestId('quickstart-button'));
 
     expect(onStartQuiz.mock.calls[0][1]).toEqual({ scriptMode: 'katakana' });

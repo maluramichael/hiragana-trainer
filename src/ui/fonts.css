@@ -1,0 +1,45 @@
+/* Self-hosted webfonts. Files in public/fonts/, served from /fonts/. No external
+   requests, so the app stays fully offline and needs no CSP change.
+   Baloo 2 and Quicksand are variable fonts: one file each covers the whole
+   weight range. Zen Maru Gothic is subset to the kana the app renders. */
+
+/* Baloo 2 — Headings/Display (Latin, variable 400–800) */
+@font-face {
+  font-family: 'Baloo 2';
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: swap;
+  src: url('/fonts/baloo2-400.woff2') format('woff2');
+}
+
+/* Quicksand — Body/UI (Latin, variable 400–700) */
+@font-face {
+  font-family: 'Quicksand';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('/fonts/quicksand-400.woff2') format('woff2');
+}
+
+/* Zen Maru Gothic — Kana (subset: Hiragana, Katakana, CJK punctuation, halfwidth/fullwidth, ASCII) */
+@font-face {
+  font-family: 'Zen Maru Gothic';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/zen-maru-gothic-400.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Zen Maru Gothic';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/fonts/zen-maru-gothic-500.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Zen Maru Gothic';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/zen-maru-gothic-700.woff2') format('woff2');
+}
