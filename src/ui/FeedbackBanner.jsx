@@ -25,8 +25,9 @@ export function FeedbackBanner({
   return (
     <div
       className={className}
-      role="status"
-      aria-live="assertive"
+      // #69: one consistent live semantic — assertive alert for a wrong answer,
+      // polite status for a correct one (each role implies its own live level).
+      role={correct ? 'status' : 'alert'}
       style={{
         display: 'flex',
         flexDirection: 'column',

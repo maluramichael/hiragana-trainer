@@ -42,8 +42,9 @@ describe('QuizResults', () => {
     await user.click(screen.getByRole('button', { name: label('results.share') }));
 
     expect(shareMock).toHaveBeenCalledTimes(1);
+    // #25: shared URL carries UTM attribution.
     expect(shareMock.mock.calls[0][0]).toMatchObject({
-      url: 'https://hiragana-trainer.de',
+      url: 'https://hiragana-trainer.de/?utm_source=share&utm_medium=result',
     });
   });
 

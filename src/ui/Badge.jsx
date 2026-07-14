@@ -10,7 +10,7 @@ const TONES = {
   fuchsia: { bg: 'var(--fuchsia-100)',      fg: 'var(--fuchsia-700)' },
   success: { bg: 'var(--color-success-bg)', fg: 'var(--emerald-600)' },
   error:   { bg: 'var(--color-error-bg)',   fg: 'var(--rose-600)' },
-  warning: { bg: 'var(--color-warning-bg)', fg: 'var(--amber-500)' },
+  warning: { bg: 'var(--color-warning-bg)', fg: 'var(--amber-700)' },
   info:    { bg: 'var(--bg-sky-50)',        fg: 'var(--sky-600)' },
 };
 

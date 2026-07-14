@@ -48,7 +48,9 @@
     "scriptBoth": "Both",
     "studyFirst": "Study first",
     "practiceWeak": "Practice weak characters",
-    "reviewDue": "Review due characters"
+    "reviewDue": "Review due characters",
+    "dailyStreak_one": "{{count}}-day streak",
+    "dailyStreak_other": "{{count}}-day streak"
   },
   "study": {
     "title": "Study characters",
@@ -81,7 +83,15 @@
     "finish": "Finish Quiz",
     "newRecord": "New record!",
     "progressLabel": "Quiz progress",
-    "confirmLeave": "Leave the quiz? Your current progress will be lost."
+    "confirmLeave": "Leave the quiz? Your current progress will be lost.",
+    "srHeading": "Kana quiz",
+    "questionAnnounce": "{{script}}: {{kana}}",
+    "inputLabel": "Romaji for this character",
+    "emptyTitle": "No characters to practice",
+    "emptyBody": "This selection produced no questions. Go back and pick at least one kana group."
+  },
+  "common": {
+    "loading": "Loading…"
   },
   "results": {
     "title": "Quiz Complete!",

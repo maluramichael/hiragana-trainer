@@ -23,8 +23,9 @@
     <meta property="og:title" content="Hiragana Trainer - Learn Japanese Hiragana & Katakana" />
     <meta property="og:description" content="Free Hiragana & Katakana quiz — no signup, no ads. Track accuracy & response time per character and master Japanese kana at your own pace." />
     <meta property="og:site_name" content="Hiragana Trainer" />
-    <!-- lazy: SVG-OG-Image; manche Plattformen rendern SVG schlecht → PNG-Export empfohlen (Backlog) -->
-    <meta property="og:image" content="https://hiragana-trainer.de/og-image.svg" />
+    <!-- #7: PNG, da X/Facebook/Slack SVG-OG-Images überwiegend nicht rendern -->
+    <meta property="og:image" content="https://hiragana-trainer.de/og-image.png" />
+    <meta property="og:image:type" content="image/png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
 
@@ -33,11 +34,14 @@
     <meta property="twitter:url" content="https://hiragana-trainer.de/" />
     <meta property="twitter:title" content="Hiragana Trainer - Learn Japanese Hiragana & Katakana" />
     <meta property="twitter:description" content="Free Hiragana & Katakana quiz — no signup, no ads. Track accuracy & response time per character and master Japanese kana at your own pace." />
-    <meta property="twitter:image" content="https://hiragana-trainer.de/og-image.svg" />
+    <meta property="twitter:image" content="https://hiragana-trainer.de/og-image.png" />
 
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/icon-192.svg" />
+
+    <!-- #30: preload the hero kana weight so the first あ/ア paints without FOUT -->
+    <link rel="preload" as="font" type="font/woff2" href="/fonts/zen-maru-gothic-700.woff2" crossorigin />
 
     <!-- PWA Manifest -->
     <link rel="manifest" href="/manifest.webmanifest" />
@@ -133,6 +137,10 @@
           });
         }
       };
+      // #61: expose on window so analytics.js' trackEvent() guard
+      // (window.CookieConsent?.analyticsAllowed?.()) actually resolves — a plain
+      // top-level const is not a window property, so events were silently dropped.
+      window.CookieConsent = CookieConsent;
       CookieConsent.init();
     </script>
   </head>

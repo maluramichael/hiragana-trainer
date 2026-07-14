@@ -45,13 +45,15 @@ describe('KanaQuiz', () => {
     expect(stats['し-shi'].timesIncorrect).toBe(0);
   });
 
-  it('#15: the feedback region is an assertive status for screen readers', async () => {
+  it('#15/#69: a wrong answer is announced assertively (role=alert)', async () => {
     const user = userEvent.setup();
     render(<KanaQuiz kanaList={pair('a')} onFinish={vi.fn()} />);
 
-    await user.type(screen.getByRole('textbox'), 'a{Enter}');
+    // Wrong answer -> FeedbackBanner uses role="alert" (the polite quiz-question
+    // announce region is role="status", so alert is unambiguous here).
+    await user.type(screen.getByRole('textbox'), 'x{Enter}');
 
-    expect(screen.getByRole('status')).toBeInTheDocument();
+    expect(screen.getByRole('alert')).toBeInTheDocument();
   });
 
   it('#65: feedback shows a control button instead of auto-advancing', async () => {

@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import KanaSelection from './components/KanaSelection';
 import LandingPage from './components/LandingPage';
 import { initializeStatistics } from './utils/statisticsManager.js';
+import { trackEvent } from './utils/analytics.js';
 import { kanaGroups } from './data/kana.js';
 import './i18n/i18n.js';
 
@@ -13,11 +14,15 @@ const Statistics = lazy(() => import('./components/Statistics'));
 const StudyMode = lazy(() => import('./components/StudyMode'));
 
 // Dezenter Fallback, während ein Screen-Chunk nachgeladen wird.
-const ScreenFallback = () => (
-  <div className="min-h-screen flex items-center justify-center" aria-hidden="true">
-    <div className="h-9 w-9 rounded-full border-[3px] border-pink-200 border-t-fuchsia-500 animate-spin" />
-  </div>
-);
+const ScreenFallback = () => {
+  const { t } = useTranslation();
+  return (
+    <div className="min-h-screen flex items-center justify-center" role="status">
+      <div className="h-9 w-9 rounded-full border-[3px] border-pink-200 border-t-fuchsia-500 animate-spin" aria-hidden="true" />
+      <span className="sr-only">{t('common.loading')}</span>
+    </div>
+  );
+};
 
 function App() {
   const { t, i18n } = useTranslation();
@@ -100,6 +105,7 @@ function App() {
   // behind the quiz first, so "back to selection" and "choose different
   // characters" land on the picker instead of bouncing to the landing page.
   const handleStartFromLanding = () => {
+    trackEvent('landing_cta_start');
     window.history.pushState({ view: 'selection' }, '', window.location.pathname);
     handleStartQuiz(kanaGroups.basic.vowels.hiragana, { scriptMode: 'hiragana' });
   };

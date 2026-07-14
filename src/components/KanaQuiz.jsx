@@ -1,12 +1,15 @@
 import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { getScriptCounterpart } from '../data/kana.js';
-import { updateKanaStatistics, getBestStreak, updateBestStreak, scheduleReview } from '../utils/statisticsManager.js';
+import { updateKanaStatistics, getBestStreak, updateBestStreak, scheduleReview, recordPracticeDay } from '../utils/statisticsManager.js';
+import { trackEvent } from '../utils/analytics.js';
 import { Card, KanaCard, TextInput, Button, FeedbackBanner, StatTile, ProgressMeter, Badge } from '../ui/index.js';
 
-// Accept common Kunrei/Hepburn spelling variants (#29).
+// Accept common Kunrei/Hepburn spelling variants (#29) plus everyday inputs (#41):
+// double-n for ん, and the widely-used 'o' reading of the particle を.
 const romajiAliases = {
-  shi: ['si'], chi: ['ti'], tsu: ['tu'], fu: ['hu'], ji: ['zi', 'di'], zu: ['du']
+  shi: ['si'], chi: ['ti'], tsu: ['tu'], fu: ['hu'], ji: ['zi', 'di'], zu: ['du'],
+  n: ['nn'], wo: ['o']
 };
 
 const isRomajiCorrect = (input, romaji) => {
@@ -22,6 +25,8 @@ const KanaQuiz = ({ kanaList, onFinish, scriptMode = 'both' }) => {
   const [userInput, setUserInput] = useState('');
   const [feedback, setFeedback] = useState(null);
   const [correctCount, setCorrectCount] = useState(0);
+  const [answeredCount, setAnsweredCount] = useState(0);
+  const [ready, setReady] = useState(false);
   const [streak, setStreak] = useState(0);
   const [bestStreak, setBestStreak] = useState(() => getBestStreak());
   const [shuffledQuestions, setShuffledQuestions] = useState([]);
@@ -46,7 +51,13 @@ const KanaQuiz = ({ kanaList, onFinish, scriptMode = 'both' }) => {
       if (scriptMode !== 'hiragana') questions.push({ kana: katakanaChar, romaji: kana.romaji, script: 'katakana' });
     });
     setShuffledQuestions([...questions].sort(() => Math.random() - 0.5));
+    setReady(true);
   }, [kanaList, scriptMode]);
+
+  useEffect(() => {
+    trackEvent('quiz_started', scriptMode);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (inputRef.current) inputRef.current.focus();
@@ -78,6 +89,7 @@ const KanaQuiz = ({ kanaList, onFinish, scriptMode = 'both' }) => {
     updateKanaStatistics([{ kana: current.kana, romaji: current.romaji, isCorrect, responseTime }]);
     scheduleReview(`${current.kana}-${current.romaji}`, isCorrect);
     setFeedback({ isCorrect, correctAnswer: current.romaji, userAnswer: userInput.trim() });
+    if (!isRetryAttempt) setAnsweredCount(prev => prev + 1);
     if (isCorrect) {
       if (!isRetryAttempt) setCorrectCount(prev => prev + 1);
       setStreak(prev => {
@@ -105,24 +117,48 @@ const KanaQuiz = ({ kanaList, onFinish, scriptMode = 'both' }) => {
       setFeedback(null);
     } else {
       updateBestStreak(bestStreak);
+      // #7: wire the built-but-dead daily-streak feature — count today as practiced.
+      const daily = recordPracticeDay();
+      trackEvent('day_practiced', String(daily.current));
       onFinish({ total: shuffledQuestions.length, correct: correctCount, bestStreak });
     }
   };
 
   const handleBack = () => {
     if (currentIndex > 0 && !window.confirm(t('quiz.confirmLeave'))) return;
+    // #40: don't lose a fresh best-streak when leaving mid-quiz.
+    updateBestStreak(bestStreak);
     onFinish(null);
   };
 
-  if (!current) return null;
+  if (!current) {
+    // #63: a selection that yields zero questions must not dead-end on a blank screen.
+    if (ready && totalQuestions === 0) {
+      return (
+        <main style={{ position: 'relative', minHeight: '100vh' }}>
+          <div style={{ maxWidth: 'var(--width-prose)', margin: '0 auto', padding: 'var(--space-12) var(--space-6)', textAlign: 'center' }}>
+            <h1 style={{ fontSize: 'var(--text-2xl)', marginBottom: 'var(--space-3)' }}>{t('quiz.emptyTitle')}</h1>
+            <p style={{ color: 'var(--text-body)', marginBottom: 'var(--space-6)' }}>{t('quiz.emptyBody')}</p>
+            <Button variant="primary" iconLeft="arrow-left" onClick={() => onFinish(null)}>{t('navigation.backToSelection')}</Button>
+          </div>
+        </main>
+      );
+    }
+    return null;
+  }
 
   const state = feedback ? (feedback.isCorrect ? 'correct' : 'wrong') : 'idle';
   const scriptLabel = current.script === 'hiragana' ? t('scripts.hiragana') : t('scripts.katakana');
-  const acc = Math.round((correctCount / Math.max(currentIndex, 1)) * 100);
+  // #28: divide by graded first-attempts, not the running index (which lags and
+  // could push the shown accuracy over 100%).
+  const acc = answeredCount > 0 ? Math.round((correctCount / answeredCount) * 100) : 0;
 
   return (
     <main style={{ position: 'relative', minHeight: '100vh' }}>
       <div style={{ maxWidth: 'var(--width-prose)', margin: '0 auto', padding: 'var(--space-8) var(--space-6) var(--space-16)' }}>
+        <h1 className="sr-only">{t('quiz.srHeading')}</h1>
+        {/* #20: announce each new character to screen readers */}
+        <div role="status" aria-live="polite" className="sr-only">{t('quiz.questionAnnounce', { script: scriptLabel, kana: current.kana })}</div>
         {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, marginBottom: 'var(--space-4)', flexWrap: 'wrap' }}>
           <Button variant="ghost" size="sm" iconLeft="arrow-left" onClick={handleBack}>{t('navigation.backToSelection')}</Button>
@@ -144,7 +180,7 @@ const KanaQuiz = ({ kanaList, onFinish, scriptMode = 'both' }) => {
           {!feedback ? (
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--space-4)' }}>
               <div style={{ width: 260, maxWidth: '100%' }}>
-                <TextInput inputRef={inputRef} value={userInput} onChange={(e) => setUserInput(e.target.value)} placeholder={t('quiz.typeRomaji')} />
+                <TextInput inputRef={inputRef} value={userInput} onChange={(e) => setUserInput(e.target.value)} placeholder={t('quiz.typeRomaji')} aria-label={t('quiz.inputLabel')} inputMode="text" enterKeyHint="go" />
               </div>
               <Button type="submit" variant="primary" size="md" iconRight="arrow-right" disabled={!userInput.trim()}>{t('quiz.submit')}</Button>
             </form>

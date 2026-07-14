@@ -163,8 +163,8 @@ const Statistics = ({ onBack }) => {
                       <td style={{ ...td, fontFamily: 'var(--font-kana)', fontWeight: 500, fontSize: 'var(--text-2xl)', color: 'var(--text-strong)' }}><span lang="ja">{stat.kana}</span></td>
                       <td style={{ ...td, fontFamily: 'var(--font-mono)', color: 'var(--text-body)' }}>{stat.romaji}</td>
                       <td style={{ ...td, color: 'var(--text-body)' }}>{stat.timesShown}</td>
-                      <td style={{ ...td, color: 'var(--emerald-600)', fontWeight: 700 }}>{stat.timesCorrect}</td>
-                      <td style={{ ...td, color: 'var(--rose-600)', fontWeight: 700 }}>{stat.timesIncorrect}</td>
+                      <td style={{ ...td, color: 'var(--emerald-700)', fontWeight: 700 }}>{stat.timesCorrect}</td>
+                      <td style={{ ...td, color: 'var(--rose-700)', fontWeight: 700 }}>{stat.timesIncorrect}</td>
                       <td style={{ ...td, fontWeight: 700, color: accTone(a) }}>
                         {stat.timesShown > 0 ? (<><span aria-hidden="true">{accuracySymbol(a)}</span> {a}%</>) : '-'}
                       </td>

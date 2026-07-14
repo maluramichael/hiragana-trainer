@@ -31,16 +31,19 @@
   --amber-300:  #fcd34d;
   --amber-400:  #fbbf24;
   --amber-500:  #f59e0b;
+  --amber-700:  #b45309; /* AA-tauglicher Text-Ton auf amber-Flächen (#11) */
 
   --emerald-300: #6ee7b7;
   --emerald-400: #34d399;
   --emerald-500: #10b981;
   --emerald-600: #059669;
+  --emerald-700: #047857; /* AA-Text auf hellem Grund (#11) */
 
   --rose-300:   #fda4af;
   --rose-400:   #fb7185;
   --rose-500:   #f43f5e;
   --rose-600:   #e11d48;
+  --rose-700:   #be123c; /* AA-Text auf hellem Grund (#11) */
 
   /* --- Neutrals: slate --- */
   --slate-50:  #f8fafc;
@@ -73,7 +76,7 @@
   --text-strong:   var(--slate-900);
   --text-body:     var(--slate-700);
   --text-muted:    var(--slate-500);
-  --text-faint:    var(--slate-400);
+  --text-faint:    var(--slate-500); /* #11: slate-400 verfehlte AA als Fließtext */
   --text-on-color: var(--white);
   --text-link:     var(--fuchsia-600);
   --text-link-hover: var(--fuchsia-700);

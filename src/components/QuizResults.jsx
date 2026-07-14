@@ -45,8 +45,10 @@ const QuizResults = ({ results, onRestart, onNewSelection, kanaList = [] }) => {
 
   const handleShare = async () => {
     trackEvent('share_clicked', `${accuracy}%`);
-    const text = t('results.shareText', { accuracy, url: APP_URL });
-    const shareData = { title: t('results.shareTitle'), text, url: APP_URL };
+    // #25: tag the shared link so the viral loop is attributable in analytics.
+    const shareUrl = `${APP_URL}/?utm_source=share&utm_medium=result`;
+    const text = t('results.shareText', { accuracy, url: shareUrl });
+    const shareData = { title: t('results.shareTitle'), text, url: shareUrl };
     try {
       if (navigator.share) { await navigator.share(shareData); return; }
       await navigator.clipboard.writeText(text);
@@ -55,6 +57,7 @@ const QuizResults = ({ results, onRestart, onNewSelection, kanaList = [] }) => {
   };
 
   const handleCopyExport = async () => {
+    trackEvent('export_clicked', `${accuracy}%`);
     try {
       await navigator.clipboard.writeText(exportStatisticsAsBase64());
       setExportStatus('copied');
@@ -85,7 +88,7 @@ const QuizResults = ({ results, onRestart, onNewSelection, kanaList = [] }) => {
           {/* Mastery celebration — only real, data-derived milestones */}
           {masteredSeries.length > 0 && (
             <div style={{ marginBottom: 'var(--space-8)', borderRadius: 'var(--radius-2xl)', background: 'var(--color-warning-bg)', padding: 'var(--space-4)', textAlign: 'left', boxShadow: 'var(--ring-white)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 800, color: 'var(--amber-500)', marginBottom: 4, fontFamily: 'var(--font-display)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 800, color: 'var(--amber-700)', marginBottom: 4, fontFamily: 'var(--font-display)' }}>
                 <Icon name="star" size={20} /> {t('mastery.title')}
               </div>
               <ul style={{ margin: 0, paddingLeft: '1.2rem', fontSize: 'var(--text-sm)', color: 'var(--text-body)' }}>
@@ -141,8 +144,8 @@ const QuizResults = ({ results, onRestart, onNewSelection, kanaList = [] }) => {
         <Card style={{ marginTop: 'var(--space-6)', textAlign: 'left' }}>
           <div style={{ fontWeight: 800, color: 'var(--text-strong)', marginBottom: 'var(--space-3)', fontFamily: 'var(--font-display)' }}>{t('results.recommendedTitle')}</div>
           <ul style={{ margin: 0, paddingLeft: '1.2rem', display: 'flex', flexDirection: 'column', gap: 8, fontSize: 'var(--text-sm)' }}>
-            <li><a href={TOFUGU_HIRAGANA_URL} target="_blank" rel="noopener noreferrer" style={linkStyle}>{t('results.recommendedHiragana')}</a></li>
-            <li><a href={TOFUGU_KATAKANA_URL} target="_blank" rel="noopener noreferrer" style={linkStyle}>{t('results.recommendedKatakana')}</a></li>
+            <li><a href={TOFUGU_HIRAGANA_URL} target="_blank" rel="noopener noreferrer" style={linkStyle} onClick={() => trackEvent('recommended_clicked', 'hiragana')}>{t('results.recommendedHiragana')}</a></li>
+            <li><a href={TOFUGU_KATAKANA_URL} target="_blank" rel="noopener noreferrer" style={linkStyle} onClick={() => trackEvent('recommended_clicked', 'katakana')}>{t('results.recommendedKatakana')}</a></li>
           </ul>
         </Card>
 
@@ -152,8 +155,8 @@ const QuizResults = ({ results, onRestart, onNewSelection, kanaList = [] }) => {
             <Icon name="star" size={20} style={{ color: 'var(--amber-500)' }} /> {t('results.supportTitle')}
           </div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem 1.5rem', fontSize: 'var(--text-sm)', marginBottom: 'var(--space-4)' }}>
-            <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer" style={linkStyle}>{t('results.starGithub')}</a>
-            <a href={SPONSORS_URL} target="_blank" rel="noopener noreferrer" style={linkStyle}>{t('results.sponsor')}</a>
+            <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer" style={linkStyle} onClick={() => trackEvent('sponsor_clicked', 'github')}>{t('results.starGithub')}</a>
+            <a href={SPONSORS_URL} target="_blank" rel="noopener noreferrer" style={linkStyle} onClick={() => trackEvent('sponsor_clicked', 'sponsors')}>{t('results.sponsor')}</a>
           </div>
           <p style={{ margin: 0, fontSize: 'var(--text-sm)', color: 'var(--text-muted)' }}>
             {t('results.aboutBy')}{' '}

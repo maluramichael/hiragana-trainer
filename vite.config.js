@@ -21,10 +21,23 @@ export default defineConfig({
         cleanupOutdatedCaches: true,
         clientsClaim: true,
         skipWaiting: true,
+        // #43: precache fonts, icons and images too, so offline is truly complete.
+        globPatterns: ['**/*.{js,css,html,woff2,png,svg,webmanifest}'],
       },
       devOptions: { enabled: false },
     }),
   ],
+  // #49: split the rarely-changing framework/i18n code into a stable vendor chunk
+  // so app edits don't bust its long-lived cache on repeat visits.
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom', 'react-i18next', 'i18next', 'i18next-browser-languagedetector'],
+        },
+      },
+    },
+  },
   test: {
     globals: true,
     environment: 'jsdom',

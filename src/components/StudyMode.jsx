@@ -60,18 +60,16 @@ const StudyMode = ({ kanaList, scriptMode = 'both', onStartQuiz, onBack }) => {
               ref={cardRef}
               tabIndex={-1}
               aria-live="polite"
-              aria-label={t('study.cardPosition', {
-                current: index + 1,
-                total: cards.length
-              })}
               className="outline-none"
             >
+              {/* #31: no aria-label here — it would mask kana + romaji; the position
+                  is already announced by the visible <p> below. */}
               <div lang="ja" className="font-kana mb-6 text-9xl font-bold text-slate-800">{card.kana}</div>
               <div className="inline-block rounded-full bg-fuchsia-100 px-5 py-1.5 text-3xl font-bold text-fuchsia-600">
                 {card.romaji}
               </div>
             </div>
-            <p className="mt-8 text-sm font-medium text-slate-400">
+            <p className="mt-8 text-sm font-medium text-slate-500">
               {t('study.cardPosition', {
                 current: index + 1,
                 total: cards.length

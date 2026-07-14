@@ -18,7 +18,8 @@ describe('index.html SEO/meta', () => {
 
   it('references an og:image', () => {
     expect(html).toContain('property="og:image"')
-    expect(html).toContain('og-image.svg')
+    // #7: PNG, weil viele Plattformen SVG-OG-Images nicht rendern.
+    expect(html).toContain('og-image.png')
   })
 
   it('declares lang="de"', () => {

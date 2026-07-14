@@ -6,8 +6,10 @@ import {
   getOverallStatistics,
   getStatistics,
   getWeakKana,
-  getDueKana
+  getDueKana,
+  getDailyStreak
 } from '../utils/statisticsManager.js';
+import { trackEvent } from '../utils/analytics.js';
 import { Card, Button, Checkbox, ProgressMeter, Badge, Icon, TopBar, AppFooter, BackdropKana } from '../ui/index.js';
 
 // Hiragana Unicode block; anything else is treated as Katakana.
@@ -142,6 +144,7 @@ const KanaSelection = ({ onStartQuiz, onStudy, onViewStatistics }) => {
   const [scripts, setScripts] = useState(loadScripts);
   const [weakKana, setWeakKana] = useState([]);
   const [dueKana, setDueKana] = useState([]);
+  const [dailyStreak, setDailyStreak] = useState(0);
 
   const scriptMode = scriptsToMode(scripts);
 
@@ -152,6 +155,7 @@ const KanaSelection = ({ onStartQuiz, onStudy, onViewStatistics }) => {
     const stats = getStatistics();
     const practicedKeys = Object.keys(stats).filter((key) => stats[key].timesShown > 0);
     setDueKana(resolveKana(getDueKana(practicedKeys)));
+    setDailyStreak(getDailyStreak().current);
   }, []);
 
   useEffect(() => {
@@ -189,27 +193,42 @@ const KanaSelection = ({ onStartQuiz, onStudy, onViewStatistics }) => {
 
   const handleStartQuiz = () => {
     const kanaToStudy = getKanaForSelection(selectedGroups);
-    if (kanaToStudy.length > 0) onStartQuiz(kanaToStudy, { scriptMode });
+    if (kanaToStudy.length > 0) {
+      trackEvent('selection_start_quiz', String(kanaToStudy.length));
+      onStartQuiz(kanaToStudy, { scriptMode });
+    }
   };
 
   const handleQuickstart = () => {
     const quickSelection = { ...defaultSelection, basicSubs: { ...defaultSelection.basicSubs, vowels: true } };
     setSelectedGroups(quickSelection);
     const kanaToStudy = getKanaForSelection(quickSelection);
-    if (kanaToStudy.length > 0) onStartQuiz(kanaToStudy, { scriptMode });
+    if (kanaToStudy.length > 0) {
+      trackEvent('quickstart');
+      onStartQuiz(kanaToStudy, { scriptMode });
+    }
   };
 
   const handleStudy = () => {
     const kanaToStudy = getKanaForSelection(selectedGroups);
-    if (kanaToStudy.length > 0) onStudy(kanaToStudy, { scriptMode });
+    if (kanaToStudy.length > 0) {
+      trackEvent('study_started', String(kanaToStudy.length));
+      onStudy(kanaToStudy, { scriptMode });
+    }
   };
 
   const handlePracticeWeak = () => {
-    if (weakKana.length > 0) onStartQuiz(weakKana, { scriptMode: deriveScriptMode(weakKana) });
+    if (weakKana.length > 0) {
+      trackEvent('practice_weak', String(weakKana.length));
+      onStartQuiz(weakKana, { scriptMode: deriveScriptMode(weakKana) });
+    }
   };
 
   const handleReviewDue = () => {
-    if (dueKana.length > 0) onStartQuiz(dueKana, { scriptMode: deriveScriptMode(dueKana) });
+    if (dueKana.length > 0) {
+      trackEvent('review_due', String(dueKana.length));
+      onStartQuiz(dueKana, { scriptMode: deriveScriptMode(dueKana) });
+    }
   };
 
   const selectedCount = getKanaForSelection(selectedGroups).length;
@@ -268,6 +287,17 @@ const KanaSelection = ({ onStartQuiz, onStudy, onViewStatistics }) => {
         <div style={{ textAlign: 'center', marginBottom: 'var(--space-8)' }}>
           <h1 style={{ fontSize: 'clamp(2rem, 6vw, var(--text-4xl))', marginBottom: 'var(--space-2)' }}>{t('selection.headline')}</h1>
           <p style={{ fontFamily: 'var(--font-body)', fontSize: 'var(--text-lg)', color: 'var(--text-body)', margin: 0 }}>{t('selection.subhead')}</p>
+          {dailyStreak > 0 && (
+            <div style={{ marginTop: 'var(--space-3)', display: 'flex', justifyContent: 'center' }}>
+              <Badge tone="warning" icon="flame">{t('selection.dailyStreak', { count: dailyStreak })}</Badge>
+            </div>
+          )}
+          {/* #38: surface the already-translated onboarding microcopy for first-timers */}
+          {!hasData && (
+            <p style={{ fontFamily: 'var(--font-body)', fontSize: 'var(--text-sm)', color: 'var(--text-muted)', margin: 'var(--space-3) auto 0', maxWidth: '34rem' }}>
+              {t('selection.intro')} {t('selection.payoff')}
+            </p>
+          )}
         </div>
 
         {/* Quickstart, only until the learner has practiced once. */}

@@ -48,7 +48,9 @@
     "scriptBoth": "Beide",
     "studyFirst": "Erst lernen",
     "practiceWeak": "Schwache Zeichen üben",
-    "reviewDue": "Fällige Zeichen wiederholen"
+    "reviewDue": "Fällige Zeichen wiederholen",
+    "dailyStreak_one": "{{count}} Tag in Folge",
+    "dailyStreak_other": "{{count}} Tage in Folge"
   },
   "study": {
     "title": "Zeichen lernen",
@@ -81,7 +83,15 @@
     "finish": "Quiz beenden",
     "newRecord": "Neuer Rekord!",
     "progressLabel": "Quiz-Fortschritt",
-    "confirmLeave": "Quiz verlassen? Dein aktueller Fortschritt geht verloren."
+    "confirmLeave": "Quiz verlassen? Dein aktueller Fortschritt geht verloren.",
+    "srHeading": "Kana-Quiz",
+    "questionAnnounce": "{{script}}: {{kana}}",
+    "inputLabel": "Romaji für dieses Zeichen",
+    "emptyTitle": "Keine Zeichen zum Üben",
+    "emptyBody": "Für diese Auswahl gibt es keine Fragen. Geh zurück und wähl mindestens eine Kana-Gruppe."
+  },
+  "common": {
+    "loading": "Lädt…"
   },
   "results": {
     "title": "Quiz beendet!",
