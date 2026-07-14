@@ -60,7 +60,8 @@
     "cardPosition": "Card {{current}} of {{total}}",
     "previous": "Previous",
     "next": "Next",
-    "startQuiz": "Start quiz now"
+    "startQuiz": "Start quiz now",
+    "introCta": "Show me the vowels"
   },
   "quiz": {
     "typeRomaji": "Type the romaji...",
@@ -94,6 +95,15 @@
   },
   "common": {
     "loading": "Loading…"
+  },
+  "writingSystem": {
+    "heading": "How Japanese writing works",
+    "scripts": "Japanese uses three scripts: Hiragana, Katakana and Kanji. Hiragana and Katakana are syllabaries, where each character is one sound.",
+    "kanjiNote": "Kanji are meaning characters. We'll save those for later 🙂",
+    "vowelsHint": "Start with the five vowels. Take a quick look, then a short quiz.",
+    "deepDive": "Read more at Tofugu",
+    "gotIt": "Got it",
+    "close": "Close"
   },
   "results": {
     "title": "Quiz Complete!",
@@ -214,7 +224,8 @@
     "hero": {
       "title": "Learn to read Hiragana and Katakana for real",
       "subtitle": "You see a Japanese character and type how it sounds. Short rounds, clear feedback, visible progress.",
-      "cta": "Learn the vowels",
+      "cta": "Let's go",
+      "ctaContinue": "Keep practicing",
       "ctaHint": "Starts right away with the five vowels.",
       "or": "or",
       "secondary": "Choose other characters",
@@ -222,7 +233,8 @@
       "scriptHiragana": "Hiragana",
       "scriptKatakana": "Katakana",
       "kanaExplainer": "Kana are the two Japanese syllabaries. Start with hiragana.",
-      "basicsLink": "New to kana? Read the basics"
+      "basicsLink": "New to kana? Read the basics",
+      "howItWorks": "How does Japanese writing work?"
     },
     "features": {
       "heading": "What you get",

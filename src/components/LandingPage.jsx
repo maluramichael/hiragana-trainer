@@ -1,6 +1,8 @@
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { trackEvent } from '../utils/analytics.js';
-import { TOFUGU_HIRAGANA_URL } from '../data/links.js';
+import { getOverallStatistics } from '../utils/statisticsManager.js';
+import WritingSystemModal from './WritingSystemModal.jsx';
 import { Card, Button, Icon, Wordmark, LanguagePill, BackdropKana, AppFooter } from '../ui/index.js';
 
 // Hero motif: the words hiragana / katakana spelled in kana as bobbing chips.
@@ -26,8 +28,14 @@ function KanaChip({ char, gradient, delay = 0 }) {
   );
 }
 
-const LandingPage = ({ onStart, onChooseCharacters }) => {
+const LandingPage = ({ onStart }) => {
   const { t } = useTranslation();
+  // Returners can re-open the writing-system explainer on demand.
+  const [introOpen, setIntroOpen] = useState(false);
+  // First-timers see "Los geht's" (into onboarding); returners see "Weiter üben".
+  const [hasData, setHasData] = useState(false);
+  useEffect(() => { setHasData(getOverallStatistics().practicedKana > 0); }, []);
+  const ctaLabel = hasData ? t('landing.hero.ctaContinue') : t('landing.hero.cta');
 
   return (
     <main style={{ position: 'relative', minHeight: '100vh', overflow: 'hidden' }}>
@@ -71,12 +79,11 @@ const LandingPage = ({ onStart, onChooseCharacters }) => {
             {t('landing.hero.kanaExplainer')}
           </p>
 
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--space-3)' }}>
-            <Button variant="primary" size="lg" iconLeft="rocket" onClick={onStart}>{t('landing.hero.cta')}</Button>
-            <span style={{ fontFamily: 'var(--font-body)', fontSize: 'var(--text-sm)', color: 'var(--text-muted)' }}>{t('landing.hero.or')}</span>
-            <Button variant="secondary" size="lg" iconLeft="book-open" onClick={onChooseCharacters}>{t('landing.hero.secondary')}</Button>
-            {/* #32: beginner explainer link on the landing itself, not only in results */}
-            <a href={TOFUGU_HIRAGANA_URL} target="_blank" rel="noopener noreferrer" onClick={() => trackEvent('basics_link', 'landing')} style={{ marginTop: 'var(--space-1)', fontFamily: 'var(--font-body)', fontSize: 'var(--text-sm)', fontWeight: 700, color: 'var(--fuchsia-600)' }}>{t('landing.hero.basicsLink')}</a>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--space-4)' }}>
+            {/* One prominent CTA: "Los geht's" -> onboarding for first-timers, "Weiter üben" -> picker for returners. */}
+            <Button variant="primary" size="lg" iconLeft="rocket" onClick={onStart} style={{ fontSize: 'var(--text-2xl)', padding: '1.1rem 2.75rem', minHeight: 64 }}>{ctaLabel}</Button>
+            {/* #32: in-app writing-system explainer, reachable any time (also for returners) */}
+            <button type="button" onClick={() => { trackEvent('how_it_works', 'landing'); setIntroOpen(true); }} style={{ marginTop: 'var(--space-1)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-body)', fontSize: 'var(--text-sm)', fontWeight: 700, color: 'var(--fuchsia-600)' }}>{t('landing.hero.howItWorks')}</button>
           </div>
 
           <p style={{ marginTop: 'var(--space-8)', display: 'inline-flex', alignItems: 'center', gap: 8, borderRadius: 'var(--radius-pill)', background: 'var(--surface-card-soft)', padding: '0.5rem 1rem', fontFamily: 'var(--font-body)', fontSize: 'var(--text-sm)', fontWeight: 500, color: 'var(--text-muted)', boxShadow: 'var(--ring-white), var(--shadow-sm)' }}>
@@ -123,6 +130,7 @@ const LandingPage = ({ onStart, onChooseCharacters }) => {
 
         <AppFooter />
       </div>
+      {introOpen && <WritingSystemModal onClose={() => setIntroOpen(false)} />}
     </main>
   );
 };

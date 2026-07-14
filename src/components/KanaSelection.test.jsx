@@ -120,7 +120,7 @@ describe('KanaSelection', () => {
     await user.click(screen.getByRole('button', { name: 'Hiragana' }));
     await user.click(screen.getByTestId('quickstart-button'));
 
-    expect(onStudy.mock.calls[0][1]).toEqual({ scriptMode: 'katakana' });
+    expect(onStudy.mock.calls[0][1]).toEqual({ scriptMode: 'katakana', intro: true });
   });
 
   it('#4: the "study first" button hands the current selection to onStudy', async () => {

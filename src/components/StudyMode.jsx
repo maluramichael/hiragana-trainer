@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeftIcon, RocketIcon } from './icons.jsx';
+import WritingSystemIntro from './WritingSystemIntro.jsx';
 
 // Hiragana Unicode block; anything else is treated as Katakana.
 const isHiragana = (char) => /[぀-ゟ]/.test(char);
@@ -9,8 +10,11 @@ const isHiragana = (char) => /[぀-ゟ]/.test(char);
 // then jump into the quiz with the same selection. scriptMode narrows which
 // script's cards are shown; the quiz itself still receives the full kanaList so
 // it behaves exactly like starting from the selection screen.
-const StudyMode = ({ kanaList, scriptMode = 'both', onStartQuiz, onBack }) => {
+const StudyMode = ({ kanaList, scriptMode = 'both', onStartQuiz, onBack, showIntro = false }) => {
   const { t } = useTranslation();
+
+  // First-timers get a short "how Japanese writing works" step before the cards.
+  const [phase, setPhase] = useState(showIntro ? 'intro' : 'cards');
 
   const cards = kanaList.filter(({ kana }) => {
     if (scriptMode === 'hiragana') return isHiragana(kana);
@@ -54,64 +58,66 @@ const StudyMode = ({ kanaList, scriptMode = 'both', onStartQuiz, onBack }) => {
           </h1>
         </div>
 
-        {card && (
-          <div className="mb-6 animate-pop-in rounded-[1.75rem] bg-white/90 p-12 text-center shadow-cute-lg ring-1 ring-white/70">
-            <div
-              ref={cardRef}
-              tabIndex={-1}
-              aria-live="polite"
-              className="outline-none"
-            >
-              {/* #31: no aria-label here — it would mask kana + romaji; the position
-                  is already announced by the visible <p> below. */}
-              <div lang="ja" className="font-kana mb-6 text-9xl font-bold text-slate-800">{card.kana}</div>
-              <div className="inline-block rounded-full bg-fuchsia-100 px-5 py-1.5 text-3xl font-bold text-fuchsia-600">
-                {card.romaji}
-              </div>
+        {phase === 'intro' ? (
+          <>
+            <div className="mb-8 animate-pop-in rounded-[1.75rem] bg-white/90 p-8 shadow-cute-lg ring-1 ring-white/70">
+              <WritingSystemIntro />
             </div>
-            <p className="mt-8 text-sm font-medium text-slate-500">
-              {t('study.cardPosition', {
-                current: index + 1,
-                total: cards.length
-              })}
-            </p>
-          </div>
+            <div className="text-center">
+              <button
+                onClick={() => setPhase('cards')}
+                className="group inline-flex items-center gap-2.5 rounded-[1.4rem] bg-fuchsia-500 px-8 py-4 text-xl font-bold text-white shadow-cute-lg transition-all duration-200 hover:-translate-y-0.5 hover:bg-fuchsia-600 active:translate-y-0.5"
+              >
+                <RocketIcon className="w-6 h-6 transition-transform duration-200 group-hover:-rotate-12" />
+                {t('study.introCta')}
+              </button>
+            </div>
+          </>
+        ) : (
+          <>
+            {card && (
+              <div className="mb-6 animate-pop-in rounded-[1.75rem] bg-white/90 p-12 text-center shadow-cute-lg ring-1 ring-white/70">
+                <div ref={cardRef} tabIndex={-1} aria-live="polite" className="outline-none">
+                  {/* #31: no aria-label here — it would mask kana + romaji; the position is announced by the visible <p>. */}
+                  <div lang="ja" className="font-kana mb-6 text-9xl font-bold text-slate-800">{card.kana}</div>
+                  <div className="inline-block rounded-full bg-fuchsia-100 px-5 py-1.5 text-3xl font-bold text-fuchsia-600">{card.romaji}</div>
+                </div>
+                <p className="mt-8 text-sm font-medium text-slate-500">{t('study.cardPosition', { current: index + 1, total: cards.length })}</p>
+              </div>
+            )}
+
+            {/* One forward control: "Weiter" through the cards, "Jetzt Quiz starten" on the last one (#studymode). */}
+            <div className="flex justify-between gap-4">
+              <button
+                onClick={atStart ? (showIntro ? () => setPhase('intro') : undefined) : goPrev}
+                disabled={atStart && !showIntro}
+                className={`inline-flex items-center gap-2 rounded-2xl px-6 py-3 font-bold transition-all ${
+                  atStart && !showIntro
+                    ? 'cursor-not-allowed bg-slate-100 text-slate-400'
+                    : 'bg-white text-slate-600 shadow-cute ring-1 ring-white/60 hover:-translate-y-0.5'
+                }`}
+              >
+                <ArrowLeftIcon className="w-4 h-4" /> {t('study.previous')}
+              </button>
+              {atEnd ? (
+                <button
+                  onClick={startQuiz}
+                  className="group inline-flex items-center gap-2.5 rounded-[1.4rem] bg-fuchsia-500 px-6 py-3 font-bold text-white shadow-cute-lg transition-all hover:-translate-y-0.5 hover:bg-fuchsia-600 active:translate-y-0.5"
+                >
+                  <RocketIcon className="w-5 h-5 transition-transform duration-200 group-hover:-rotate-12" />
+                  {t('study.startQuiz')}
+                </button>
+              ) : (
+                <button
+                  onClick={goNext}
+                  className="inline-flex items-center gap-2 rounded-2xl bg-white px-6 py-3 font-bold text-slate-600 shadow-cute ring-1 ring-white/60 transition-all hover:-translate-y-0.5"
+                >
+                  {t('study.next')} <ArrowLeftIcon className="w-4 h-4 rotate-180" />
+                </button>
+              )}
+            </div>
+          </>
         )}
-
-        <div className="mb-8 flex justify-between gap-4">
-          <button
-            onClick={goPrev}
-            disabled={atStart}
-            className={`inline-flex items-center gap-2 rounded-2xl px-6 py-3 font-bold transition-all ${
-              atStart
-                ? 'cursor-not-allowed bg-slate-100 text-slate-400'
-                : 'bg-white text-slate-600 shadow-cute ring-1 ring-white/60 hover:-translate-y-0.5'
-            }`}
-          >
-            <ArrowLeftIcon className="w-4 h-4" /> {t('study.previous')}
-          </button>
-          <button
-            onClick={goNext}
-            disabled={atEnd}
-            className={`inline-flex items-center gap-2 rounded-2xl px-6 py-3 font-bold transition-all ${
-              atEnd
-                ? 'cursor-not-allowed bg-slate-100 text-slate-400'
-                : 'bg-white text-slate-600 shadow-cute ring-1 ring-white/60 hover:-translate-y-0.5'
-            }`}
-          >
-            {t('study.next')} <ArrowLeftIcon className="w-4 h-4 rotate-180" />
-          </button>
-        </div>
-
-        <div className="text-center">
-          <button
-            onClick={startQuiz}
-            className="group inline-flex items-center gap-2.5 rounded-[1.4rem] bg-fuchsia-500 px-8 py-4 text-xl font-bold text-white shadow-cute-lg transition-all duration-200 hover:-translate-y-0.5 hover:bg-fuchsia-600 active:translate-y-0.5"
-          >
-            <RocketIcon className="w-6 h-6 transition-transform duration-200 group-hover:-rotate-12" />
-            {t('study.startQuiz')}
-          </button>
-        </div>
       </div>
     </div>
   );

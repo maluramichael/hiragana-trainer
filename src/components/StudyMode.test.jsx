@@ -38,16 +38,35 @@ describe('StudyMode', () => {
     expect(screen.getByText('あ')).toBeInTheDocument();
   });
 
-  it('#4: "start quiz" hands the full list and script mode to the callback', async () => {
+  it('#4: the last card starts the quiz with the full list and script mode', async () => {
     const user = userEvent.setup();
     const onStartQuiz = vi.fn();
     render(
       <StudyMode kanaList={kanaList} scriptMode="both" onStartQuiz={onStartQuiz} onBack={vi.fn()} />
     );
 
+    // Forward is "Weiter" until the last card, where it becomes "Jetzt Quiz starten".
+    await user.click(screen.getByRole('button', { name: /^Weiter$/i }));
+    await user.click(screen.getByRole('button', { name: /^Weiter$/i }));
+    await user.click(screen.getByRole('button', { name: /^Weiter$/i }));
     await user.click(screen.getByRole('button', { name: /Quiz starten/i }));
 
     expect(onStartQuiz).toHaveBeenCalledWith(kanaList, { scriptMode: 'both' });
+  });
+
+  it('#onboarding: showIntro opens the writing-system intro before the cards', async () => {
+    const user = userEvent.setup();
+    render(
+      <StudyMode kanaList={kanaList} scriptMode="both" showIntro onStartQuiz={vi.fn()} onBack={vi.fn()} />
+    );
+
+    // Intro first, no card yet.
+    expect(screen.getByText(/So funktioniert japanische Schrift/)).toBeInTheDocument();
+    expect(screen.queryByText('あ')).not.toBeInTheDocument();
+
+    // The CTA reveals the flashcards.
+    await user.click(screen.getByRole('button', { name: /Zeig mir die Vokale/i }));
+    expect(screen.getByText('あ')).toBeInTheDocument();
   });
 
   it('#4: shows only hiragana cards in hiragana mode', () => {

@@ -66,3 +66,13 @@ Ergebnis: das Label „Lerne die Vokale" wird ehrlich.
 - Auf Landing/Selection steht ein Satz, was Kana sind, plus ein Grundlagen-Link.
 - Wiederkehrer erleben keine Regression (direkter Quiz-Einstieg, voller Picker).
 - Lint + Tests grün; Erstlauf-Flow per Playwright verifiziert.
+
+## Revisionen (aus Review, 2026-07-14)
+
+Aus dem Live-Review sind über die ursprüngliche Spec hinaus dazugekommen:
+
+- **Geführtes Intro statt nur Routing:** Der Erstlauf öffnet nicht direkt die Flashcards, sondern einen kurzen, kanji-ehrlichen Erklär-Screen („Japanisch nutzt drei Schriften: Hiragana, Katakana und Kanji … Kanji heben wir uns für später auf 🙂") mit CTA „Zeig mir die Vokale", dann erst die Karten. Umgesetzt als `showIntro`-Phase in StudyMode + neue Komponente `WritingSystemIntro`.
+- **StudyMode-Button vereinheitlicht (alle Sessions):** Der immer sichtbare Dauer-„Jetzt Quiz starten"-Button ist weg. Der Vorwärts-Button ist „Weiter" und wird auf der letzten Karte zu „Jetzt Quiz starten".
+- **Wiederkehrer-Erklärung:** `WritingSystemModal` — auf der Landing öffnet „Wie funktioniert japanische Schrift?" die Erklärung jederzeit als Dialog (mit Tofugu-Deeplink). Ersetzt den früheren externen Landing-Basics-Link.
+- **Landing-CTA neu:** die zwei mittigen Buttons durch **einen** prominenten CTA ersetzt; Label dynamisch: Erstnutzer „Los geht's" (→ Onboarding), Wiederkehrer „Weiter üben" (→ direkt auf die Auswahl-Übersicht). „Wähle andere Zeichen" ist von der Landing entfernt.
+- **Wordmark:** „Hiragana Trainer" ist jetzt ein Homepage-Link (`<a href="/">`), wirkt auf allen Screens (Nav + TopBar).

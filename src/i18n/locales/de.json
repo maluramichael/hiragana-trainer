@@ -60,7 +60,8 @@
     "cardPosition": "Karte {{current}} von {{total}}",
     "previous": "Zurück",
     "next": "Weiter",
-    "startQuiz": "Jetzt Quiz starten"
+    "startQuiz": "Jetzt Quiz starten",
+    "introCta": "Zeig mir die Vokale"
   },
   "quiz": {
     "typeRomaji": "Gib das Romaji ein...",
@@ -94,6 +95,15 @@
   },
   "common": {
     "loading": "Lädt…"
+  },
+  "writingSystem": {
+    "heading": "So funktioniert japanische Schrift",
+    "scripts": "Japanisch nutzt drei Schriften: Hiragana, Katakana und Kanji. Hiragana und Katakana sind Silbenschriften, jedes Zeichen steht für einen Laut.",
+    "kanjiNote": "Kanji sind Bedeutungszeichen. Die heben wir uns für später auf 🙂",
+    "vowelsHint": "Fang mit den fünf Vokalen an. Schau sie dir kurz an, danach ein kurzes Quiz.",
+    "deepDive": "Mehr dazu bei Tofugu",
+    "gotIt": "Alles klar",
+    "close": "Schließen"
   },
   "results": {
     "title": "Quiz beendet!",
@@ -214,7 +224,8 @@
     "hero": {
       "title": "Hiragana und Katakana sicher lesen lernen",
       "subtitle": "Du siehst ein japanisches Zeichen und tippst seine Aussprache. Kurze Runden, klares Feedback, sichtbarer Fortschritt.",
-      "cta": "Lerne die Vokale",
+      "cta": "Los geht's",
+      "ctaContinue": "Weiter üben",
       "ctaHint": "Startet sofort mit den fünf Vokalen.",
       "or": "oder",
       "secondary": "Wähle andere Zeichen",
@@ -222,7 +233,8 @@
       "scriptHiragana": "Hiragana",
       "scriptKatakana": "Katakana",
       "kanaExplainer": "Kana sind die zwei japanischen Silbenschriften. Fang mit Hiragana an.",
-      "basicsLink": "Neu bei Kana? Grundlagen lesen"
+      "basicsLink": "Neu bei Kana? Grundlagen lesen",
+      "howItWorks": "Wie funktioniert japanische Schrift?"
     },
     "features": {
       "heading": "Was dich erwartet",

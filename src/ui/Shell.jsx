@@ -8,8 +8,9 @@ import { Button } from './Button.jsx';
 export function Wordmark({ size = 'md' }) {
   const chip = size === 'lg' ? 56 : 44;
   const type = size === 'lg' ? 26 : 21;
+  // Links to the homepage from any screen it appears on (nav + TopBar).
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+    <a href="/" aria-label="Hiragana Trainer" style={{ display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none' }}>
       <span lang="ja" style={{
         fontFamily: 'var(--font-kana)', fontWeight: 700, color: '#fff',
         background: 'var(--tile-fuchsia)', width: chip, height: chip,
@@ -19,7 +20,7 @@ export function Wordmark({ size = 'md' }) {
       <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: type, color: 'var(--text-strong)', lineHeight: 1 }}>
         Hiragana Trainer
       </span>
-    </div>
+    </a>
   );
 }
 

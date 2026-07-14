@@ -10,10 +10,13 @@ import { updateKanaStatistics } from './utils/statisticsManager.js'
 // anchor for "are we on the selection screen?".
 const SELECTION_MARKER = /ひらがな/
 
-// The app now opens on the landing page; its CTA is the stable anchor for
-// "are we on the landing screen?". Helper to leave it for the picker.
+// Seed a practiced kana so the app treats this render as a returning learner.
+const seedReturner = () =>
+  updateKanaStatistics([{ kana: 'あ', romaji: 'a', isCorrect: true, responseTime: 500 }])
+
+// Returners reach the picker via the "Weiter üben" CTA (call seedReturner before render).
 const goToSelection = async (user) =>
-  user.click(screen.getByRole('button', { name: /Wähle andere Zeichen/i }))
+  user.click(screen.getByRole('button', { name: /Weiter üben/i }))
 
 afterEach(async () => {
   // Clear any challenge param a test set on the URL.
@@ -28,8 +31,8 @@ describe('App', () => {
   it('renders the landing page as the initial screen', () => {
     render(<App />)
     expect(screen.getByRole('heading', { level: 1 })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /Lerne die Vokale/i })).toBeInTheDocument()
-    // The picker only appears after choosing to select characters.
+    expect(screen.getByRole('button', { name: /Los geht's/i })).toBeInTheDocument()
+    // The picker only appears after starting.
     expect(screen.queryByText(SELECTION_MARKER)).not.toBeInTheDocument()
   })
 
@@ -38,25 +41,31 @@ describe('App', () => {
     render(<App />)
 
     // No stats yet -> the CTA leads into StudyMode (flashcards), not straight to the quiz.
-    await user.click(screen.getByRole('button', { name: /Lerne die Vokale/i }))
-    const startQuiz = await screen.findByRole('button', { name: /Jetzt Quiz starten/i })
+    await user.click(screen.getByRole('button', { name: /Los geht's/i }))
+    // First-run opens the writing-system intro; continue to the cards.
+    await user.click(await screen.findByRole('button', { name: /Zeig mir die Vokale/i }))
 
-    // One click from study continues into the quiz on the same set.
-    await user.click(startQuiz)
+    // Forward through the vowel cards; the last card's button starts the quiz.
+    for (let i = 0; i < 12; i++) {
+      if (screen.queryByRole('button', { name: /Jetzt Quiz starten/i })) break
+      await user.click(screen.getByRole('button', { name: /^Weiter$/i }))
+    }
+    await user.click(screen.getByRole('button', { name: /Jetzt Quiz starten/i }))
     expect(await screen.findByPlaceholderText(/Romaji/i)).toBeInTheDocument()
   })
 
-  it('#2: a returning learner (has stats) goes straight into the quiz', async () => {
+  it('#2: a returning learner (has stats) lands on the selection overview', async () => {
     const user = userEvent.setup()
-    updateKanaStatistics([{ kana: 'あ', romaji: 'a', isCorrect: true, responseTime: 500 }])
+    seedReturner()
     render(<App />)
 
-    await user.click(screen.getByRole('button', { name: /Lerne die Vokale/i }))
-    expect(await screen.findByPlaceholderText(/Romaji/i)).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: /Weiter üben/i }))
+    expect(await screen.findByText(SELECTION_MARKER)).toBeInTheDocument()
   })
 
-  it('landing secondary link leads to the selection screen', async () => {
+  it('returner CTA leads to the selection screen', async () => {
     const user = userEvent.setup()
+    seedReturner()
     render(<App />)
 
     await goToSelection(user)
@@ -75,6 +84,7 @@ describe('App', () => {
 
   it('navigates forward to statistics, and back to selection via popstate (#80)', async () => {
     const user = userEvent.setup()
+    seedReturner()
     render(<App />)
 
     // Leave the landing page for the picker first.
@@ -97,6 +107,7 @@ describe('App', () => {
 
   it('#4: study flow leads from selection into study and then the quiz', async () => {
     const user = userEvent.setup()
+    seedReturner()
     render(<App />)
 
     await goToSelection(user)
@@ -106,6 +117,11 @@ describe('App', () => {
     // The lazy study screen appears in place of the selection.
     expect(await screen.findByText(/Zeichen lernen/)).toBeInTheDocument()
 
+    // Forward through the flashcards; the last card's button starts the quiz.
+    for (let i = 0; i < 12; i++) {
+      if (screen.queryByRole('button', { name: /Quiz starten/i })) break
+      await user.click(screen.getByRole('button', { name: /^Weiter$/i }))
+    }
     await user.click(screen.getByRole('button', { name: /Quiz starten/i }))
 
     // The quiz screen is up: its romaji input is the stable anchor.

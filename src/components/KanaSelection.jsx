@@ -212,8 +212,8 @@ const KanaSelection = ({ onStartQuiz, onStudy, onViewStatistics }) => {
     const kanaToStudy = getKanaForSelection(quickSelection);
     if (kanaToStudy.length > 0) {
       trackEvent('quickstart');
-      // #2: quickstart only shows for first-timers -> learn the vowels first.
-      onStudy(kanaToStudy, { scriptMode });
+      // #2: quickstart only shows for first-timers -> guided learn (with intro) first.
+      onStudy(kanaToStudy, { scriptMode, intro: true });
     }
   };
 

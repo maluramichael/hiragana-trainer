@@ -33,6 +33,8 @@ function App() {
   // Which script(s) the quiz drills; 'both' keeps the legacy behaviour (#72).
   const [scriptMode, setScriptMode] = useState('both');
   const [quizResults, setQuizResults] = useState(null);
+  // Whether the current study session opens with the guided writing-system intro.
+  const [studyIntro, setStudyIntro] = useState(false);
   // Marks a back navigation we triggered ourselves, so popstate skips the quiz-leave prompt.
   const intentionalLeaveRef = useRef(false);
 
@@ -107,19 +109,22 @@ function App() {
   // different characters" land on the picker instead of the landing page.
   const handleStartFromLanding = () => {
     trackEvent('landing_cta_start');
-    window.history.pushState({ view: 'selection' }, '', window.location.pathname);
-    const vowels = kanaGroups.basic.vowels.hiragana;
     if (getOverallStatistics().practicedKana === 0) {
-      handleStartStudy(vowels, { scriptMode: 'hiragana' });
+      // First run: seed a selection entry behind, then the guided study intro.
+      window.history.pushState({ view: 'selection' }, '', window.location.pathname);
+      handleStartStudy(kanaGroups.basic.vowels.hiragana, { scriptMode: 'hiragana', intro: true });
     } else {
-      handleStartQuiz(vowels, { scriptMode: 'hiragana' });
+      // Returning learner: straight to the picker/overview to continue.
+      navigateTo('selection');
     }
   };
 
-  // #4: study the picked kana as flashcards before quizzing.
+  // #4: study the picked kana as flashcards before quizzing. options.intro opens
+  // the guided writing-system intro first (first-run onboarding).
   const handleStartStudy = (kanaList, options = {}) => {
     setSelectedKana(kanaList);
     setScriptMode(options.scriptMode ?? 'both');
+    setStudyIntro(!!options.intro);
     navigateTo('study');
   };
 
@@ -168,10 +173,7 @@ function App() {
   return (
     <div className="App">
       {currentView === 'landing' && (
-        <LandingPage
-          onStart={handleStartFromLanding}
-          onChooseCharacters={() => navigateTo('selection')}
-        />
+        <LandingPage onStart={handleStartFromLanding} />
       )}
 
       {currentView === 'selection' && (
@@ -187,6 +189,7 @@ function App() {
           <StudyMode
             kanaList={selectedKana}
             scriptMode={scriptMode}
+            showIntro={studyIntro}
             onStartQuiz={handleStudyStartQuiz}
             onBack={handleBackToSelection}
           />
