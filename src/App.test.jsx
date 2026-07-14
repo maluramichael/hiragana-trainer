@@ -3,6 +3,7 @@ import { render, screen, waitFor, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import App from './App.jsx'
 import i18n from './i18n/i18n.js'
+import { updateKanaStatistics } from './utils/statisticsManager.js'
 
 // The redesigned selection screen shows the two scripts as toggle tiles; the
 // hiragana tile's kana label ("ひらがな") is a stable, translation-independent
@@ -32,8 +33,22 @@ describe('App', () => {
     expect(screen.queryByText(SELECTION_MARKER)).not.toBeInTheDocument()
   })
 
-  it('landing CTA jumps straight into the quiz', async () => {
+  it('#2: first-run CTA teaches the vowels first, then flows into the quiz', async () => {
     const user = userEvent.setup()
+    render(<App />)
+
+    // No stats yet -> the CTA leads into StudyMode (flashcards), not straight to the quiz.
+    await user.click(screen.getByRole('button', { name: /Lerne die Vokale/i }))
+    const startQuiz = await screen.findByRole('button', { name: /Jetzt Quiz starten/i })
+
+    // One click from study continues into the quiz on the same set.
+    await user.click(startQuiz)
+    expect(await screen.findByPlaceholderText(/Romaji/i)).toBeInTheDocument()
+  })
+
+  it('#2: a returning learner (has stats) goes straight into the quiz', async () => {
+    const user = userEvent.setup()
+    updateKanaStatistics([{ kana: 'あ', romaji: 'a', isCorrect: true, responseTime: 500 }])
     render(<App />)
 
     await user.click(screen.getByRole('button', { name: /Lerne die Vokale/i }))

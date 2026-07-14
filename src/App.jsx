@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 import KanaSelection from './components/KanaSelection';
 import LandingPage from './components/LandingPage';
-import { initializeStatistics } from './utils/statisticsManager.js';
+import { initializeStatistics, getOverallStatistics } from './utils/statisticsManager.js';
 import { trackEvent } from './utils/analytics.js';
 import { kanaGroups } from './data/kana.js';
 import './i18n/i18n.js';
@@ -100,14 +100,20 @@ function App() {
     navigateTo('quiz');
   };
 
-  // Landing CTA: one click jumps straight into a quiz on the five hiragana
-  // vowels, the natural first thing a learner drills. Seed a selection entry
-  // behind the quiz first, so "back to selection" and "choose different
-  // characters" land on the picker instead of bouncing to the landing page.
+  // Landing CTA "Lerne die Vokale": a first-time learner (no stats yet) is first
+  // walked through the five hiragana vowels as flashcards (StudyMode), then flows
+  // into the quiz — teach before test (#2). Returning learners keep the direct
+  // quiz entry. Seed a selection entry behind it first, so "back" and "choose
+  // different characters" land on the picker instead of the landing page.
   const handleStartFromLanding = () => {
     trackEvent('landing_cta_start');
     window.history.pushState({ view: 'selection' }, '', window.location.pathname);
-    handleStartQuiz(kanaGroups.basic.vowels.hiragana, { scriptMode: 'hiragana' });
+    const vowels = kanaGroups.basic.vowels.hiragana;
+    if (getOverallStatistics().practicedKana === 0) {
+      handleStartStudy(vowels, { scriptMode: 'hiragana' });
+    } else {
+      handleStartQuiz(vowels, { scriptMode: 'hiragana' });
+    }
   };
 
   // #4: study the picked kana as flashcards before quizzing.

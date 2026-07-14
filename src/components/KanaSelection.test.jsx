@@ -30,17 +30,27 @@ describe('KanaSelection', () => {
     localStorage.clear();
   });
 
-  it('#2: the quickstart button starts the quiz with a non-empty selection', async () => {
+  it('#2: quickstart sends first-timers into study (learn before quiz) with a non-empty selection', async () => {
     const user = userEvent.setup();
-    const onStartQuiz = vi.fn();
-    render(<KanaSelection onStartQuiz={onStartQuiz} onViewStatistics={vi.fn()} />);
+    const onStudy = vi.fn();
+    render(<KanaSelection onStartQuiz={vi.fn()} onStudy={onStudy} onViewStatistics={vi.fn()} />);
 
     await user.click(screen.getByTestId('quickstart-button'));
 
-    expect(onStartQuiz).toHaveBeenCalledTimes(1);
-    const kana = onStartQuiz.mock.calls[0][0];
+    expect(onStudy).toHaveBeenCalledTimes(1);
+    const kana = onStudy.mock.calls[0][0];
     expect(Array.isArray(kana)).toBe(true);
     expect(kana.length).toBeGreaterThan(0);
+  });
+
+  it('#51: first-run picker keeps only the basic group expanded', () => {
+    render(<KanaSelection onStartQuiz={vi.fn()} onStudy={vi.fn()} onViewStatistics={vi.fn()} />);
+    // One collapse toggle per group; aria-label ends in "…ausklappen".
+    const toggles = screen.getAllByRole('button', { name: /ausklappen/i });
+    expect(toggles).toHaveLength(3);
+    expect(toggles[0]).toHaveAttribute('aria-expanded', 'true');  // basic
+    expect(toggles[1]).toHaveAttribute('aria-expanded', 'false'); // dakuten
+    expect(toggles[2]).toHaveAttribute('aria-expanded', 'false'); // handakuten
   });
 
   it('#18: the selection is persisted to localStorage and restored on remount', async () => {
@@ -101,16 +111,16 @@ describe('KanaSelection', () => {
     expect(screen.getByRole('button', { name: 'Hiragana' })).toHaveAttribute('aria-pressed', 'false');
   });
 
-  it('#72: the chosen script mode is handed to onStartQuiz', async () => {
+  it('#72: the chosen script mode is handed to onStudy from quickstart', async () => {
     const user = userEvent.setup();
-    const onStartQuiz = vi.fn();
-    render(<KanaSelection onStartQuiz={onStartQuiz} onViewStatistics={vi.fn()} />);
+    const onStudy = vi.fn();
+    render(<KanaSelection onStartQuiz={vi.fn()} onStudy={onStudy} onViewStatistics={vi.fn()} />);
 
     await user.click(screen.getByRole('button', { name: 'Katakana' }));
     await user.click(screen.getByRole('button', { name: 'Hiragana' }));
     await user.click(screen.getByTestId('quickstart-button'));
 
-    expect(onStartQuiz.mock.calls[0][1]).toEqual({ scriptMode: 'katakana' });
+    expect(onStudy.mock.calls[0][1]).toEqual({ scriptMode: 'katakana' });
   });
 
   it('#4: the "study first" button hands the current selection to onStudy', async () => {

@@ -50,7 +50,9 @@
     "practiceWeak": "Practice weak characters",
     "reviewDue": "Review due characters",
     "dailyStreak_one": "{{count}}-day streak",
-    "dailyStreak_other": "{{count}}-day streak"
+    "dailyStreak_other": "{{count}}-day streak",
+    "toggleGroup": "Expand or collapse {{group}}",
+    "basicsLink": "New to kana? Read the basics"
   },
   "study": {
     "title": "Study characters",
@@ -216,7 +218,11 @@
       "ctaHint": "Starts right away with the five vowels.",
       "or": "or",
       "secondary": "Choose other characters",
-      "trust": "Free. No signup. Runs offline in your browser."
+      "trust": "Free. No signup. Runs offline in your browser.",
+      "scriptHiragana": "Hiragana",
+      "scriptKatakana": "Katakana",
+      "kanaExplainer": "Kana are the two Japanese syllabaries. Start with hiragana.",
+      "basicsLink": "New to kana? Read the basics"
     },
     "features": {
       "heading": "What you get",

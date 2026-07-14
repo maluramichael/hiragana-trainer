@@ -3,14 +3,13 @@ import { useTranslation } from 'react-i18next';
 import { exportStatisticsAsBase64 } from '../utils/statisticsManager';
 import { calculateGroupProgress, getProgressDescription } from '../utils/progressCalculator';
 import { trackEvent } from '../utils/analytics';
+import { TOFUGU_HIRAGANA_URL, TOFUGU_KATAKANA_URL } from '../data/links.js';
 import { Card, StatTile, Button, Icon, BackdropKana, AppFooter } from '../ui/index.js';
 
 const APP_URL = 'https://hiragana-trainer.de';
 const GITHUB_URL = 'https://github.com/maluramichael/hiragana-trainer';
 const SPONSORS_URL = 'https://github.com/sponsors/maluramichael';
 const AUTHOR_URL = 'https://malura.de';
-const TOFUGU_HIRAGANA_URL = 'https://www.tofugu.com/japanese/learn-hiragana/';
-const TOFUGU_KATAKANA_URL = 'https://www.tofugu.com/japanese/learn-katakana/';
 
 const MASTERY_LEVEL = 9;
 

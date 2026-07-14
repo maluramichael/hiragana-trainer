@@ -1,4 +1,6 @@
 import { useTranslation } from 'react-i18next';
+import { trackEvent } from '../utils/analytics.js';
+import { TOFUGU_HIRAGANA_URL } from '../data/links.js';
 import { Card, Button, Icon, Wordmark, LanguagePill, BackdropKana, AppFooter } from '../ui/index.js';
 
 // Hero motif: the words hiragana / katakana spelled in kana as bobbing chips.
@@ -42,26 +44,39 @@ const LandingPage = ({ onStart, onChooseCharacters }) => {
 
         {/* Hero */}
         <header style={{ textAlign: 'center', padding: 'var(--space-8) 0 var(--space-12)' }}>
-          <div aria-hidden="true" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, marginBottom: 'var(--space-8)' }}>
-            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center' }}>
-              {HIRAGANA_WORD.map((c, i) => <KanaChip key={`h${i}`} char={c} gradient="var(--tile-fuchsia)" delay={i * 0.15} />)}
+          <div aria-hidden="true" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20, marginBottom: 'var(--space-8)' }}>
+            {/* #32: label the decorative script chips so the terms aren't assumed known */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+              <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center' }}>
+                {HIRAGANA_WORD.map((c, i) => <KanaChip key={`h${i}`} char={c} gradient="var(--tile-fuchsia)" delay={i * 0.15} />)}
+              </div>
+              <div style={{ fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 'var(--text-sm)', color: 'var(--fuchsia-600)', letterSpacing: 'var(--tracking-wide)' }}>{t('landing.hero.scriptHiragana')}</div>
             </div>
-            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center' }}>
-              {KATAKANA_WORD.map((c, i) => <KanaChip key={`k${i}`} char={c} gradient="var(--tile-violet)" delay={0.6 + i * 0.15} />)}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+              <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center' }}>
+                {KATAKANA_WORD.map((c, i) => <KanaChip key={`k${i}`} char={c} gradient="var(--tile-violet)" delay={0.6 + i * 0.15} />)}
+              </div>
+              <div style={{ fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 'var(--text-sm)', color: 'var(--violet-600)', letterSpacing: 'var(--tracking-wide)' }}>{t('landing.hero.scriptKatakana')}</div>
             </div>
           </div>
 
           <h1 style={{ fontSize: 'clamp(2.25rem, 7vw, var(--text-6xl))', lineHeight: 1.05, letterSpacing: 'var(--tracking-tight)', maxWidth: 820, margin: '0 auto var(--space-5)' }}>
             {t('landing.hero.title')}
           </h1>
-          <p style={{ fontFamily: 'var(--font-body)', fontSize: 'clamp(1.05rem, 2.6vw, var(--text-xl))', color: 'var(--text-body)', lineHeight: 1.55, maxWidth: 620, margin: '0 auto var(--space-8)' }}>
+          <p style={{ fontFamily: 'var(--font-body)', fontSize: 'clamp(1.05rem, 2.6vw, var(--text-xl))', color: 'var(--text-body)', lineHeight: 1.55, maxWidth: 620, margin: '0 auto var(--space-5)' }}>
             {t('landing.hero.subtitle')}
+          </p>
+          {/* #32: one plain sentence on what kana are, for real beginners */}
+          <p style={{ fontFamily: 'var(--font-body)', fontSize: 'var(--text-base)', color: 'var(--text-muted)', lineHeight: 1.5, maxWidth: 560, margin: '0 auto var(--space-8)' }}>
+            {t('landing.hero.kanaExplainer')}
           </p>
 
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--space-3)' }}>
             <Button variant="primary" size="lg" iconLeft="rocket" onClick={onStart}>{t('landing.hero.cta')}</Button>
             <span style={{ fontFamily: 'var(--font-body)', fontSize: 'var(--text-sm)', color: 'var(--text-muted)' }}>{t('landing.hero.or')}</span>
             <Button variant="secondary" size="lg" iconLeft="book-open" onClick={onChooseCharacters}>{t('landing.hero.secondary')}</Button>
+            {/* #32: beginner explainer link on the landing itself, not only in results */}
+            <a href={TOFUGU_HIRAGANA_URL} target="_blank" rel="noopener noreferrer" onClick={() => trackEvent('basics_link', 'landing')} style={{ marginTop: 'var(--space-1)', fontFamily: 'var(--font-body)', fontSize: 'var(--text-sm)', fontWeight: 700, color: 'var(--fuchsia-600)' }}>{t('landing.hero.basicsLink')}</a>
           </div>
 
           <p style={{ marginTop: 'var(--space-8)', display: 'inline-flex', alignItems: 'center', gap: 8, borderRadius: 'var(--radius-pill)', background: 'var(--surface-card-soft)', padding: '0.5rem 1rem', fontFamily: 'var(--font-body)', fontSize: 'var(--text-sm)', fontWeight: 500, color: 'var(--text-muted)', boxShadow: 'var(--ring-white), var(--shadow-sm)' }}>

@@ -10,6 +10,7 @@ import {
   getDailyStreak
 } from '../utils/statisticsManager.js';
 import { trackEvent } from '../utils/analytics.js';
+import { TOFUGU_HIRAGANA_URL } from '../data/links.js';
 import { Card, Button, Checkbox, ProgressMeter, Badge, Icon, TopBar, AppFooter, BackdropKana } from '../ui/index.js';
 
 // Hiragana Unicode block; anything else is treated as Katakana.
@@ -145,17 +146,23 @@ const KanaSelection = ({ onStartQuiz, onStudy, onViewStatistics }) => {
   const [weakKana, setWeakKana] = useState([]);
   const [dueKana, setDueKana] = useState([]);
   const [dailyStreak, setDailyStreak] = useState(0);
+  // #51: for first-timers only the basic group is expanded; the effect opens the
+  // rest once we know the learner already has history.
+  const [openGroups, setOpenGroups] = useState({ basic: true, dakuten: false, handakuten: false });
 
   const scriptMode = scriptsToMode(scripts);
 
   useEffect(() => {
     setProgress(getAllGroupProgress());
-    setHasData(getOverallStatistics().practicedKana > 0);
+    const practiced = getOverallStatistics().practicedKana > 0;
+    setHasData(practiced);
     setWeakKana(resolveKana(getWeakKana()));
     const stats = getStatistics();
     const practicedKeys = Object.keys(stats).filter((key) => stats[key].timesShown > 0);
     setDueKana(resolveKana(getDueKana(practicedKeys)));
     setDailyStreak(getDailyStreak().current);
+    // Returning learners see the whole tree; first-timers keep basic-only.
+    if (practiced) setOpenGroups({ basic: true, dakuten: true, handakuten: true });
   }, []);
 
   useEffect(() => {
@@ -205,7 +212,8 @@ const KanaSelection = ({ onStartQuiz, onStudy, onViewStatistics }) => {
     const kanaToStudy = getKanaForSelection(quickSelection);
     if (kanaToStudy.length > 0) {
       trackEvent('quickstart');
-      onStartQuiz(kanaToStudy, { scriptMode });
+      // #2: quickstart only shows for first-timers -> learn the vowels first.
+      onStudy(kanaToStudy, { scriptMode });
     }
   };
 
@@ -239,6 +247,7 @@ const KanaSelection = ({ onStartQuiz, onStudy, onViewStatistics }) => {
     const subsState = selectedGroups[`${group}Subs`];
     const allSubs = Object.values(subsState).every(Boolean);
     const anySub = Object.values(subsState).some(Boolean);
+    const isOpen = openGroups[group];
     return (
       <div key={group} style={{ borderRadius: 'var(--radius-2xl)', background: 'var(--surface-sunken)', padding: 'var(--space-4)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)', flexWrap: 'wrap' }}>
@@ -255,8 +264,18 @@ const KanaSelection = ({ onStartQuiz, onStudy, onViewStatistics }) => {
               <ProgressMeter variant="segments" level={progress[group].overall.level} height={12} />
             </div>
           )}
+          <button
+            type="button"
+            onClick={() => setOpenGroups((o) => ({ ...o, [group]: !o[group] }))}
+            aria-expanded={isOpen}
+            aria-label={t('selection.toggleGroup', { group: t(`groups.${group}`) })}
+            style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 32, height: 32, borderRadius: 'var(--radius-md)', border: 'none', background: 'transparent', cursor: 'pointer', color: 'var(--text-muted)' }}
+          >
+            <Icon name="chevron-right" size={20} style={{ transform: isOpen ? 'rotate(90deg)' : 'rotate(0deg)', transition: 'transform var(--dur-fast) var(--ease-soft)' }} />
+          </button>
         </div>
 
+        {isOpen && (
         <div style={{ marginTop: 'var(--space-3)', marginLeft: 34, display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
           {subs.map(({ key, translationKey, recommended: subRec }) => (
             <div key={key} style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)', padding: '0.35rem 0.5rem', borderRadius: 'var(--radius-md)', background: subsState[key] ? 'var(--fuchsia-50)' : 'transparent' }}>
@@ -274,6 +293,7 @@ const KanaSelection = ({ onStartQuiz, onStudy, onViewStatistics }) => {
             </div>
           ))}
         </div>
+        )}
       </div>
     );
   };
@@ -294,9 +314,15 @@ const KanaSelection = ({ onStartQuiz, onStudy, onViewStatistics }) => {
           )}
           {/* #38: surface the already-translated onboarding microcopy for first-timers */}
           {!hasData && (
-            <p style={{ fontFamily: 'var(--font-body)', fontSize: 'var(--text-sm)', color: 'var(--text-muted)', margin: 'var(--space-3) auto 0', maxWidth: '34rem' }}>
-              {t('selection.intro')} {t('selection.payoff')}
-            </p>
+            <>
+              <p style={{ fontFamily: 'var(--font-body)', fontSize: 'var(--text-sm)', color: 'var(--text-muted)', margin: 'var(--space-3) auto 0', maxWidth: '34rem' }}>
+                {t('selection.intro')} {t('selection.payoff')}
+              </p>
+              {/* #32: beginner explainer link, surfaced before the first quiz (not only in results) */}
+              <p style={{ margin: 'var(--space-2) 0 0' }}>
+                <a href={TOFUGU_HIRAGANA_URL} target="_blank" rel="noopener noreferrer" onClick={() => trackEvent('basics_link', 'selection')} style={{ fontSize: 'var(--text-sm)', fontWeight: 700, color: 'var(--fuchsia-600)' }}>{t('selection.basicsLink')}</a>
+              </p>
+            </>
           )}
         </div>
 

@@ -50,7 +50,9 @@
     "practiceWeak": "Schwache Zeichen üben",
     "reviewDue": "Fällige Zeichen wiederholen",
     "dailyStreak_one": "{{count}} Tag in Folge",
-    "dailyStreak_other": "{{count}} Tage in Folge"
+    "dailyStreak_other": "{{count}} Tage in Folge",
+    "toggleGroup": "{{group}} ein- oder ausklappen",
+    "basicsLink": "Neu bei Kana? Grundlagen lesen"
   },
   "study": {
     "title": "Zeichen lernen",
@@ -216,7 +218,11 @@
       "ctaHint": "Startet sofort mit den fünf Vokalen.",
       "or": "oder",
       "secondary": "Wähle andere Zeichen",
-      "trust": "Kostenlos. Keine Anmeldung. Läuft offline im Browser."
+      "trust": "Kostenlos. Keine Anmeldung. Läuft offline im Browser.",
+      "scriptHiragana": "Hiragana",
+      "scriptKatakana": "Katakana",
+      "kanaExplainer": "Kana sind die zwei japanischen Silbenschriften. Fang mit Hiragana an.",
+      "basicsLink": "Neu bei Kana? Grundlagen lesen"
     },
     "features": {
       "heading": "Was dich erwartet",
