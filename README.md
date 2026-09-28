@@ -1,5 +1,10 @@
 # Hiragana Trainer 🇯🇵
 
+<!-- links:start -->
+[![Support me on Ko-fi](https://malura.de/assets/badge/kofi.svg)](https://malura.de/go/kofi?ref=hiragana-trainer)
+[![Check out my page](https://malura.de/assets/badge/malura.svg)](https://malura.de/go/site?ref=hiragana-trainer)
+<!-- links:end -->
+
 A free web app for learning the two Japanese kana syllabaries, Hiragana and Katakana.
 You see a character, type its reading, and get instant feedback. Progress stays on your
 device. No signup, no ads.
