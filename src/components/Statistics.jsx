@@ -69,6 +69,23 @@ const Statistics = ({ onBack }) => {
 
   const formatResponseTime = (avg) => avg > 0 ? `${(avg / 1000).toFixed(1)}s` : '-';
 
+  const scriptTabs = [['hiragana', t('scripts.hiragana')], ['katakana', t('scripts.katakana')]];
+
+  // #50: Tab-Semantik mit Roving-Tabindex; Pfeiltasten/Home/End wechseln den Tab.
+  const handleTabKeyDown = (event) => {
+    const keys = scriptTabs.map(([k]) => k);
+    const i = keys.indexOf(activeTab);
+    let next = null;
+    if (event.key === 'ArrowRight') next = keys[(i + 1) % keys.length];
+    else if (event.key === 'ArrowLeft') next = keys[(i - 1 + keys.length) % keys.length];
+    else if (event.key === 'Home') next = keys[0];
+    else if (event.key === 'End') next = keys[keys.length - 1];
+    if (next === null) return;
+    event.preventDefault();
+    setActiveTab(next);
+    document.getElementById(`stats-tab-${next}`)?.focus();
+  };
+
   const getSortIcon = (column) => (sortBy !== column ? '↕' : sortOrder === 'asc' ? '↑' : '↓');
   const accuracySymbol = (a) => (a >= 80 ? '✓' : a >= 60 ? '•' : '✗');
   const accTone = (a) => (a >= 80 ? 'var(--emerald-600)' : a >= 60 ? 'var(--amber-500)' : 'var(--rose-600)');
@@ -128,9 +145,9 @@ const Statistics = ({ onBack }) => {
 
         <Card padding="sm" style={{ overflow: 'hidden' }}>
           {/* Tabs */}
-          <div style={{ display: 'flex', gap: 8, padding: 'var(--space-2)' }}>
-            {[['hiragana', t('scripts.hiragana')], ['katakana', t('scripts.katakana')]].map(([k, lbl]) => (
-              <button key={k} onClick={() => setActiveTab(k)} style={{
+          <div role="tablist" aria-label={t('statistics.title')} onKeyDown={handleTabKeyDown} style={{ display: 'flex', gap: 8, padding: 'var(--space-2)' }}>
+            {scriptTabs.map(([k, lbl]) => (
+              <button key={k} type="button" role="tab" id={`stats-tab-${k}`} aria-selected={activeTab === k} aria-controls="stats-tabpanel" tabIndex={activeTab === k ? 0 : -1} onClick={() => setActiveTab(k)} style={{
                 flex: 1, padding: '0.7rem', borderRadius: 'var(--radius-xl)', border: 'none', cursor: 'pointer',
                 fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 'var(--text-base)',
                 background: activeTab === k ? 'var(--color-primary)' : 'transparent',
@@ -140,6 +157,7 @@ const Statistics = ({ onBack }) => {
             ))}
           </div>
 
+          <div role="tabpanel" id="stats-tabpanel" aria-labelledby={`stats-tab-${activeTab}`}>
           {/* Table */}
           <div style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: 'var(--font-body)' }}>
@@ -183,6 +201,7 @@ const Statistics = ({ onBack }) => {
               <div style={{ color: 'var(--text-faint)', fontSize: 'var(--text-sm)', marginTop: 'var(--space-2)' }}>{t('statistics.startPracticing')}</div>
             </div>
           )}
+          </div>
         </Card>
 
         <AppFooter />

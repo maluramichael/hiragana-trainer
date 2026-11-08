@@ -80,4 +80,23 @@ describe('Statistics', () => {
     // Table behind the modal still holds the same rows.
     expect(screen.getAllByRole('row').length).toBe(rowsBefore);
   });
+
+  it('#50: Hiragana/Katakana-Umschaltung hat Tab-Semantik und Pfeiltasten', async () => {
+    const user = userEvent.setup();
+    render(<Statistics onBack={() => {}} />);
+
+    const tabs = screen.getAllByRole('tab');
+    expect(tabs).toHaveLength(2);
+    expect(screen.getByRole('tablist')).toBeInTheDocument();
+    expect(tabs[0]).toHaveAttribute('aria-selected', 'true');
+    expect(tabs[1]).toHaveAttribute('aria-selected', 'false');
+    expect(screen.getByRole('tabpanel')).toHaveAttribute('aria-labelledby', tabs[0].id);
+    expect(tabs[0]).toHaveAttribute('aria-controls', screen.getByRole('tabpanel').id);
+
+    tabs[0].focus();
+    await user.keyboard('{ArrowRight}');
+    expect(tabs[1]).toHaveAttribute('aria-selected', 'true');
+    expect(tabs[1]).toHaveFocus();
+    expect(screen.getByRole('tabpanel')).toHaveAttribute('aria-labelledby', tabs[1].id);
+  });
 });
