@@ -227,7 +227,10 @@ export const exportStatistics = () => {
   const statistics = getStatistics();
   const exportData = {
     exportDate: new Date().toISOString(),
-    statistics
+    statistics,
+    // #19: Streaks liegen in eigenen Keys und gehören zum Fortschritt.
+    streak: getDailyStreak(),
+    bestStreak: getBestStreak()
   };
   return JSON.stringify(exportData, null, 2);
 };
@@ -246,13 +249,23 @@ export const exportStatisticsAsBase64 = () => {
       c: stat.timesCorrect,
       i: stat.timesIncorrect,
       ...(stat.lastSeen && { l: stat.lastSeen }), // Only include if not null
-      ...(stat.averageResponseTime > 0 && { a: Math.round(stat.averageResponseTime) }) // Round to integer
+      ...(stat.averageResponseTime > 0 && { a: Math.round(stat.averageResponseTime) }), // Round to integer
+      // #18: Leitner-Zeitplan und letzte Antwortzeiten mitnehmen
+      ...(Number.isInteger(stat.box) && { b: stat.box }),
+      ...(isNonEmptyString(stat.dueAt) && { d: stat.dueAt }),
+      ...(Array.isArray(stat.responseTimes) && stat.responseTimes.length > 0 && {
+        t: stat.responseTimes.map(Math.round)
+      })
     }));
 
+  const daily = getDailyStreak();
   const exportData = {
     v: '2.0', // version
     d: new Date().toISOString(), // exportDate
-    s: compactStats // stats
+    s: compactStats, // stats
+    // #19: Daily-Streak (c=current, l=longest, p=lastPracticeDate) und Best-Streak
+    st: { c: daily.current, l: daily.longest, p: daily.lastPracticeDate },
+    bs: getBestStreak()
   };
 
   const jsonString = JSON.stringify(exportData);
@@ -278,6 +291,14 @@ const normalizeImportedStat = (raw) => {
     ? raw.responseTimes.map(Number).filter(Number.isFinite)
     : [];
 
+  // #18: Leitner-Felder nur übernehmen, wenn sie gültig sind (box 0..max, dueAt parsebar)
+  const rawBox = raw.box ?? raw.b;
+  const rawDueAt = raw.dueAt ?? raw.d;
+  const box = Number.isInteger(rawBox) && rawBox >= 0 && rawBox <= SR_MAX_BOX ? rawBox : null;
+  const dueAt = isNonEmptyString(rawDueAt) && Number.isFinite(Date.parse(rawDueAt)) ? rawDueAt : null;
+  const rawTimes = raw.responseTimes ?? raw.t;
+  const times = Array.isArray(rawTimes) ? rawTimes.map(Number).filter(Number.isFinite) : responseTimes;
+
   return {
     kana,
     romaji,
@@ -287,8 +308,24 @@ const normalizeImportedStat = (raw) => {
     timesIncorrect: toNumber(raw.timesIncorrect ?? raw.i),
     lastSeen: isNonEmptyString(lastSeen) ? lastSeen : null,
     averageResponseTime: toNumber(raw.averageResponseTime ?? raw.a),
-    responseTimes
+    responseTimes: times.slice(-10),
+    ...(box !== null && { box }),
+    ...(dueAt !== null && { dueAt })
   };
+};
+
+// Pick the Leitner state when merging two stats: the higher box wins, on a tie the
+// later dueAt. Box and dueAt always come from the same side so they stay consistent.
+const mergeSchedule = (existing, incoming) => {
+  const hasSr = (stat) => Number.isInteger(stat.box) || isNonEmptyString(stat.dueAt);
+  if (!hasSr(incoming)) return hasSr(existing) ? { box: existing.box, dueAt: existing.dueAt } : {};
+  if (!hasSr(existing)) return { box: incoming.box, dueAt: incoming.dueAt };
+  const eBox = Number.isInteger(existing.box) ? existing.box : 0;
+  const iBox = Number.isInteger(incoming.box) ? incoming.box : 0;
+  const eDue = Date.parse(existing.dueAt) || 0;
+  const iDue = Date.parse(incoming.dueAt) || 0;
+  const pick = iBox > eBox || (iBox === eBox && iDue > eDue) ? incoming : existing;
+  return { box: pick.box, dueAt: pick.dueAt };
 };
 
 // Merge an incoming stat into an existing one. Counters are additive; lastSeen
@@ -313,8 +350,54 @@ const mergeStat = (existing, incoming) => {
     lastSeen,
     averageResponseTime,
     // ISO strings sort chronologically; keep the last 10 combined samples
-    responseTimes: [...(existing.responseTimes || []), ...(incoming.responseTimes || [])].slice(-10)
+    responseTimes: [...(existing.responseTimes || []), ...(incoming.responseTimes || [])].slice(-10),
+    ...Object.fromEntries(Object.entries(mergeSchedule(existing, incoming)).filter(([, v]) => v !== undefined))
   };
+};
+
+const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+
+// Normalize an imported daily streak (compact {c,l,p} or full {current,longest,lastPracticeDate}).
+// Returns null when absent or unusable.
+const normalizeImportedDailyStreak = (raw) => {
+  if (!raw || typeof raw !== 'object') return null;
+  const current = Math.floor(toNumber(raw.current ?? raw.c));
+  const longest = Math.floor(toNumber(raw.longest ?? raw.l));
+  const last = raw.lastPracticeDate ?? raw.p;
+  const lastPracticeDate = isNonEmptyString(last) && DATE_RE.test(last) ? last : null;
+  if (current === 0 && longest === 0 && !lastPracticeDate) return null;
+  return { current, longest: Math.max(longest, current), lastPracticeDate };
+};
+
+// Merge streaks without letting a re-import inflate them: the entry with the later
+// practice day provides current/date, longest is the maximum of both.
+const mergeDailyStreak = (local, imported) => {
+  const newer = (imported.lastPracticeDate || '') > (local.lastPracticeDate || '')
+    || ((imported.lastPracticeDate || '') === (local.lastPracticeDate || '') && imported.current > local.current)
+    ? imported : local;
+  return {
+    current: newer.current,
+    longest: Math.max(local.longest, imported.longest, newer.current),
+    lastPracticeDate: newer.lastPracticeDate
+  };
+};
+
+const restoreStreaks = (importData, mode) => {
+  const dailyRaw = importData.st ?? importData.streak;
+  const daily = normalizeImportedDailyStreak(dailyRaw);
+  const bestRaw = Math.floor(toNumber(importData.bs ?? importData.bestStreak));
+  try {
+    if (daily) {
+      const next = mode === 'replace' ? daily : mergeDailyStreak(getDailyStreak(), daily);
+      localStorage.setItem(DAILY_STREAK_KEY, JSON.stringify(next));
+    }
+    if (bestRaw > 0) {
+      if (mode === 'replace') localStorage.setItem(STREAK_KEY, String(bestRaw));
+      else updateBestStreak(bestRaw);
+    }
+  } catch (error) {
+    console.error('Error restoring streaks to localStorage:', error);
+  }
 };
 
 // Import statistics from base64 string.
@@ -370,6 +453,8 @@ export const importStatisticsFromBase64 = (base64String, options = {}) => {
         message: 'Failed to save imported statistics. Storage may be full.'
       };
     }
+
+    restoreStreaks(importData, mode);
 
     return {
       success: true,

@@ -271,3 +271,57 @@ describe('spaced repetition scheduling (#12)', () => {
     expect(getDueKana(['ぬ-nu'])).toEqual(['ぬ-nu']);
   });
 });
+
+describe('Transfer-Export enthält SR-Zeitplan und Streaks (#18, #19)', () => {
+  it('Round-Trip über Base64 erhält box/dueAt/responseTimes sowie Daily- und Best-Streak', () => {
+    const now = new Date('2026-11-01T10:00:00.000Z');
+    updateKanaStatistic('あ', 'a', true, 1200);
+    scheduleReview('あ-a', true, now);
+    scheduleReview('あ-a', true, now); // box 2
+    recordPracticeDay(new Date(2026, 10, 1));
+    recordPracticeDay(new Date(2026, 10, 2)); // current 2
+    updateBestStreak(7);
+    const before = getStatistics()['あ-a'];
+    const dailyBefore = getDailyStreak();
+
+    const code = exportStatisticsAsBase64();
+    localStorage.clear();
+    expect(importStatisticsFromBase64(code).success).toBe(true);
+
+    const after = getStatistics()['あ-a'];
+    expect(after.box).toBe(2);
+    expect(after.dueAt).toBe(before.dueAt);
+    expect(after.responseTimes).toEqual(before.responseTimes);
+    expect(getDailyStreak()).toEqual(dailyBefore);
+    expect(getBestStreak()).toBe(7);
+  });
+
+  it('Merge: höhere Box gewinnt samt eigenem dueAt, Streaks werden nicht aufgebläht', () => {
+    const now = new Date('2026-11-01T10:00:00.000Z');
+    updateKanaStatistic('い', 'i', true);
+    scheduleReview('い-i', true, now); // lokal box 1
+    recordPracticeDay(new Date(2026, 10, 5)); // lokal current 1, zuletzt 2026-11-05
+    updateBestStreak(3);
+
+    const code = makeBase64(
+      [{ k: 'い', r: 'i', s: 1, c: 1, i: 0, b: 4, d: '2026-12-01T00:00:00.000Z' }],
+      { st: { c: 20, l: 25, p: '2026-10-01' }, bs: 2 }
+    );
+    expect(importStatisticsFromBase64(code).success).toBe(true);
+
+    const stat = getStatistics()['い-i'];
+    expect(stat.box).toBe(4);
+    expect(stat.dueAt).toBe('2026-12-01T00:00:00.000Z');
+    // Alter Import-Streak (Oktober) ersetzt den aktuellen nicht, longest ist das Maximum.
+    expect(getDailyStreak()).toEqual({ current: 1, longest: 25, lastPracticeDate: '2026-11-05' });
+    expect(getBestStreak()).toBe(3);
+  });
+
+  it('verwirft ungültige box/dueAt-Werte, statt sie zu übernehmen', () => {
+    const code = makeBase64([{ k: 'う', r: 'u', s: 1, c: 1, i: 0, b: 99, d: 'kein-datum' }]);
+    expect(importStatisticsFromBase64(code).success).toBe(true);
+    const stat = getStatistics()['う-u'];
+    expect(stat.box).toBeUndefined();
+    expect(stat.dueAt).toBeUndefined();
+  });
+});
