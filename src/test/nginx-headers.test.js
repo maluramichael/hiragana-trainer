@@ -31,6 +31,21 @@ describe('nginx security headers', () => {
     expect(conf).toContain('analytics.malura.de')
   })
 
+  it("hat kein 'unsafe-inline' im script-src und lädt keine Skripte von Dritten (#29, #17)", () => {
+    const policies = conf.match(/Content-Security-Policy "[^"]*"/g) || []
+    expect(policies.length).toBeGreaterThanOrEqual(3)
+    for (const p of policies) {
+      const scriptSrc = p.match(/script-src ([^;]*);/)[1]
+      expect(scriptSrc).toBe("'self'")
+      expect(p).toContain("object-src 'none'")
+    }
+  })
+
+  it('setzt HSTS in jedem Header-Block', () => {
+    const count = (conf.match(/Strict-Transport-Security/g) || []).length
+    expect(count).toBe((conf.match(/Content-Security-Policy/g) || []).length)
+  })
+
   it('setzt frame-ancestors none in der CSP', () => {
     expect(conf).toContain("frame-ancestors 'none'")
   })

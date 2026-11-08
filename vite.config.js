@@ -23,6 +23,8 @@ export default defineConfig({
         skipWaiting: true,
         // #43: precache fonts, icons and images too, so offline is truly complete.
         globPatterns: ['**/*.{js,css,html,woff2,png,svg,webmanifest}'],
+        // Der Analytics-Tracker wird erst nach Opt-in geladen, nicht vorab cachen.
+        globIgnores: ['**/owa.tracker-*.js'],
       },
       devOptions: { enabled: false },
     }),

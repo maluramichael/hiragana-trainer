@@ -36,9 +36,14 @@ describe('index.html SEO/meta', () => {
     expect(html).toContain('"@type": "SoftwareApplication"')
   })
 
-  it('keeps the cookie consent logic intact', () => {
-    expect(html).toContain('const CookieConsent')
-    expect(html).toContain('CookieConsent.init()')
+  it('hat kein Inline-Script und keine Inline-Handler (CSP ohne unsafe-inline)', () => {
+    const scripts = [...html.matchAll(/<script\b([^>]*)>/g)].map((m) => m[1])
+    for (const attrs of scripts) {
+      expect(attrs).toMatch(/type="(module|application\/ld\+json)"/)
+    }
+    expect(html).not.toMatch(/\sonclick=/)
+    expect(html).toContain('id="cookie-accept"')
+    expect(html).toContain('id="cookie-reject"')
   })
 })
 

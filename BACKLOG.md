@@ -49,13 +49,11 @@ den nur der Betreiber anlegen kann. Zurückgestellt, bis Konto und Inhalte stehe
   `maluramichael`). Ein Ko-fi/BMAC-Kanal braucht ein echtes Handle, sonst kein Link.
 - **#93 Affiliate:** Es stehen saubere, normale Links (Tofugu). Affiliate-Monetarisierung braucht echte
   Partner-IDs (Amazon PartnerNet für Genki, WaniKani-Referral); erst dann Tracking-Parameter ergänzen.
-- **#31 SRI auf Analytics-Script:** Echte Subresource Integrity braucht einen fixen Hash der
-  selbst-gehosteten OWA-Datei. Da sich die Datei bei OWA-Updates ändert, würde ein Hash still brechen.
-  Aktuell nur `crossorigin` gesetzt. Sauber lösbar, wenn die OWA-Version eingefroren/gepinnt wird.
-- **#81 Inline-Consent-Script auslagern:** Die CSP nutzt aktuell `script-src 'unsafe-inline'`, weil der
-  GDPR-Consent-Loader inline in `index.html` liegt (samt inline `onclick`). Auslagern in eine gebündelte
-  JS-Datei (Event-Listener statt inline onclick) erlaubt `script-src 'self'` ohne `unsafe-inline`.
-  Berührt die DSGVO-Mechanik, daher bewusst separat.
+- **OWA-Tracker aktualisieren:** Der Tracker liegt als gepinnte Kopie in `src/vendor/owa.tracker.js`
+  (Quelle: `https://analytics.malura.de/public/base/dist/owa.tracker.js`), wird von Vite mit Hash im
+  Dateinamen ausgeliefert und fällt unter `script-src 'self'`. Nach einem OWA-Update die Datei neu
+  von dort holen und committen. Die Lazy-Chunks (Heatmap/Player) werden nicht genutzt und sind per CSP
+  gesperrt.
 - **#24 OG-Image als PNG:** Aktuell `og-image.svg`. Manche Plattformen rendern SVG-OG-Images schlecht;
   ein 1200x630-PNG-Export wird empfohlen.
 - **#37 Delta zur letzten Session:** Der "nächster Schritt"-CTA ist da; der Vergleich "+4% vs. letzte
